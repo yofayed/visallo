@@ -22,7 +22,7 @@ public class ChangeEmailWebPlugin implements WebAppPlugin {
         app.registerJavaScript("/org/visallo/web/changeEmail/changeEmail.js");
         app.registerResourceBundle("/org/visallo/web/changeEmail/messages.properties");
 
-        app.get("/jsc/org/visallo/web/changeEmail/template.hbs", new StaticResourceHandler(this.getClass(), "/org/visallo/web/changeEmail/template.hbs", "text/plain"));
+        app.registerJavaScriptTemplate("/org/visallo/web/changeEmail/template.hbs");
 
         app.post("/changeEmail", authenticationHandlerClass, csrfHandlerClass, ReadPrivilegeFilter.class, ChangeEmail.class);
     }
