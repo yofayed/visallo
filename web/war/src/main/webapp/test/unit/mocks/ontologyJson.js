@@ -10,14 +10,14 @@ define(['text!/base/test/unit/mocks/ontology.json'], function(json) {
     }
 
     ontologyJson.properties.push({
-      "title": "http://visallo.org/dev#nameNoValidationFormula",
-      "displayName": "Name",
-      "userVisible": true,
-      "searchable": true,
-      "dataType": "string",
-      "dependentPropertyIris": [
-        "http://visallo.org/dev#lastName",
-        "http://visallo.org/dev#firstName"
+      'title': 'http://visallo.org/dev#nameNoValidationFormula',
+      'displayName': 'Name',
+      'userVisible': true,
+      'searchable': true,
+      'dataType': 'string',
+      'dependentPropertyIris': [
+        'http://visallo.org/dev#lastName',
+        'http://visallo.org/dev#firstName'
       ]
     });
 

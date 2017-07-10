@@ -19,7 +19,12 @@ import org.visallo.web.clientapi.model.PropertyType;
 import org.visallo.web.clientapi.model.SandboxStatus;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,6 +38,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     private static final String TEST_OWL = "test.owl";
     private static final String TEST_CHANGED_OWL = "test_changed.owl";
     private static final String TEST01_OWL = "test01.owl";
+    private static final String GLYPH_ICON_FILE = "glyphicons_003_user@2x.png";
     private static final String TEST_IRI = "http://visallo.org/test";
 
     private static final String TEST_HIERARCHY_IRI = "http://visallo.org/testhierarchy";
@@ -65,6 +71,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     @Test
     public void testChangingDisplayAnnotationsShouldSucceed() throws Exception {
         loadTestOwlFile();
+
         File changedOwl = new File(OntologyRepositoryTestBase.class.getResource(TEST_CHANGED_OWL).toURI());
 
         getOntologyRepository().importFile(changedOwl, IRI.create(TEST_IRI), authorizations);
@@ -97,6 +104,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     @Test
     public void testDependenciesBetweenOntologyFilesShouldNotChangeParentProperties() throws Exception {
         loadTestOwlFile();
+
         File changedOwl = new File(OntologyRepositoryTestBase.class.getResource(TEST01_OWL).toURI());
 
         getOntologyRepository().importFile(changedOwl, IRI.create(TEST01_IRI), authorizations);
@@ -560,6 +568,13 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals("First Met", firstMetProperty.getDisplayName());
         assertEquals(PropertyType.DATE, firstMetProperty.getDataType());
 
+        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor");
+        assertEquals("Favorite Color", favColorProperty.getDisplayName());
+        possibleValues = favColorProperty.getPossibleValues();
+        assertEquals(2, possibleValues.size());
+        assertEquals("red 1", possibleValues.get("Red"));
+        assertEquals("blue 2", possibleValues.get("Blue"));
+
         Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", null);
         assertTrue(relationship.getProperties()
                 .stream()
@@ -659,6 +674,13 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         OntologyProperty firstMetProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#firstMet", null);
         assertEquals("First Met", firstMetProperty.getDisplayName());
         assertEquals(PropertyType.DATE, firstMetProperty.getDataType());
+
+        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor");
+        assertEquals("Favorite Color", favColorProperty.getDisplayName());
+        possibleValues = favColorProperty.getPossibleValues();
+        assertEquals(2, possibleValues.size());
+        assertEquals("red 1", possibleValues.get("Red"));
+        assertEquals("blue 2", possibleValues.get("Blue"));
 
         Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", null);
         assertTrue(relationship.getProperties()

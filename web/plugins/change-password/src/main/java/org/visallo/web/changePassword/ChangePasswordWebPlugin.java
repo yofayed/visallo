@@ -23,7 +23,7 @@ public class ChangePasswordWebPlugin implements WebAppPlugin {
         app.registerCss("/org/visallo/web/changePassword/changePassword.css");
         app.registerResourceBundle("/org/visallo/web/changePassword/messages.properties");
 
-        app.get("/jsc/org/visallo/web/changePassword/template.hbs", new StaticResourceHandler(ChangePasswordWebPlugin.class, "/org/visallo/web/changePassword/template.hbs", "text/plain"));
+        app.registerJavaScriptTemplate("/org/visallo/web/changePassword/template.hbs");
 
         app.post("/changePassword", authenticationHandlerClass, csrfHandlerClass, ReadPrivilegeFilter.class, ChangePassword.class);
     }
