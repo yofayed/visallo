@@ -1,9 +1,7 @@
-
 define([
     'util/vertex/formatters',
     'util/requirejs/promise!util/service/ontologyPromise'
 ], function(f, ontology) {
-    'use strict';
 
     var V = f.vertex,
         VERTEX_ERROR = 'Vertex is invalid',
@@ -444,8 +442,8 @@ define([
             })
             it('should return longest userVisible property value if no params', function() {
                 var vertex = vertexFactory([
-                        propertyFactory(PROPERTY_NAME_FIRST, 'k1', 'a'),
-                        propertyFactory(PROPERTY_NAME_LAST, 'k1', 'aa')
+                        propertyFactory(PROPERTY_NAME_TITLE, 'k1', 'a'),
+                        propertyFactory(PROPERTY_NAME_GENDER, 'k1', 'aa')
                     ]);
 
                 expect(V.longestProp(vertex)).to.equal('aa')
@@ -540,23 +538,17 @@ define([
         })
 
         describe('singlePropValid', function() {
-            var VALIDATION_FORMULA = 'propRaw("' + PROPERTY_NAME_INTEGER + '") > 1';
-
             it('should validate property without validation formula', function() {
-                var property = propertyFactory(PROPERTY_NAME_INTEGER, 1);
+                var property = propertyFactory('http://visallo.org/testing#integer1noform', 1);
                 V.singlePropValid(property.value, property.name, property.key).should.equal(true);
             });
 
             it('should validate property with validation formula', function() {
-                ontology.properties.byTitle[PROPERTY_NAME_INTEGER].validationFormula = VALIDATION_FORMULA;
-
                 var property = propertyFactory(PROPERTY_NAME_INTEGER, 1);
                 V.singlePropValid(property.value, property.name, property.key).should.equal(false);
 
                 property.value = 2;
                 V.singlePropValid(property.value, property.name, property.key).should.equal(true);
-
-                delete ontology.properties.byTitle[PROPERTY_NAME_INTEGER].validationFormula;
             });
         });
 
@@ -615,23 +607,11 @@ define([
                 vertex.properties.push(propertyFactory(PROPERTY_NAME_LAST, 'k1', 'harwig'));
                 expect(V.propValid(vertex, [], COMPOUND_PROPERTY_NAME)).to.be.true
                 expect(V.propValid(vertex, ['override last name', undefined], COMPOUND_PROPERTY_NAME)).to.be.false
-                expect(V.propValid(vertex, ['l', 'f'], COMPOUND_PROPERTY_NAME)).to.be.true
+                expect(V.propValid(vertex, ['lll', 'ff'], COMPOUND_PROPERTY_NAME)).to.be.true
             })
 
             describe('with validation formulas on dependent properties', function() {
-                var FIRST_NAME_VALIDATION_FORMULA = 'propRaw("' + PROPERTY_NAME_FIRST + '").length > 1',
-                    LAST_NAME_VALIDATION_FORMULA = 'propRaw("' + PROPERTY_NAME_LAST + '").length > 2',
-                    vertex;
-
-                before(function() {
-                    ontology.properties.byTitle[PROPERTY_NAME_FIRST].validationFormula = FIRST_NAME_VALIDATION_FORMULA;
-                    ontology.properties.byTitle[PROPERTY_NAME_LAST].validationFormula = LAST_NAME_VALIDATION_FORMULA;
-                });
-
-                after(function() {
-                    delete ontology.properties.byTitle[PROPERTY_NAME_FIRST].validationFormula;
-                    delete ontology.properties.byTitle[PROPERTY_NAME_LAST].validationFormula;
-                });
+                var vertex;
 
                 beforeEach(function() {
                     vertex = vertexFactory([
@@ -641,7 +621,7 @@ define([
                     ]);
                 });
 
-                var validateExisting = function() {
+                var validateExisting = function(name = COMPOUND_PROPERTY_NAME) {
                         V.propValid(vertex, [], COMPOUND_PROPERTY_NAME).should.equal(false);
 
                         vertex.properties[0].value = vertex.properties[1].value = 'A';
@@ -653,7 +633,7 @@ define([
                         vertex.properties[1].value = 'ABC';
                         V.propValid(vertex, [], COMPOUND_PROPERTY_NAME).should.equal(true);
                     },
-                    validateOverriding = function() {
+                    validateOverriding = function(name = COMPOUND_PROPERTY_NAME) {
                         V.propValid(vertex, [], COMPOUND_PROPERTY_NAME).should.equal(false);
                         V.propValid(vertex, ['A', 'A'], COMPOUND_PROPERTY_NAME).should.equal(false);
                         V.propValid(vertex, ['AB', 'AB'], COMPOUND_PROPERTY_NAME).should.equal(false);
@@ -669,23 +649,12 @@ define([
                 });
 
                 describe('without validation formula on compound property', function() {
-                    var compoundFormula;
-
-                    before(function() {
-                        compoundFormula = ontology.properties.byTitle[COMPOUND_PROPERTY_NAME].validationFormula;
-                        delete ontology.properties.byTitle[COMPOUND_PROPERTY_NAME].validationFormula;
-                    });
-
-                    after(function() {
-                        ontology.properties.byTitle[COMPOUND_PROPERTY_NAME].validationFormula = compoundFormula;
-                    });
-
                     it('should validate existing values', function () {
-                        validateExisting();
+                        validateExisting('http://visallo.org/dev#nameNoValidationFormula');
                     });
 
                     it('should validate overriding values', function () {
-                        validateOverriding();
+                        validateOverriding('http://visallo.org/dev#nameNoValidationFormula');
                     });
                 });
             });

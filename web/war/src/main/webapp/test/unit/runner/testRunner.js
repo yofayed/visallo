@@ -10,9 +10,18 @@ requirejs.config({
     }
 });
 
+//requirejs.onResourceLoad = function(c, map) {
+    //console.log(map.name)
+//}
+
+global.visalloEnvironment = { dev: false, prod: true };
+
 requirejs(['/base/jsc/require.config.js'], function(cfg) {
 
-    var requireConfig = $.extend(true, {}, cfg, unminifyForTest('react', 'react-dom', 'react-redux'), {
+    // Use react with addons for test utils
+    cfg.paths['react'] = '../libs/react/dist/react-with-addons';
+
+    var requireConfig = $.extend(true, {}, cfg, unminifyForTest('react-dom', 'create-react-class', 'react-proptypes-dev', 'react-redux'), {
 
         // Karma serves files from '/base'
         baseUrl: '/base/jsc',
@@ -33,6 +42,7 @@ requirejs(['/base/jsc/require.config.js'], function(cfg) {
             'util/service/ontologyPromise': '../test/unit/mocks/ontologyPromise',
             'util/service/propertiesPromise': '../test/unit/mocks/propertiesPromise',
             'util/messages': '../test/unit/mocks/messages',
+            'data/web-worker/store/ontology/selectors': '../test/unit/mocks/ontologySelectors',
             'data/web-worker/store': '../test/unit/mocks/store',
             'data/web-worker/util/ajax': '../test/unit/mocks/ajax',
             testutils: '../test/unit/utils'
@@ -42,10 +52,11 @@ requirejs(['/base/jsc/require.config.js'], function(cfg) {
 
         deps: [
             'chai',
+            'util/promise',
             '../libs/underscore/underscore'
         ],
 
-        callback: function(_chai) {
+        callback: function(_chai, Promise) {
             global.chai = _chai
             if (typeof Function.prototype.bind !== 'function') {
                 /*eslint no-extend-native:0 */
@@ -73,15 +84,17 @@ requirejs(['/base/jsc/require.config.js'], function(cfg) {
                 currentWorkspaceId: 'w1',
                 currentUser: {
                     authorizations: ['a','b']
-                }
+                },
+                storePromise: Promise.require('util/service/ontologyPromise')
+                    .then(() => Promise.require('data/web-worker/store'))
+                    .then(store => store.getStore())
             };
-            global.visalloEnvironment = { dev: false, prod: true };
-
             _.templateSettings.escape = /\{([\s\S]+?)\}/g;
             _.templateSettings.evaluate = /<%([\s\S]+?)%>/g;
             _.templateSettings.interpolate = /\{-([\s\S]+?)\}/g;
 
             require([
+                'react',
                 'chai-datetime',
                 'chai-spies',
                 'chai-as-promised',
@@ -92,7 +105,9 @@ requirejs(['/base/jsc/require.config.js'], function(cfg) {
                 'util/jquery.flight',
                 'util/jquery.removePrefixedClasses',
                 'mocha-flight'
-            ], function(chaiDateTime, chaiSpies, chaiAsPromised, _sinon, sinonChai) {
+            ], function(React, chaiDateTime, chaiSpies, chaiAsPromised, _sinon, sinonChai) {
+
+                global.React = React;
 
                 chai.should();
                 chai.use(chaiDateTime);
@@ -127,9 +142,23 @@ requirejs(['/base/jsc/require.config.js'], function(cfg) {
 
                 // Run tests after loading
                 if (tests.length) {
-                    require(tests, function() {
+                    visalloData.storePromise.then(function(s) {
+                        return Promise.all(
+                            tests.map(function(t) {
+                                return new Promise(f => {
+                                    var timer = setTimeout(function() {
+                                        throw new Error('Failed to require test: ' + t)
+                                    }, 5000)
+                                    require([t], function(t) {
+                                        clearTimeout(timer);
+                                        f(t);
+                                    })
+                                })
+                            })
+                        );
+                    }).then(function() {
                         global.__karma__.start();
-                    });
+                    })
                 } else global.__karma__.start();
             });
 

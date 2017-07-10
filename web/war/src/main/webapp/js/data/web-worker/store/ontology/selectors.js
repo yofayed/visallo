@@ -64,7 +64,7 @@ define(['reselect'], function(reselect) {
         const concepts = ontology[workspaceId].concepts;
         const fn = _collectParents(concepts, {
             parentKey: 'parentConcept',
-            extraKeys: ['color', 'glyphIconHref', 'glyphIconSelectedHref', 'titleFormula', 'subtitleFormula', 'timeFormula'],
+            extraKeys: ['color', 'glyphIconHref', 'glyphIconSelectedHref', 'titleFormula', 'subtitleFormula', 'timeFormula', 'validationFormula'],
             defaults: { glyphIconHref: 'img/glyphicons/glyphicons_194_circle_question_mark@2x.png' }
         });
         return _.mapObject(concepts, c => {
@@ -158,6 +158,23 @@ define(['reselect'], function(reselect) {
         })
     })
 
+    const getPropertiesByDependentToCompound = createSelector([getProperties], properties => {
+        const dependentToCompounds = {};
+        Object.keys(properties).forEach(iri => {
+            const { dependentPropertyIris } = properties[iri];
+            if (dependentPropertyIris) {
+                dependentPropertyIris.forEach(dIri => {
+                    const list = dependentToCompounds[dIri] || (dependentToCompounds[dIri] = [])
+                    if (!list.includes(iri)) {
+                        list.push(iri)
+                    }
+                })
+            }
+        })
+
+        return dependentToCompounds;
+    })
+
     const getVisibleProperties = createSelector([getProperties], properties => {
         const compareNameAndGroup = ({ displayName, propertyGroup }) => {
             const displayNameLC = displayName.toLowerCase();
@@ -207,6 +224,7 @@ define(['reselect'], function(reselect) {
         getPropertyKeyIris,
         getPropertiesByConcept,
         getPropertiesByRelationship,
+        getPropertiesByDependentToCompound,
         getVisibleProperties,
         getVisiblePropertiesWithHeaders,
 

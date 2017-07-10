@@ -1,7 +1,7 @@
 
 define([
     'flight/lib/component',
-    'create-react-class',
+    'react',
     'react-dom',
     './DiffPanel',
     'util/vertex/formatters',
@@ -9,7 +9,7 @@ define([
     'util/dnd'
 ], function(
     defineComponent,
-    createReactClass,
+    React,
     ReactDOM,
     DiffPanel,
     F,
@@ -39,7 +39,7 @@ define([
     function Diff() {
 
         this.render = function() {
-            ReactDOM.render(createReactClass(DiffPanel, {
+            ReactDOM.render(React.createElement(DiffPanel, {
                 diffs: this.diffs,
                 formatLabel: this.formatLabel,
                 onPublishClick: this.onMarkPublish.bind(this),

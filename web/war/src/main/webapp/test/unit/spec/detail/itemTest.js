@@ -647,12 +647,12 @@ require(['configuration/plugins/registry'], function(registry) {
 
                 $c.length.should.equal(2)
                 comps.length.should.equal(1)
-                comps[0].toString().should.equal('FlexLayout')
+                comps[0].toString().should.contain('FlexLayout')
 
                 $node.on('modelUpdated', function(event) {
                         comps = $y.lookupAllComponents()
                         comps.length.should.equal(1)
-                        comps[0].toString().should.equal('ItemTestLayout')
+                        comps[0].toString().should.contain('ItemTestLayout')
                         done()
                     })
                     .trigger('updateModel', {

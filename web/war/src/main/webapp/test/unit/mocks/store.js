@@ -1,18 +1,21 @@
-define(['util/promise'], function(Promise) {
+define(['util/promise', '/base/test/unit/mocks/ontologyJson'], function(Promise, ontologyJson) {
     var promise;
+    var ontology = {};
+    ontology[publicData.currentWorkspaceId] = {
+        concepts: _.indexBy(ontologyJson.concepts, 'id'),
+        relationships: _.indexBy(ontologyJson.relationships, 'title'),
+        properties: _.indexBy(ontologyJson.properties, 'title')
+    }
+
     return {
         getStore: function() {
             return {
                 getState: function() {
                     return {
-                        workspace: {},
-                        ontology: {
-                            //['w1']: {
-                                //concepts: {},
-                                //relationships: {},
-                                //properties: {}
-                            //}
-                       }
+                        workspace: {
+                            currentId: publicData.currentWorkspaceId
+                        },
+                        ontology
                     };
                 },
                 subscribe: function() { }
@@ -22,16 +25,7 @@ define(['util/promise'], function(Promise) {
             if (promise) return promise.then(function(o) {
                 return JSON.parse(JSON.stringify(o));
             });
-            var parsedOntology = window.ONTOLOGY_JSON;
-            var copied = callback({
-                ontology: {
-                    [publicData.currentWorkspaceId]: {
-                        concepts: _.indexBy(parsedOntology.concepts, 'id'),
-                        relationships: _.indexBy(parsedOntology.relationships, 'title'),
-                        properties: _.indexBy(parsedOntology.properties, 'title')
-                    }
-                }
-            })
+            var copied = callback({ ontology })
             return (promise = Promise.resolve(copied));
         }
     }

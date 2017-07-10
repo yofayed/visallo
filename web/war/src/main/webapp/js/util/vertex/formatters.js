@@ -14,10 +14,12 @@ define([
     visibilityUtil) {
     'use strict';
 
-    var ontology;
     var _state;
     var getProperty = function(iri) {
         return ontologySelectors.getProperties(_state)[iri];
+    };
+    var getPropertiesByDependentToCompound = function(iri) {
+        return ontologySelectors.getPropertiesByDependentToCompound(_state)[iri];
     };
     var getConcept = function(iri) {
         return ontologySelectors.getConcepts(_state)[iri];
@@ -742,7 +744,7 @@ define([
              * @returns {object} The property
              */
             longestProp: function(vertex, optionalName) {
-                var properties = vertex.properties
+                var properties = _.chain(vertex.properties)
                     .filter(function(a) {
                         var ontologyProperty = getProperty(a.name);
                         if (optionalName && optionalName !== a.name) {
@@ -751,13 +753,20 @@ define([
                         return ontologyProperty && ontologyProperty.userVisible;
                     })
                     .map(function(a) {
-                        // FIXME
-                        var parentProperty = ontology.properties.byDependentToCompound[a.name];
-                        if (parentProperty && V.hasProperty(vertex, parentProperty)) {
-                            return V.prop(vertex, parentProperty, a.key);
+                        var parentProperties = getPropertiesByDependentToCompound(a.name);
+                        if (parentProperties) {
+                            var concept = V.concept(vertex);
+                            return parentProperties.map(parentProperty => {
+                                if (concept.properties.includes(parentProperty)) {
+                                    return V.prop(vertex, parentProperty, a.key);
+                                }
+                                return '';
+                            })
                         }
                         return V.prop(vertex, a.name, a.key);
                     })
+                    .flatten(true)
+                    .value()
                     .sort(function(a, b) {
                         return b.length - a.length;
                     });

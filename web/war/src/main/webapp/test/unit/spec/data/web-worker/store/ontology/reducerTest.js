@@ -5,7 +5,7 @@ define([
 
     const workspaceId = 'w1';
 
-    describe.only('ontologyReducer', () => {
+    describe('ontologyReducer', () => {
 
         it('should update ontology', () => {
             const nextState = reducer(undefined, {
