@@ -48,21 +48,23 @@ define([], function() {
                     }
                 };
             }
+            case 'PUSH_UNDO':
             default: {
                 if (!payload) {
                     return state;
                 }
 
-                const { undoScope: scope = 'global', undo, redo } = payload;
+                const { undoScope: scope = 'global', undo, redo, undoActionType } = payload;
                 if (!undo || !redo) {
                     return state;
                 }
 
                 const newUndo = {
-                    type,
                     undo,
-                    redo
+                    redo,
+                    type: undoActionType || type
                 };
+
                 const scopedState = state[scope] || { undos: [], redos: [] };
                 const { undos, redos } = scopedState;
 

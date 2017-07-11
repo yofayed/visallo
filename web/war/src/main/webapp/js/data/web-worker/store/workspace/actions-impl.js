@@ -87,6 +87,16 @@ define(['../actions', '../../util/ajax'], function(actions, ajax) {
             })
             if (!currentId || !byId[currentId]) {
                 dispatch(api.setCurrent({ workspaceId: workspace.workspaceId }))
+            } else {
+                require([
+                    'data/web-worker/store/product/actions-impl',
+                    'data/web-worker/store/product/selectors'
+                ], (productActions, productSelectors) => {
+                    const selectedProduct = productSelectors.getProduct(state);
+                    if (selectedProduct && selectedProduct.extendedData) {
+                            dispatch(productActions.get({ productId: selectedProduct.id, invalidate: true }));
+                    }
+                })
             }
         }
     }

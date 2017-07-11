@@ -3,8 +3,9 @@ define([
     '../../util/ajax',
     '../element/actions-impl',
     '../selection/actions-impl',
-    './selectors'
-], function(actions, ajax, elementActions, selectionActions, selectors) {
+    './selectors',
+    'configuration/plugins/registry'
+], function(actions, ajax, elementActions, selectionActions, selectors, registry) {
     actions.protectFromMain();
 
     const api = {
@@ -31,8 +32,8 @@ define([
                     dispatch(api.update(product));
 
                     const { vertices, edges } = product.extendedData;
-                    const vertexIds = _.pluck(vertices, 'id');
-                    const edgeIds = _.pluck(edges, 'edgeId');
+                    const vertexIds = Object.keys(vertices);
+                    const edgeIds = Object.keys(edges);
 
                     dispatch(elementActions.get({ workspaceId, vertexIds, edgeIds }));
                 })
@@ -57,6 +58,24 @@ define([
 
         updatePreview: ({ productId, dataUrl }) => (dispatch, getState) => {
             ajax('POST', '/product', { productId, preview: dataUrl })
+        },
+
+        updateLocalData: ({productId, key, value}) => (dispatch, getState) => {
+            const state = getState();
+            const workspaceId = state.workspace.currentId;
+            const product = state.product.workspaces[workspaceId].products[productId];
+
+            let localData = product.localData || {};
+            if (value === null) {
+                localData = _.omit(localData, key);
+            } else {
+                localData = {
+                    ...localData,
+                    [key]: value
+                }
+            }
+
+            dispatch({type: 'PRODUCT_UPDATE_LOCAL_DATA', payload: {workspaceId, productId, localData}});
         },
 
         updateData: ({productId, key, value}) => (dispatch, getState) => {
@@ -94,56 +113,6 @@ define([
             }
         }),
 
-        removeElements: ({ productId, elements, undoable }) => (dispatch, getState) => {
-            const state = getState();
-            const workspaceId = state.workspace.currentId;
-            const workspace = state.workspace.byId[workspaceId];
-            if (workspace.editable && elements && elements.vertexIds && elements.vertexIds.length) {
-                const removeVertices = elements.vertexIds;
-                const product = state.product.workspaces[workspaceId].products[productId];
-                const byId = _.indexBy(product.extendedData.vertices, 'id');
-
-                let undoPayload = {};
-                if (undoable) {
-                    const updateVertices = removeVertices
-                        .map(id => byId[id])
-                        .reduce(
-                            (vertices, {id, pos}) => ({
-                                [id]: pos,
-                                ...vertices
-                            }),
-                            {}
-                        );
-                    undoPayload = {
-                        undoScope: productId,
-                        undo: {
-                            productId,
-                            updateVertices
-                        },
-                        redo: {
-                            productId,
-                            removeElements: elements
-                        }
-                    };
-                }
-                dispatch({
-                    type: 'PRODUCT_REMOVE_ELEMENTS',
-                    payload: {
-                        elements: { vertexIds: removeVertices },
-                        productId,
-                        workspaceId,
-                        ...undoPayload
-                    }
-                });
-                dispatch(selectionActions.remove({
-                    selection: { vertices: removeVertices }
-                }));
-                if (removeVertices.length) {
-                    ajax('POST', '/product', { productId, params: { removeVertices }})
-                }
-            }
-        },
-
         selectAll: ({ productId }) => (dispatch, getState) => {
             const state = getState(),
                 workspaceId = state.workspace.currentId,
@@ -151,8 +120,8 @@ define([
 
             dispatch(selectionActions.set({
                 selection: {
-                    vertices: product.extendedData.vertices.map(v => v.id),
-                    edges: product.extendedData.edges.map(e => e.id)
+                    vertices: Object.keys(product.extendedData.vertices),
+                    edges: Object.keys(product.extendedData.edges)
                 }
             }));
         },
