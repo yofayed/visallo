@@ -18,13 +18,17 @@ define([
     const ConceptsSelector = createReactClass({
         propTypes: {
             filter: PropTypes.shape({
-                conceptId: PropTypes.string.isRequired,
-                showAncestors: PropTypes.bool
+                conceptId: PropTypes.string,
+                relatedToConceptId: PropTypes.string,
+                showAncestors: PropTypes.bool,
+                userVisible: PropTypes.bool,
+                searchable: PropTypes.bool
             }),
-            privileges: PropTypes.object.isRequired,
-            concepts: PropTypes.array.isRequired,
             conceptAncestors: PropTypes.object.isRequired,
-            placeholder: PropTypes.string
+            concepts: PropTypes.array.isRequired,
+            privileges: PropTypes.object.isRequired,
+            placeholder: PropTypes.string,
+            value: PropTypes.string
         },
         getDefaultProps() {
             return { creatable: true, placeholder: i18n('concept.field.placeholder') }
@@ -42,8 +46,16 @@ define([
             var options = concepts;
             if (filter) {
                 options = concepts.filter(o => {
-                    return o.id === filter.conceptId ||
+                    return (
+                        o.id === filter.conceptId ||
                         (!filter.showAncestors || conceptAncestors[filter.conceptId].includes(o.id))
+                    ) && (
+                        (filter.userVisible === undefined || filter.userVisible === true) ?
+                        (o.userVisible !== false) : true
+                    ) && (
+                        (filter.searchable === true) ?
+                        (o.searchable !== false) : true
+                    )/* TODO: add relatedToConceptId && (true)*/;
                 })
             }
             return (

@@ -162,7 +162,7 @@ define([], function() {
             })
 
             if (ontologyCleared) {
-                this.refreshOntology().then(ontology => {
+                this.refreshOntology().then(ontologyRequest => {
                     /**
                      * Triggered when the ontology is modified, either by changing the
                      * case or something was published.
@@ -183,7 +183,7 @@ define([], function() {
                      *     console.log('Ontology:', data.ontology);
                      * })
                      */
-                    this.trigger('ontologyChanged', { ontology });
+                    this.trigger('ontologyChanged', { ontology: ontologyRequest.result });
                 })
             }
         };

@@ -36,19 +36,33 @@ define([
         })
 
         this.after('initialize', function() {
-            this.on('clearSelectedConcept', function() {
-                console.log(event.type, this.attacher);
+            this.on('clearSelectedConcept', function(event) {
+                this.attacher.params({ ...this.attacher._params, value: '' }).attach();
             })
-            this.on('selectConceptId', function() {
-                console.log(event.type, this.attacher);
+            this.on('selectConceptId', function(event, { conceptId }) {
+                this.attacher.params({ ...this.attacher._params, value: conceptId }).attach();
             })
-            this.on('enableConcept', function() {
-                console.log(event.type, this.attacher);
+            this.on('enableConcept', function(event, { disable, enable }) {
+                const disabled = disable === true || enable === false
+                this.attacher.params({ ...this.attacher._params, disabled }).attach();
             })
+
+            const filter = {};
+            if (this.attr.showAdminConcepts === true) {
+                filter.userVisible = undefined;
+            }
+            if (this.attr.onlySearchable === true) {
+                filter.searchable = true;
+            }
+            if (this.attr.restrictConcept) {
+                filter.conceptId = this.attr.restrictConcept;
+            }
 
             this.attacher = attacher()
                 .node(this.node)
                 .params({
+                    filter,
+                    value: this.attr.selectedConceptId,
                     placeholder: this.attr.defaultText,
                     autofocus: this.attr.focus === true
                 })

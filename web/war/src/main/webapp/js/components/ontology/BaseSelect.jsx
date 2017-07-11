@@ -70,7 +70,7 @@ define([
                 const value = nextProps.iriKeys[key];
                 this.setState({ value, key: false })
                 this.props.onSelected(this.getOptionByValue(value));
-            } else if (nextProps.value !== this.props.value) {
+            } else if (nextProps.value !== (this.state.value || this.props.value)) {
                 this.setState({ value: nextProps.value })
             }
             if (nextProps.creatable !== this.props.creatable) {

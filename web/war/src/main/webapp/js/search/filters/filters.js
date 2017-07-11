@@ -100,6 +100,14 @@ define([
                 return this.dataRequest('ontology', 'propertiesByDomainType', this.matchType);
             };
 
+            this.on(document, 'ontologyChanged', function(event, { ontology }) {
+                const { relationships, concepts } = ontology;
+                this.conceptsById = concepts.byId;
+                this.relationshipsById = relationships.byId;
+                this.conceptsByParent = _.groupBy(concepts.byTitle, 'parentConcept');
+                this.relationshipsByParent = _.groupBy(relationships.list, 'parentIri');
+            });
+
             this.filtersLoaded = this.dataRequest('ontology', 'ontology').then(({ relationships, concepts }) => {
                 this.conceptsById = concepts.byId;
                 this.relationshipsById = relationships.byId;

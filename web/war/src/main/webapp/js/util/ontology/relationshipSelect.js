@@ -32,7 +32,7 @@ define([
             var self = this;
             this.on('limitParentConceptId', function(event, data) {
                 const { conceptId: concept, sourceConcept, targetConcept } = data;
-                self.attacher.params({ concept, sourceConcept, targetConcept }).attach();
+                self.attacher.params({ ...self.attacher._params, concept, sourceConcept, targetConcept }).attach();
             })
             this.on('selectRelationshipId', function(event, data) {
                 const relationshipId = data && data.relationshipId || '';

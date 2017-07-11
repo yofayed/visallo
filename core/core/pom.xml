@@ -156,6 +156,16 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>install-node-and-yarn</id>
+                        <goals>
+                            <goal>install-node-and-yarn</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                            <yarnVersion>${yarnjs.version}</yarnVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>yarn install</id>
                         <goals>
                             <goal>yarn</goal>

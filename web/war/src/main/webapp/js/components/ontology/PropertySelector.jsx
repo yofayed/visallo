@@ -44,11 +44,22 @@ define([
                 conceptId: PropTypes.string,
                 relationshipId: PropTypes.string,
                 addable: PropTypes.bool,
-                searchable: PropTypes.bool
-            })
+                userVisible: PropTypes.bool,
+                searchable: PropTypes.bool,
+                deleteable: PropTypes.bool,
+                sortable: PropTypes.bool,
+                updateable: PropTypes.bool,
+                dataType: PropTypes.string
+            }),
+            value: PropTypes.string,
+            properties: PropTypes.array.isRequired,
+            propertiesByConcept: PropTypes.object.isRequired,
+            propertiesByRelationship: PropTypes.object.isRequired,
+            privileges: PropTypes.object.isRequired,
+            placeholder: PropTypes.string
         },
         getDefaultProps() {
-            return { creatable: true }
+            return { creatable: true, placeholder: i18n('property.field.placeholder') }
         },
         render() {
             const {
