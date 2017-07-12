@@ -52,6 +52,12 @@ public class SearchOptions {
         if (resultType == Integer.class && obj instanceof String) {
             return resultType.cast(Integer.parseInt((String) obj));
         }
+        if (resultType == Long.class && obj instanceof String) {
+            return resultType.cast(Long.parseLong((String) obj));
+        }
+        if (resultType == Long.class && obj instanceof Integer) {
+            return resultType.cast(((Integer) obj).longValue());
+        }
         if (resultType == Double.class && obj instanceof String) {
             return resultType.cast(Double.parseDouble((String) obj));
         }
@@ -77,6 +83,11 @@ public class SearchOptions {
         checkNotNull(defaultValue, "defaultValue cannot be null");
         T obj = (T) getOptionalParameter(parameterName, defaultValue.getClass());
         if (obj == null) {
+            // null is a possible value, for example limit=null signifies don't limit the results. If limit is
+            // not specified use the defaultValue
+            if (parameters.containsKey(parameterName)) {
+                return null;
+            }
             return defaultValue;
         }
         return obj;

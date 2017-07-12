@@ -26,7 +26,7 @@ public abstract class VertexiumObjectSearchRunnerBase extends SearchRunner {
     private final Graph graph;
     private final DirectoryRepository directoryRepository;
     private final OntologyRepository ontologyRepository;
-    private int defaultSearchResultCount;
+    private long defaultSearchResultCount;
 
     protected VertexiumObjectSearchRunnerBase(
             OntologyRepository ontologyRepository,
@@ -57,10 +57,16 @@ public abstract class VertexiumObjectSearchRunnerBase extends SearchRunner {
         applyExtendedDataFilters(queryAndData, searchOptions);
 
         EnumSet<FetchHint> fetchHints = getFetchHints(searchOptions);
-        final int offset = searchOptions.getOptionalParameter("offset", 0);
-        final int size = searchOptions.getOptionalParameter("size", defaultSearchResultCount);
-        queryAndData.getQuery().limit(size);
-        queryAndData.getQuery().skip(offset);
+
+        Long size = searchOptions.getOptionalParameter("size", defaultSearchResultCount);
+        if (size != null) {
+            queryAndData.getQuery().limit(size);
+        }
+
+        Long offset = searchOptions.getOptionalParameter("offset", 0L);
+        if (offset != null) {
+            queryAndData.getQuery().skip(offset.intValue());
+        }
 
         QueryResultsIterable<? extends VertexiumObject> searchResults = getSearchResults(queryAndData, fetchHints);
 
