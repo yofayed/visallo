@@ -33,8 +33,11 @@ define(['updeep'], function(u) {
         return u(u.omit(workspaceIds), state);
     }
 
-    function updateIri(state, { type, key, iri }) {
-        return u.updateIn(`iris.${type}.${key}`, iri, state);
+    function updateIri(state, { type, key, error, iri }) {
+        if (iri) {
+            return u.updateIn(`iris.${type}.${key}`, iri, state);
+        }
+        return u.updateIn(`iris.${type}.${key}.error`, error, state);
     }
 });
 

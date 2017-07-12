@@ -28,9 +28,12 @@ define([
         propTypes: {
             conceptDescendents: PropTypes.object.isRequired,
             relationships: PropTypes.array.isRequired,
-            sourceConcept: PropTypes.string,
-            targetConcept: PropTypes.string,
-            concept: PropTypes.string,
+            filter: PropTypes.shape({
+                sourceId: PropTypes.string,
+                targetId: PropTypes.string,
+                conceptId: PropTypes.string,
+                relationshipId: PropTypes.string
+            }),
             placeholder: PropTypes.string
         },
         getDefaultProps() {
@@ -38,29 +41,35 @@ define([
         },
         render() {
             const {
-                concept,
                 conceptDescendents,
+                relationshipAncestors,
                 privileges,
                 relationships,
-                sourceConcept,
-                targetConcept,
+                filter,
                 creatable,
                 ...rest
             } = this.props;
-            const formProps = { sourceConcept, targetConcept };
+            const formProps = { ...filter };
 
-            if (concept && (sourceConcept || targetConcept)) {
-                throw new Error('only one of concept or source/target can be sent');
-            }
             var options = relationships;
-            if (concept) {
-                options = filterList(conceptDescendents, options, ['domainConceptIris', 'rangeConceptIris'], concept);
-            } else {
-                if (sourceConcept) {
-                    options = filterList(conceptDescendents, options, ['domainConceptIris'], sourceConcept);
+
+            if (filter) {
+                const { conceptId, sourceId, targetId, relationshipId } = filter;
+                if (conceptId && (sourceId || targetId)) {
+                    throw new Error('only one of conceptId or source/target can be sent');
                 }
-                if (targetConcept) {
-                    options = filterList(conceptDescendents, options, ['rangeConceptIris'], targetConcept);
+                if (relationshipId) {
+                    options = options.filter(o => o.title === relationshipId || relationshipAncestors[relationshipId].includes(o.title));
+                }
+                if (conceptId) {
+                    options = filterList(conceptDescendents, options, ['domainConceptIris', 'rangeConceptIris'], conceptId);
+                } else {
+                    if (sourceId) {
+                        options = filterList(conceptDescendents, options, ['domainConceptIris'], sourceId);
+                    }
+                    if (targetId) {
+                        options = filterList(conceptDescendents, options, ['rangeConceptIris'], targetId);
+                    }
                 }
             }
 
@@ -80,7 +89,7 @@ define([
             return {
                 privileges: userSelectors.getPrivileges(state),
                 conceptDescendents: ontologySelectors.getConceptDescendents(state),
-                concepts: ontologySelectors.getConcepts(state),
+                relationshipAncestors: ontologySelectors.getRelationshipAncestors(state),
                 relationships: ontologySelectors.getVisibleRelationships(state),
                 iriKeys: ontologySelectors.getRelationshipKeyIris(state),
                 ...props

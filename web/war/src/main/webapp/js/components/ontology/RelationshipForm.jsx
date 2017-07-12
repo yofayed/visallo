@@ -1,8 +1,9 @@
 define([
     'create-react-class',
     'prop-types',
-    './ConceptSelector'
-], function(createReactClass, PropTypes, ConceptsSelector) {
+    './ConceptSelector',
+    '../Alert'
+], function(createReactClass, PropTypes, ConceptsSelector, Alert) {
 
     const RelationshipForm = createReactClass({
         propTypes: {
@@ -20,6 +21,7 @@ define([
             const disabled = _.isEmpty(value);
             return (
                 <div>
+                    { this.props.error ? (<Alert error={this.props.error} />) : null }
                     <ConceptsSelector
                         value={_.isString(this.state.sourceConcept) ? this.state.sourceConcept : this.props.sourceConcept}
                         placeholder="From Concept"

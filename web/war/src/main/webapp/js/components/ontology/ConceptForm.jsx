@@ -3,8 +3,14 @@ define([
     'prop-types',
     './ConceptSelector',
     '../GlyphSelector',
-    '../ColorSelector'
-], function(createReactClass, PropTypes, ConceptsSelector, GlyphSelector, ColorSelector) {
+    '../ColorSelector',
+    '../Alert'
+], function(createReactClass,
+    PropTypes,
+    ConceptsSelector,
+    GlyphSelector,
+    ColorSelector,
+    Alert) {
 
     const ConceptForm = createReactClass({
         propTypes: {
@@ -23,6 +29,7 @@ define([
             const disabled = _.isEmpty(value);
             return (
                 <div>
+                    { this.props.error ? (<Alert error={this.props.error} />) : null }
                     <input type="text"
                         placeholder="Display Name"
                         onChange={this.onDisplayNameChange}

@@ -11,6 +11,12 @@ define(['../actions', '../../util/ajax'], function(actions, ajax) {
                     dispatch(api.iriCreated({ key, type, iri: payload.title }))
                 }
             })
+            .catch(payload => {
+                if (key) {
+                    dispatch(api.iriFailed({ key, type, error: payload.message }))
+                }
+                throw payload;
+            })
     };
 
     const api = {
@@ -66,6 +72,11 @@ define(['../actions', '../../util/ajax'], function(actions, ajax) {
         iriCreated: ({ type, key, iri }) => ({
             type: 'ONTOLOGY_IRI_CREATED',
             payload: { type, key, iri }
+        }),
+
+        iriFailed: ({ type, key, error }) => ({
+            type: 'ONTOLOGY_IRI_CREATED',
+            payload: { type, key, error }
         }),
 
         ontologyChange: ({ workspaceId, conceptIds, relationshipIds, propertyIds }) => (dispatch, getState) => {

@@ -47,14 +47,15 @@ define([
             if (filter) {
                 options = concepts.filter(o => {
                     return (
-                        o.id === filter.conceptId ||
-                        (!filter.showAncestors || conceptAncestors[filter.conceptId].includes(o.id))
+                        filter.conceptId ?
+                            (o.id === filter.conceptId ||
+                            (!filter.showAncestors || conceptAncestors[filter.conceptId].includes(o.id))) : true
                     ) && (
-                        (filter.userVisible === undefined || filter.userVisible === true) ?
-                        (o.userVisible !== false) : true
+                        filter.userVisible === undefined || filter.userVisible === true ?
+                            o.userVisible !== false : true
                     ) && (
-                        (filter.searchable === true) ?
-                        (o.searchable !== false) : true
+                        filter.searchable === true ?
+                            o.searchable !== false : true
                     )/* TODO: add relatedToConceptId && (true)*/;
                 })
             }

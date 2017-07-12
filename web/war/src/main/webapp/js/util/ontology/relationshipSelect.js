@@ -31,8 +31,8 @@ define([
             if (this.attr.maxItems) console.warn('maxItems is no longer supported');
             var self = this;
             this.on('limitParentConceptId', function(event, data) {
-                const { conceptId: concept, sourceConcept, targetConcept } = data;
-                self.attacher.params({ ...self.attacher._params, concept, sourceConcept, targetConcept }).attach();
+                const { conceptId, sourceConcept: sourceId, targetConcept: targetId } = data;
+                self.attacher.params({ ...self.attacher._params, conceptId, sourceId, targetId }).attach();
             })
             this.on('selectRelationshipId', function(event, data) {
                 const relationshipId = data && data.relationshipId || '';
@@ -44,9 +44,11 @@ define([
                 .params({
                     placeholder: this.attr.defaultText,
                     autofocus: this.attr.focus === true,
-                    concept: this.attr.limitParentConceptId,
-                    sourceConcept: this.attr.sourceConcept,
-                    targetConcept: this.attr.targetConcept
+                    filter: {
+                        conceptId: this.attr.limitParentConceptId,
+                        sourceId: this.attr.sourceConcept,
+                        targetId: this.attr.targetConcept
+                    }
                 })
                 .behavior({
                     onSelected: (attacher, relationship) => {

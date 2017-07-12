@@ -79,11 +79,13 @@ define([
                 if (filter && filter.conceptId) {
                     const conceptProps = propertiesByConcept[filter.conceptId];
                     const conceptProp = conceptProps && conceptProps[p.title];
+                    formProps.domain = filter.conceptId;
                     test = test && Boolean(conceptProp);
                 }
                 if (filter && filter.relationshipId) {
                     const relationshipProps = propertiesByRelationship[filter.relationshipId];
                     const relationshipProp = relationshipProps && relationshipProps[p.title];
+                    formProps.domain = filter.relationshipId;
                     test = test && Boolean(relationshipProp);
                 }
                 if (filter && filter.rollupCompound && p.dependentPropertyIris) {
@@ -95,8 +97,6 @@ define([
                         if (filter[fp] !== undefined && filter[fp] !== null) {
                             test = test && p[fp] === filter[fp];
                         }
-                    } else if (fp in FilterPropDefaults) {
-                        test = test && p[fp] === FilterPropDefaults[fp];
                     }
                 })
                 return test;
@@ -134,7 +134,7 @@ define([
 
         (dispatch, props) => ({
             onCreate: ({ displayName, type, domain }, options) => {
-                let property = { displayName, domain };
+                let property = { displayName, ...domain };
                 if (ontologyDisplayTypes[type]) {
                     property = {
                         ...property,

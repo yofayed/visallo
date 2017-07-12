@@ -346,7 +346,8 @@ define([
             var commentPropertyAcls = _.reject(propertyAcls, function(property) {
                     return property.name === 'http://visallo.org/comment#entry';
                 }),
-                hasAddableProperties = _.where(commentPropertyAcls, { addable: true }).length > 0,
+                hasAddableProperties = _.where(commentPropertyAcls, { addable: true }).length > 0 ||
+                    visalloData.currentUser.privilegesHelper.ONTOLOGY_ADD,
                 disableAdd = (model.hasOwnProperty('updateable') && !model.updateable) || !hasAddableProperties;
 
             if (!disableAdd) {

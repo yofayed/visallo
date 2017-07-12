@@ -108,14 +108,30 @@ define(['reselect'], function(reselect) {
             .value()
     })
 
+    const getRelationshipAncestors = createSelector([getRelationships], relationships => {
+        const byParent = _.groupBy(relationships, 'parentIri');
+        const collectAncestors = (list, r, skipFirst) => {
+            if (r) {
+                if (!skipFirst) list.push(r.title);
+                if (r.parentIri) {
+                    collectAncestors(list, relationships[r.parentIri]);
+                }
+            }
+            return _.uniq(list);
+        }
+        return _.mapObject(relationships, c => collectAncestors([], c, true));
+    })
+
     const getRelationshipKeyIris = state => state.ontology.iris && state.ontology.iris.relationship;
 
     const getConceptAncestors = createSelector([getConcepts], concepts => {
         const byParent = _.groupBy(concepts, 'parentConcept');
         const collectAncestors = (list, c, skipFirst) => {
-            if (!skipFirst) list.push(c.title);
-            if (c.parentConcept) {
-                collectAncestors(list, concepts[c.parentConcept]);
+            if (c) {
+                if (!skipFirst) list.push(c.title);
+                if (c.parentConcept) {
+                    collectAncestors(list, concepts[c.parentConcept]);
+                }
             }
             return _.uniq(list);
         }
@@ -187,7 +203,7 @@ define(['reselect'], function(reselect) {
             .value()
     });
 
-    const getPropertyKeyIris = state => state.ontology.iris && state.ontology.iris.properties;
+    const getPropertyKeyIris = state => state.ontology.iris && state.ontology.iris.property;
 
     const getVisiblePropertiesWithHeaders = createSelector([getVisibleProperties], properties => {
         let lastGroup;
@@ -229,6 +245,7 @@ define(['reselect'], function(reselect) {
         getVisiblePropertiesWithHeaders,
 
         getRelationships,
+        getRelationshipAncestors,
         getRelationshipKeyIris,
         getVisibleRelationships
     }

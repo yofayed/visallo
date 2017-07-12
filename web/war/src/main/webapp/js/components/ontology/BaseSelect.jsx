@@ -41,7 +41,7 @@ define([
             creatable: PropTypes.bool
         },
         getInitialState() {
-            return { creating: false }
+            return { showForm: false }
         },
         getDefaultProps() {
             return { creatable: true, labelKey: 'displayName', valueKey: 'title' }
@@ -68,8 +68,12 @@ define([
             const { key } = this.state;
             if (key && nextProps.iriKeys && nextProps.iriKeys[key]) {
                 const value = nextProps.iriKeys[key];
-                this.setState({ value, key: false })
-                this.props.onSelected(this.getOptionByValue(value));
+                if ('error' in value) {
+                    this.setState({ key: false, showForm: true, error: value.error || 'Server Error' })
+                } else {
+                    this.setState({ value, key: false, error: null })
+                    this.props.onSelected(this.getOptionByValue(value));
+                }
             } else if (nextProps.value !== (this.state.value || this.props.value)) {
                 this.setState({ value: nextProps.value })
             }
@@ -82,17 +86,18 @@ define([
             }
         },
         render() {
-            const { creating, value, CreateForm, selectComponent, key } = this.state;
+            const { creating, showForm, value, CreateForm, selectComponent, key, error } = this.state;
             const { formProps, value: defaultValue, creatable, createForm, disabled, placeholder, ...rest } = this.props;
             const hasKey = Boolean(key);
             return (
                 <div>
                 {
-                    (creating && CreateForm) ? (
+                    (creating && showForm && CreateForm) ? (
                         <CreateForm
                             displayName={creating}
                             onCancel={this.onCancel}
                             onCreate={this.onCreate}
+                            error={error}
                             {...(formProps || {})} />
                     ) : (
                         <VirtualizedSelect
@@ -144,15 +149,15 @@ define([
             } else throw new Error('Create form prop required when creatable')
         },
         onCancel() {
-            this.setState({ creating: false })
+            this.setState({ showForm: false })
         },
         onCreate(option) {
             const key = keyCounter();
             this.props.onCreate(option, { key });
-            this.setState({ creating: false, key })
+            this.setState({ showForm: false, key })
         },
         onNewOptionClick(option) {
-            this.setState({ creating: option[this.props.labelKey] })
+            this.setState({ showForm: true, error: null, creating: option[this.props.labelKey] })
             this.props.onSelected();
         }
     });

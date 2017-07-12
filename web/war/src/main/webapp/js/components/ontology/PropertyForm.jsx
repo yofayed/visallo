@@ -1,50 +1,80 @@
 define([
     'create-react-class',
     'prop-types',
-    './ConceptSelector'
-], function(createReactClass, PropTypes, ConceptsSelector) {
-    'use strict';
+    './ConceptSelector',
+    './RelationshipSelector',
+    '../Alert'
+], function(
+    createReactClass,
+    PropTypes,
+    ConceptsSelector,
+    RelationshipSelector,
+    Alert) {
 
     const PropertyForm = createReactClass({
         propTypes: {
         },
         getInitialState() {
-            return {
-                type: 'string'
-            };
+            return {};
         },
         getValue() {
             const { displayName } = this.state;
             const { displayName: defaultValue } = this.props;
             return _.isString(displayName) ? displayName : defaultValue;
         },
+        componentDidMount() {
+            this.setState({ domain: this.props.domain })
+        },
+        componentWillReceiveProps(nextProps) {
+            if (nextProps.domain !== this.state.domain) {
+                this.setState({ domain: this.props.domain })
+            }
+        },
         render() {
-            const { conceptId } = this.props;
+            const { domain } = this.state;
+            const { conceptId, relationshipId } = this.props;
             const value = this.getValue();
-            const disabled = _.isEmpty(value);
+            const disabled = _.isEmpty(value) || !this.state.type;
             return (
                 <div>
+                    { this.props.error ? (<Alert error={this.props.error} />) : null }
                     <input type="text"
                         onChange={this.onDisplayNameChange}
                         value={value} />
 
-                    <ConceptsSelector
-                        value={this.state.domain}
-                        creatable={false}
-                        filter={conceptId ? { conceptId, showAncestors: true } : null}
-                        onSelected={this.onConceptSelected} />
+                    { conceptId ?
+                        (<ConceptsSelector
+                            value={domain}
+                            creatable={false}
+                            filter={domain ? { conceptId: domain, showAncestors: true } : null}
+                            onSelected={this.onDomainSelected} />) :
+                        (<RelationshipSelector
+                            value={domain}
+                            creatable={false}
+                            filter={domain ? { relationshipId: domain, showAncestors: true } : null}
+                            onSelected={this.onDomainSelected} />)
+                    }
 
                     <select value={this.state.type} onChange={this.handleTypeChange}>
-                        <option value="string">String</option>
-                        <option value="integer">Integer</option>
-                        <option value="double">Double</option>
-                        <option value="currency">Currency</option>
-                        <option value="dateOnly">Date</option>
-                        <option value="datetime">Datetime</option>
-                        <option value="geolocation">Geolocation</option>
-                        <option value="duration">Duration</option>
-                        <option value="link">Link</option>
-                        <option value="bytes">Bytes</option>
+                        <option value="">Select Data Format…</option>
+                        <optgroup label="Text">
+                            <option value="string">String</option>
+                            <option value="link">Link</option>
+                        </optgroup>
+                        <optgroup label="Numbers">
+                            <option value="integer">Integer</option>
+                            <option value="double">Double</option>
+                            <option value="currency">Currency</option>
+                            <option value="duration">Duration</option>
+                            <option value="bytes">Size (Bytes)</option>
+                        </optgroup>
+                        <optgroup label="Dates">
+                            <option value="dateOnly">Date</option>
+                            <option value="datetime">Date (including time)</option>
+                        </optgroup>
+                        <optgroup label="Location">
+                            <option value="geolocation">Geo Coordinate</option>
+                        </optgroup>
                     </select>
 
                     <div className="base-select-form-buttons" style={{textAlign: 'right'}}>
@@ -63,7 +93,7 @@ define([
                 </div>
             )
         },
-        onConceptSelected(option) {
+        onDomainSelected(option) {
             this.setState({ domain: option ? option.title : null })
         },
         onDisplayNameChange(event) {
@@ -73,8 +103,15 @@ define([
             this.setState({ type: event.target.value });
         },
         onCreate() {
+            const domain = {};
+            if (this.props.conceptId) {
+                domain.conceptIris = [this.state.domain];
+            }
+            if (this.props.relationshipId) {
+                domain.relationshipIris = [this.state.domain];
+            }
             this.props.onCreate({
-                domain: this.state.domain,
+                domain: domain,
                 type: this.state.type,
                 displayName: this.getValue()
             })
