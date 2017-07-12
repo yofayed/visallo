@@ -6,7 +6,6 @@ import com.v5analytics.webster.ParameterizedHandler;
 import com.v5analytics.webster.annotations.Handle;
 import com.v5analytics.webster.annotations.Required;
 import org.vertexium.Authorizations;
-import org.visallo.core.model.ontology.OntologyRepository;
 import org.visallo.core.model.workspace.WorkspaceUndoHelper;
 import org.visallo.core.user.User;
 import org.visallo.core.util.VisalloLogger;
@@ -23,20 +22,9 @@ public class WorkspaceUndo implements ParameterizedHandler {
 
     @Inject
     public WorkspaceUndo(
-            final WorkspaceUndoHelper workspaceUndoHelper,
-            final OntologyRepository ontologyRepository
+            final WorkspaceUndoHelper workspaceUndoHelper
     ) {
         this.workspaceUndoHelper = workspaceUndoHelper;
-
-        String entityHasImageIri = ontologyRepository.getRelationshipIRIByIntent("entityHasImage");
-        if (entityHasImageIri == null) {
-            LOGGER.warn("'entityHasImage' intent has not been defined. Please update your ontology.");
-        }
-
-        String artifactContainsImageOfEntityIri = ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity");
-        if (artifactContainsImageOfEntityIri == null) {
-            LOGGER.warn("'artifactContainsImageOfEntity' intent has not been defined. Please update your ontology.");
-        }
     }
 
     @Handle

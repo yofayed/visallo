@@ -48,6 +48,7 @@ import static org.mockito.Mockito.when;
 
 public class ParquetStructuredIngestParserTest {
     private Graph graph;
+    private static final String SSN_PROP_IRI = "http://visallo.org/testontology#ssn";
     final String WORKSPACE_ID_A = "wsA";
     final String WORKSPACE_ID_B = "wsB";
     final String PARQUET_FILE_VERTEX_ID = "fileVertex";
@@ -81,7 +82,10 @@ public class ParquetStructuredIngestParserTest {
         when(user.getUserId()).thenReturn("user1");
         ontologyRepository = mock(OntologyRepository.class);
         OntologyProperty ontologyProperty = mock(OntologyProperty.class);
-        when(ontologyRepository.getPropertyByIRI(anyString())).thenReturn(ontologyProperty);
+        when(ontologyRepository.getPropertyByIRI(VisalloProperties.CONCEPT_TYPE.getPropertyName(), WORKSPACE_ID_A)).thenReturn(ontologyProperty);
+        when(ontologyRepository.getPropertyByIRI(VisalloProperties.CONCEPT_TYPE.getPropertyName(), WORKSPACE_ID_B)).thenReturn(ontologyProperty);
+        when(ontologyRepository.getPropertyByIRI(SSN_PROP_IRI, WORKSPACE_ID_A)).thenReturn(ontologyProperty);
+        when(ontologyRepository.getPropertyByIRI(SSN_PROP_IRI, WORKSPACE_ID_B)).thenReturn(ontologyProperty);
 
         this.workspaceRepository = mock(WorkspaceRepository.class);
         Workspace workspaceA = mock(Workspace.class);
@@ -156,7 +160,7 @@ public class ParquetStructuredIngestParserTest {
 
         List<List<JSONObject>> vertexMappings = Arrays.asList(Lists.newArrayList(
                 conceptTypeObj("testConceptType"),
-                nameKeyObj("http://visallo.org/testontology#ssn", "social_security_number"))
+                nameKeyObj(SSN_PROP_IRI, "social_security_number"))
         );
         GraphBuilderParserHandler graphBuilderParserHandler = setupGraphBuilder(parseMapping(vertexMappings, null));
         new ParquetStructuredIngestParser().ingest(inputStream, new ParseOptions(), graphBuilderParserHandler);
@@ -168,7 +172,7 @@ public class ParquetStructuredIngestParserTest {
 
         assertThat(IterableUtils.count(graph.getVertices(WORKSPACE_AUTHORIZATIONS_A)), is(23));
         assertConceptTypeOfAllVertices(vertices, "testConceptType");
-        assertPropertyMatchesPattern(vertices, "http://visallo.org/testontology#ssn", "[0-9]{3}-[0-9]{2}-[0-9]{4}");
+        assertPropertyMatchesPattern(vertices, SSN_PROP_IRI, "[0-9]{3}-[0-9]{2}-[0-9]{4}");
     }
 
     @Test
@@ -180,7 +184,7 @@ public class ParquetStructuredIngestParserTest {
 
         List<List<JSONObject>> vertexMappings = Arrays.asList(Lists.newArrayList(
                 conceptTypeObj("testConceptType"),
-                nameKeyObj("http://visallo.org/testontology#ssn", "social_security_number")),
+                nameKeyObj(SSN_PROP_IRI, "social_security_number")),
                 Lists.newArrayList(conceptTypeObj("otherConceptType"))
         );
         GraphBuilderParserHandler graphBuilderParserHandler = setupGraphBuilder(parseMapping(vertexMappings, null));
@@ -206,7 +210,7 @@ public class ParquetStructuredIngestParserTest {
         List<List<JSONObject>> vertexMappings = Arrays.asList(
                 Lists.newArrayList(
                     conceptTypeObj("testConceptType"),
-                    nameKeyObj("http://visallo.org/testontology#ssn", "social_security_number").put("isIdentifier", true)
+                    nameKeyObj(SSN_PROP_IRI, "social_security_number").put("isIdentifier", true)
                 ),
                 Lists.newArrayList(conceptTypeObj("otherConceptType"))
         );
@@ -233,7 +237,7 @@ public class ParquetStructuredIngestParserTest {
         List<List<JSONObject>> vertexMappings = Arrays.asList(
             Lists.newArrayList(
                 conceptTypeObj("testConceptType"),
-                nameKeyObj("http://visallo.org/testontology#ssn", "social_security_number").put("isIdentifier", true)
+                nameKeyObj(SSN_PROP_IRI, "social_security_number").put("isIdentifier", true)
             )
         );
         JSONObject mapping = parseMapping(vertexMappings, null);
@@ -271,7 +275,7 @@ public class ParquetStructuredIngestParserTest {
 
         List<List<JSONObject>> vertexMappings = Arrays.asList(Lists.newArrayList(
                 conceptTypeObj("testConceptType"),
-                nameKeyObj("http://visallo.org/testontology#ssn", "social_security_number")),
+                nameKeyObj(SSN_PROP_IRI, "social_security_number")),
                 Lists.newArrayList(conceptTypeObj("otherConceptType"))
         );
 

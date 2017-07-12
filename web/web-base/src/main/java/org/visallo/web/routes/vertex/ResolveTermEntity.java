@@ -19,8 +19,6 @@ import org.visallo.core.model.workspace.WorkspaceRepository;
 import org.visallo.core.security.VisalloVisibility;
 import org.visallo.core.security.VisibilityTranslator;
 import org.visallo.core.user.User;
-import org.visallo.core.util.VisalloLogger;
-import org.visallo.core.util.VisalloLoggerFactory;
 import org.visallo.web.VisalloResponse;
 import org.visallo.web.clientapi.model.ClientApiSourceInfo;
 import org.visallo.web.clientapi.model.ClientApiSuccess;
@@ -33,14 +31,12 @@ import java.util.Date;
 import java.util.ResourceBundle;
 
 public class ResolveTermEntity implements ParameterizedHandler {
-    private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(ResolveTermEntity.class);
     private static final String MULTI_VALUE_KEY = ResolveTermEntity.class.getName();
     private final Graph graph;
     private final OntologyRepository ontologyRepository;
     private final VisibilityTranslator visibilityTranslator;
     private final WorkspaceRepository workspaceRepository;
     private final WorkQueueRepository workQueueRepository;
-    private String artifactHasEntityIri;
 
     @Inject
     public ResolveTermEntity(
@@ -55,10 +51,6 @@ public class ResolveTermEntity implements ParameterizedHandler {
         this.visibilityTranslator = visibilityTranslator;
         this.workspaceRepository = workspaceRepository;
         this.workQueueRepository = workQueueRepository;
-        this.artifactHasEntityIri = ontologyRepository.getRelationshipIRIByIntent("artifactHasEntity");
-        if (this.artifactHasEntityIri == null) {
-            LOGGER.warn("'artifactHasEntity' intent has not been defined. Please update your ontology.");
-        }
     }
 
     @Handle
@@ -79,9 +71,7 @@ public class ResolveTermEntity implements ParameterizedHandler {
             User user,
             Authorizations authorizations
     ) throws Exception {
-        if (this.artifactHasEntityIri == null) {
-            this.artifactHasEntityIri = ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity");
-        }
+        String artifactHasEntityIri = ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity", workspaceId);
 
         Workspace workspace = workspaceRepository.findById(workspaceId, user);
 
@@ -90,7 +80,7 @@ public class ResolveTermEntity implements ParameterizedHandler {
 
         String id = resolvedVertexId == null ? graph.getIdGenerator().nextId() : resolvedVertexId;
 
-        Concept concept = ontologyRepository.getConceptByIRI(conceptId);
+        Concept concept = ontologyRepository.getConceptByIRI(conceptId, workspaceId);
 
         final Vertex artifactVertex = graph.getVertex(artifactId, authorizations);
         VisalloVisibility visalloVisibility = visibilityTranslator.toVisibility(visibilityJson);
@@ -120,7 +110,7 @@ public class ResolveTermEntity implements ParameterizedHandler {
             workspaceRepository.updateEntityOnWorkspace(workspace, vertex.getId(), user);
         }
 
-        EdgeBuilder edgeBuilder = graph.prepareEdge(artifactVertex, vertex, this.artifactHasEntityIri, visalloVisibility.getVisibility());
+        EdgeBuilder edgeBuilder = graph.prepareEdge(artifactVertex, vertex, artifactHasEntityIri, visalloVisibility.getVisibility());
         VisalloProperties.MODIFIED_BY.setProperty(edgeBuilder, user.getUserId(), defaultVisibility);
         VisalloProperties.MODIFIED_DATE.setProperty(edgeBuilder, new Date(), defaultVisibility);
         VisalloProperties.VISIBILITY_JSON.setProperty(edgeBuilder, visibilityJson, defaultVisibility);

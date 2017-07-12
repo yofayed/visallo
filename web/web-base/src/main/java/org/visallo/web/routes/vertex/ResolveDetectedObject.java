@@ -20,8 +20,6 @@ import org.visallo.core.security.VisalloVisibility;
 import org.visallo.core.security.VisibilityTranslator;
 import org.visallo.core.user.User;
 import org.visallo.core.util.ClientApiConverter;
-import org.visallo.core.util.VisalloLogger;
-import org.visallo.core.util.VisalloLoggerFactory;
 import org.visallo.web.clientapi.model.ClientApiSourceInfo;
 import org.visallo.web.clientapi.model.ClientApiVertex;
 import org.visallo.web.clientapi.model.VisibilityJson;
@@ -33,7 +31,6 @@ import java.util.Date;
 import java.util.ResourceBundle;
 
 public class ResolveDetectedObject implements ParameterizedHandler {
-    private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(ResolveDetectedObject.class);
     private static final String MULTI_VALUE_KEY_PREFIX = ResolveDetectedObject.class.getName();
     private static final String MULTI_VALUE_KEY = ResolveDetectedObject.class.getName();
     private final Graph graph;
@@ -42,7 +39,6 @@ public class ResolveDetectedObject implements ParameterizedHandler {
     private final VisibilityTranslator visibilityTranslator;
     private final WorkspaceRepository workspaceRepository;
     private final TermMentionRepository termMentionRepository;
-    private String artifactContainsImageOfEntityIri;
 
     @Inject
     public ResolveDetectedObject(
@@ -59,11 +55,6 @@ public class ResolveDetectedObject implements ParameterizedHandler {
         this.visibilityTranslator = visibilityTranslator;
         this.workspaceRepository = workspaceRepository;
         this.termMentionRepository = termMentionRepository;
-
-        this.artifactContainsImageOfEntityIri = ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity");
-        if (this.artifactContainsImageOfEntityIri == null) {
-            LOGGER.warn("'artifactContainsImageOfEntity' intent has not been defined. Please update your ontology.");
-        }
     }
 
     @Handle
@@ -85,9 +76,7 @@ public class ResolveDetectedObject implements ParameterizedHandler {
             User user,
             Authorizations authorizations
     ) throws Exception {
-        if (this.artifactContainsImageOfEntityIri == null) {
-            this.artifactContainsImageOfEntityIri = ontologyRepository.getRequiredRelationshipIRIByIntent("artifactContainsImageOfEntity");
-        }
+        String artifactContainsImageOfEntityIri = ontologyRepository.getRequiredRelationshipIRIByIntent("artifactContainsImageOfEntity", workspaceId);
 
         Workspace workspace = workspaceRepository.findById(workspaceId, user);
 
@@ -96,7 +85,7 @@ public class ResolveDetectedObject implements ParameterizedHandler {
         VisibilityJson visibilityJson = VisibilityJson.updateVisibilitySourceAndAddWorkspaceId(null, visibilitySource, workspaceId);
         VisalloVisibility visalloVisibility = visibilityTranslator.toVisibility(visibilityJson);
 
-        Concept concept = ontologyRepository.getConceptByIRI(conceptId);
+        Concept concept = ontologyRepository.getConceptByIRI(conceptId, workspaceId);
         Vertex artifactVertex = graph.getVertex(artifactId, authorizations);
         ElementMutation<Vertex> resolvedVertexMutation;
 

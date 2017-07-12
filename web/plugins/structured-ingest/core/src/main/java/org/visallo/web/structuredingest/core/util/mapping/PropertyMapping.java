@@ -77,7 +77,7 @@ public class PropertyMapping {
 
     public static PropertyMapping fromJSON(OntologyRepository ontologyRepository, VisibilityTranslator visibilityTranslator, String workspaceId, JSONObject propertyMapping) {
         String propertyName = propertyMapping.getString(PROPERTY_MAPPING_NAME_KEY);
-        OntologyProperty ontologyProperty = ontologyRepository.getPropertyByIRI(propertyName);
+        OntologyProperty ontologyProperty = ontologyRepository.getPropertyByIRI(propertyName, workspaceId);
         if (ontologyProperty == null) {
             throw new VisalloException("Property " + propertyName + " was not found in the ontology.");
         }

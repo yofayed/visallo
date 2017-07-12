@@ -10,10 +10,10 @@ import com.v5analytics.webster.annotations.Required;
 import org.visallo.core.model.artifactThumbnails.ArtifactThumbnailRepository;
 import org.visallo.core.model.ontology.Concept;
 import org.visallo.core.model.ontology.OntologyRepository;
-import org.visallo.core.user.User;
 import org.visallo.core.util.VisalloLogger;
 import org.visallo.core.util.VisalloLoggerFactory;
 import org.visallo.web.VisalloResponse;
+import org.visallo.web.parameterProviders.ActiveWorkspaceId;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -51,7 +51,7 @@ public class MapMarkerImage implements ParameterizedHandler {
             @Optional(name = "heading", defaultValue = "0.0") double headingParam,
             @Optional(name = "selected", defaultValue = "false") boolean selected,
             VisalloResponse response,
-            User user
+            @ActiveWorkspaceId String workspaceId
     ) throws Exception {
         int heading = roundHeadingAngle(headingParam);
         typeStr = typeStr.isEmpty() ? "http://www.w3.org/2002/07/owl#Thing" : typeStr;
@@ -60,17 +60,14 @@ public class MapMarkerImage implements ParameterizedHandler {
         if (imageData == null) {
             LOGGER.info("map marker cache miss %s (scale: %d, heading: %d)", typeStr, scale, heading);
 
-            Concept concept = ontologyRepository.getConceptByIRI(typeStr);
-            if (concept == null) {
-                concept = ontologyRepository.getConceptByIRI(typeStr);
-            }
+            Concept concept = ontologyRepository.getConceptByIRI(typeStr, workspaceId);
 
             boolean isMapGlyphIcon = false;
-            byte[] glyphIcon = getMapGlyphIcon(concept, user);
+            byte[] glyphIcon = getMapGlyphIcon(concept, workspaceId);
             if (glyphIcon != null) {
                 isMapGlyphIcon = true;
             } else {
-                glyphIcon = getGlyphIcon(concept, user);
+                glyphIcon = getGlyphIcon(concept, workspaceId);
                 if (glyphIcon == null) {
                     response.respondWithNotFound();
                     return;
@@ -162,17 +159,17 @@ public class MapMarkerImage implements ParameterizedHandler {
         return imageData.toByteArray();
     }
 
-    private byte[] getMapGlyphIcon(Concept concept, User user) {
+    private byte[] getMapGlyphIcon(Concept concept, String workspaceId) {
         byte[] mapGlyphIcon = null;
-        for (Concept con = concept; mapGlyphIcon == null && con != null; con = ontologyRepository.getParentConcept(con)) {
+        for (Concept con = concept; mapGlyphIcon == null && con != null; con = ontologyRepository.getParentConcept(con, workspaceId)) {
             mapGlyphIcon = con.getMapGlyphIcon();
         }
         return mapGlyphIcon;
     }
 
-    private byte[] getGlyphIcon(Concept concept, User user) {
+    private byte[] getGlyphIcon(Concept concept, String workspaceId) {
         byte[] glyphIcon = null;
-        for (Concept con = concept; glyphIcon == null && con != null; con = ontologyRepository.getParentConcept(con)) {
+        for (Concept con = concept; glyphIcon == null && con != null; con = ontologyRepository.getParentConcept(con, workspaceId)) {
             glyphIcon = con.hasGlyphIconResource() ? con.getGlyphIcon() : null;
         }
         return glyphIcon;
