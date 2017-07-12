@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
 import org.vertexium.Authorizations;
 import org.vertexium.TextIndexHint;
+import org.vertexium.util.IterableUtils;
 import org.visallo.core.exception.VisalloAccessDeniedException;
 import org.visallo.core.user.SystemUser;
 import org.visallo.core.user.User;
@@ -19,12 +20,7 @@ import org.visallo.web.clientapi.model.PropertyType;
 import org.visallo.web.clientapi.model.SandboxStatus;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -164,6 +160,85 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         assertNull(relationshipsByIri.get("http://www.w3.org/2002/07/owl#topObjectProperty").getParentIRI());
         assertEquals("http://www.w3.org/2002/07/owl#topObjectProperty", relationshipsByIri.get("http://visallo.org/testhierarchy#personKnowsPerson").getParentIRI());
+    }
+
+    @Test
+    public void testGetConceptsByIri() throws Exception {
+        createSampleOntology();
+
+        Iterable<Concept> conceptsByIRI = getOntologyRepository().getConceptsByIRI(Collections.singletonList(PUBLIC_CONCEPT_IRI), null);
+        List<Concept> concepts = IterableUtils.toList(conceptsByIRI);
+        assertEquals(1, concepts.size());
+        assertEquals(PUBLIC_CONCEPT_IRI, concepts.get(0).getIRI());
+
+        conceptsByIRI = getOntologyRepository().getConceptsByIRI(Collections.singletonList(SANDBOX_CONCEPT_IRI), workspaceId);
+        concepts = IterableUtils.toList(conceptsByIRI);
+        assertEquals(1, concepts.size());
+        assertEquals(SANDBOX_CONCEPT_IRI, concepts.get(0).getIRI());
+
+        conceptsByIRI = getOntologyRepository().getConceptsByIRI(Arrays.asList(PUBLIC_CONCEPT_IRI, SANDBOX_CONCEPT_IRI), null);
+        concepts = IterableUtils.toList(conceptsByIRI);
+        assertEquals(1, concepts.size());
+        assertEquals(PUBLIC_CONCEPT_IRI, concepts.get(0).getIRI());
+
+        conceptsByIRI = getOntologyRepository().getConceptsByIRI(Arrays.asList(PUBLIC_CONCEPT_IRI, SANDBOX_CONCEPT_IRI), workspaceId);
+        concepts = IterableUtils.toList(conceptsByIRI);
+        assertEquals(2, concepts.size());
+        assertTrue(concepts.stream().map(Concept::getIRI).anyMatch(iri -> iri.equals(PUBLIC_CONCEPT_IRI)));
+        assertTrue(concepts.stream().map(Concept::getIRI).anyMatch(iri -> iri.equals(SANDBOX_CONCEPT_IRI)));
+    }
+
+    @Test
+    public void testGetRelationshipsByIri() throws Exception {
+        createSampleOntology();
+
+        Iterable<Relationship> relationshipsByIRI = getOntologyRepository().getRelationshipsByIRI(Collections.singletonList(PUBLIC_RELATIONSHIP_IRI), null);
+        List<Relationship> relationships = IterableUtils.toList(relationshipsByIRI);
+        assertEquals(1, relationships.size());
+        assertEquals(PUBLIC_RELATIONSHIP_IRI, relationships.get(0).getIRI());
+
+        relationshipsByIRI = getOntologyRepository().getRelationshipsByIRI(Collections.singletonList(SANDBOX_RELATIONSHIP_IRI), workspaceId);
+        relationships = IterableUtils.toList(relationshipsByIRI);
+        assertEquals(1, relationships.size());
+        assertEquals(SANDBOX_RELATIONSHIP_IRI, relationships.get(0).getIRI());
+
+        relationshipsByIRI = getOntologyRepository().getRelationshipsByIRI(Arrays.asList(PUBLIC_RELATIONSHIP_IRI, SANDBOX_RELATIONSHIP_IRI), null);
+        relationships = IterableUtils.toList(relationshipsByIRI);
+        assertEquals(1, relationships.size());
+        assertEquals(PUBLIC_RELATIONSHIP_IRI, relationships.get(0).getIRI());
+
+        relationshipsByIRI = getOntologyRepository().getRelationshipsByIRI(Arrays.asList(PUBLIC_RELATIONSHIP_IRI, SANDBOX_RELATIONSHIP_IRI), workspaceId);
+        relationships = IterableUtils.toList(relationshipsByIRI);
+        assertEquals(2, relationships.size());
+        assertTrue(relationships.stream().map(Relationship::getIRI).anyMatch(iri -> iri.equals(PUBLIC_RELATIONSHIP_IRI)));
+        assertTrue(relationships.stream().map(Relationship::getIRI).anyMatch(iri -> iri.equals(SANDBOX_RELATIONSHIP_IRI)));
+    }
+
+
+    @Test
+    public void testPropertiesByIri() throws Exception {
+        createSampleOntology();
+
+        Iterable<OntologyProperty> propertiesByIRI = getOntologyRepository().getPropertiesByIRI(Collections.singletonList(PUBLIC_PROPERTY_IRI), null);
+        List<OntologyProperty> properties = IterableUtils.toList(propertiesByIRI);
+        assertEquals(1, properties.size());
+        assertEquals(PUBLIC_PROPERTY_IRI, properties.get(0).getIri());
+
+        propertiesByIRI = getOntologyRepository().getPropertiesByIRI(Collections.singletonList(SANDBOX_PROPERTY_IRI), workspaceId);
+        properties = IterableUtils.toList(propertiesByIRI);
+        assertEquals(1, properties.size());
+        assertEquals(SANDBOX_PROPERTY_IRI, properties.get(0).getIri());
+
+        propertiesByIRI = getOntologyRepository().getPropertiesByIRI(Arrays.asList(PUBLIC_PROPERTY_IRI, SANDBOX_PROPERTY_IRI), null);
+        properties = IterableUtils.toList(propertiesByIRI);
+        assertEquals(1, properties.size());
+        assertEquals(PUBLIC_PROPERTY_IRI, properties.get(0).getIri());
+
+        propertiesByIRI = getOntologyRepository().getPropertiesByIRI(Arrays.asList(PUBLIC_PROPERTY_IRI, SANDBOX_PROPERTY_IRI), workspaceId);
+        properties = IterableUtils.toList(propertiesByIRI);
+        assertEquals(2, properties.size());
+        assertTrue(properties.stream().map(OntologyProperty::getIri).anyMatch(iri -> iri.equals(PUBLIC_PROPERTY_IRI)));
+        assertTrue(properties.stream().map(OntologyProperty::getIri).anyMatch(iri -> iri.equals(SANDBOX_PROPERTY_IRI)));
     }
 
     @Test

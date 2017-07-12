@@ -28,19 +28,19 @@ public class OntologyGet extends OntologyBase {
     ) throws Exception {
         ClientApiOntology clientApiOntology = new ClientApiOntology();
 
-        List<Concept> concepts = ontologyIrisToConcepts(conceptIds, workspaceId);
+        List<Concept> concepts = ontologyIdsToConcepts(conceptIds, workspaceId);
         List<ClientApiOntology.Concept> clientConcepts = concepts.stream()
                 .map(Concept::toClientApi)
                 .collect(Collectors.toList());
         clientApiOntology.addAllConcepts(clientConcepts);
 
-        List<Relationship> relationships = ontologyIrisToRelationships(relationshipIds, workspaceId);
+        List<Relationship> relationships = ontologyIdsToRelationships(relationshipIds, workspaceId);
         List<ClientApiOntology.Relationship> clientRelationships = relationships.stream()
                 .map(Relationship::toClientApi)
                 .collect(Collectors.toList());
         clientApiOntology.addAllRelationships(clientRelationships);
 
-        List<OntologyProperty> properties = ontologyIrisToProperties(propertyIds, workspaceId);
+        List<OntologyProperty> properties = ontologyIdsToProperties(propertyIds, workspaceId);
         List<ClientApiOntology.Property> clientProperties = properties.stream()
                 .map(OntologyProperty::toClientApi)
                 .collect(Collectors.toList());

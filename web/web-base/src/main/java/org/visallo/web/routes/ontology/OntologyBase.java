@@ -23,20 +23,32 @@ public abstract class OntologyBase implements ParameterizedHandler {
     }
 
     protected List<Concept> ontologyIrisToConcepts(String[] iris, String workspaceId) {
-        return ontologyIrisToObjects(iris, ontologyRepository::getConcepts, Concept::getIRI, "concept", workspaceId);
+        return getOntologyObjects(iris, ontologyRepository::getConceptsByIRI, Concept::getIRI, "concept", workspaceId);
     }
 
     protected List<Relationship> ontologyIrisToRelationships(String[] iris, String workspaceId) {
-        return ontologyIrisToObjects(iris, ontologyRepository::getRelationships, Relationship::getIRI, "relationship", workspaceId);
+        return getOntologyObjects(iris, ontologyRepository::getRelationshipsByIRI, Relationship::getIRI, "relationship", workspaceId);
     }
 
     protected List<OntologyProperty> ontologyIrisToProperties(String[] iris, String workspaceId) {
-        return ontologyIrisToObjects(iris, ontologyRepository::getProperties, OntologyProperty::getId, "property", workspaceId);
+        return getOntologyObjects(iris, ontologyRepository::getPropertiesByIRI, OntologyProperty::getId, "property", workspaceId);
     }
 
-    protected <T> List<T> ontologyIrisToObjects(
+    protected List<Concept> ontologyIdsToConcepts(String[] ids, String workspaceId) {
+        return getOntologyObjects(ids, ontologyRepository::getConcepts, Concept::getIRI, "concept", workspaceId);
+    }
+
+    protected List<Relationship> ontologyIdsToRelationships(String[] ids, String workspaceId) {
+        return getOntologyObjects(ids, ontologyRepository::getRelationships, Relationship::getIRI, "relationship", workspaceId);
+    }
+
+    protected List<OntologyProperty> ontologyIdsToProperties(String[] ids, String workspaceId) {
+        return getOntologyObjects(ids, ontologyRepository::getProperties, OntologyProperty::getId, "property", workspaceId);
+    }
+
+    private <T> List<T> getOntologyObjects(
             String[] iris,
-            BiFunction<Iterable<String>, String, Iterable<T>> getAllByIriFunction,
+            BiFunction<List<String>, String, Iterable<T>> getAllByIriFunction,
             Function<T, String> getIriFunction,
             String ontologyObjectType,
             String workspaceId

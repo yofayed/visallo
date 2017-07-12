@@ -58,6 +58,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -1122,6 +1123,13 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
         return null;
     }
 
+    @Override
+    public Iterable<Concept> getConceptsByIRI(List<String> conceptIRIs, String workspaceId) {
+        return StreamSupport.stream(getConceptsWithProperties(workspaceId).spliterator(), false)
+                .filter(concept -> conceptIRIs.contains(concept.getIRI()))
+                .collect(Collectors.toSet());
+    }
+
     @Deprecated
     @Override
     public final OntologyProperty getPropertyByIRI(String propertyIRI) {
@@ -1136,6 +1144,13 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
             }
         }
         return null;
+    }
+
+    @Override
+    public Iterable<OntologyProperty> getPropertiesByIRI(List<String> propertyIRIs, String workspaceId) {
+        return StreamSupport.stream(getProperties(workspaceId).spliterator(), false)
+                .filter(property -> propertyIRIs.contains(property.getIri()))
+                .collect(Collectors.toList());
     }
 
     @Deprecated
@@ -1209,6 +1224,13 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
             }
         }
         return null;
+    }
+
+    @Override
+    public Iterable<Relationship> getRelationshipsByIRI(List<String> relationshipIRIs, String workspaceId) {
+        return StreamSupport.stream(getRelationships(workspaceId).spliterator(), false)
+                .filter(relationship -> relationshipIRIs.contains(relationship.getIRI()))
+                .collect(Collectors.toList());
     }
 
     @Deprecated

@@ -79,6 +79,8 @@ public interface OntologyRepository {
 
     OntologyProperty getPropertyByIRI(String propertyIRI, String workspaceId);
 
+    Iterable<OntologyProperty> getPropertiesByIRI(List<String> propertyIRIs, String workspaceId);
+
     /**
      * @deprecated  With the addition of ontology sandboxing, ontology elements must now be retrieved with
      *              the context of a user and a workspace</br>
@@ -95,9 +97,11 @@ public interface OntologyRepository {
      *              {will be removed in next version} </br>
      *              use {@link #getRelationshipByIRI(String, String)} instead.
      */
-    Relationship getRelationshipByIRI(String propertyIRI);
+    Relationship getRelationshipByIRI(String relationshipIRI);
 
-    Relationship getRelationshipByIRI(String propertyIRI, String workspaceId);
+    Relationship getRelationshipByIRI(String relationshipIRI, String workspaceId);
+
+    Iterable<Relationship> getRelationshipsByIRI(List<String> relationshipIRIs, String workspaceId);
 
     /**
      * @deprecated  With the addition of ontology sandboxing, ontology elements must now be retrieved with
@@ -162,6 +166,8 @@ public interface OntologyRepository {
     Concept getConceptByIRI(String conceptIRI);
 
     Concept getConceptByIRI(String conceptIRI, String workspaceId);
+
+    Iterable<Concept> getConceptsByIRI(List<String> conceptIRIs, String workspaceId);
 
     /**
      * @deprecated  With the addition of ontology sandboxing, ontology elements must now be retrieved with
