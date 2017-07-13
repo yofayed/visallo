@@ -37,7 +37,7 @@ define([
             const { domain, type } = this.state;
             const { conceptId, relationshipId, error } = this.props;
             const value = this.getValue();
-            const disabled = _.isEmpty(value) || !type;
+            const disabled = _.isEmpty(value) || !type || !domain;
             return (
                 <div>
                     { error ? (<Alert error={error} />) : null }
@@ -49,12 +49,14 @@ define([
                         (<ConceptsSelector
                             value={domain}
                             creatable={false}
-                            filter={domain ? { conceptId: domain, showAncestors: true } : null}
+                            clearable={false}
+                            filter={{ conceptId, showAncestors: true }}
                             onSelected={this.onDomainSelected} />) :
                         (<RelationshipSelector
                             value={domain}
                             creatable={false}
-                            filter={domain ? { relationshipId: domain, showAncestors: true } : null}
+                            clearable={false}
+                            filter={{ relationshipId, showAncestors: true }}
                             onSelected={this.onDomainSelected} />)
                     }
 
