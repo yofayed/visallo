@@ -9,9 +9,11 @@ import org.junit.runners.Parameterized;
 import org.vertexium.*;
 import org.vertexium.inmemory.InMemoryAuthorizations;
 import org.visallo.core.formula.FormulaEvaluator;
-import org.visallo.core.ingest.graphProperty.ElementOrPropertyStatus;
 import org.visallo.core.model.graph.VisibilityAndElementMutation;
-import org.visallo.core.model.ontology.*;
+import org.visallo.core.model.ontology.Concept;
+import org.visallo.core.model.ontology.OntologyProperty;
+import org.visallo.core.model.ontology.OntologyPropertyDefinition;
+import org.visallo.core.model.ontology.Relationship;
 import org.visallo.core.model.properties.VisalloProperties;
 import org.visallo.core.model.user.UserPropertyAuthorizationRepository;
 import org.visallo.core.model.workQueue.Priority;
@@ -22,7 +24,6 @@ import org.visallo.core.security.VisalloVisibility;
 import org.visallo.core.user.User;
 import org.visallo.core.util.SandboxStatusUtil;
 import org.visallo.core.util.VisalloInMemoryTestBase;
-import org.visallo.vertexium.model.ontology.InMemoryOntologyProperty;
 import org.visallo.web.clientapi.model.*;
 import org.visallo.web.clientapi.model.ClientApiPublishItem.Action;
 import org.visallo.web.clientapi.model.ClientApiWorkspaceDiff.EdgeItem;
@@ -33,9 +34,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.visallo.core.util.StreamUtil.stream;
 
 /**
@@ -91,7 +89,6 @@ public class VertexiumWorkspaceSandboxingTest extends VisalloInMemoryTestBase {
 
         User systemUser = getUserRepository().getSystemUser();
         Authorizations systemUserAuth = getAuthorizationRepository().getGraphAuthorizations(systemUser);
-        Visibility defaultVisibility = getVisibilityTranslator().getDefaultVisibility();
         entity1Vertex = getGraph().prepareVertex("entity1aId", initialVisibility)
                 .addPropertyValue("key1", "prop1", "value1", new Metadata(), initialVisibility)
                 .addPropertyValue("key9", "prop9", "value9", new Metadata(), initialVisibility)
@@ -592,7 +589,7 @@ public class VertexiumWorkspaceSandboxingTest extends VisalloInMemoryTestBase {
     public void recreatedVertexWithSameIdAfterUndoShouldNotHaveOldProperties() {
         Metadata propertyMetadata = new Metadata();
         VisalloProperties.VISIBILITY_JSON_METADATA.setMetadata(propertyMetadata, initialVisibilityJson,
-                                                               getVisibilityTranslator().getDefaultVisibility()
+                getVisibilityTranslator().getDefaultVisibility()
         );
 
         ElementBuilder<Vertex> vertexBuilder = getGraph().prepareVertex("v1", initialVisibility)
@@ -845,7 +842,7 @@ public class VertexiumWorkspaceSandboxingTest extends VisalloInMemoryTestBase {
         // to the use of InMemoryGraph.
         Metadata propertyMetadata = new Metadata();
         VisalloProperties.VISIBILITY_JSON_METADATA.setMetadata(propertyMetadata, initialVisibilityJson,
-                                                               getVisibilityTranslator().getDefaultVisibility()
+                getVisibilityTranslator().getDefaultVisibility()
         );
         VisalloProperties.CONCEPT_TYPE.setProperty(
                 vertexBuilder,
@@ -989,7 +986,7 @@ public class VertexiumWorkspaceSandboxingTest extends VisalloInMemoryTestBase {
     }
 
     private void markPublicPropertyHiddenOnWorkspace() {
-        OntologyProperty ontologyProperty = getOntologyRepository().getRequiredPropertyByIRI("prop1");
+        OntologyProperty ontologyProperty = getOntologyRepository().getRequiredPropertyByIRI("prop1", null);
         workspaceHelper.deleteProperties(
                 entity1Vertex,
                 "key1",
@@ -1110,7 +1107,7 @@ public class VertexiumWorkspaceSandboxingTest extends VisalloInMemoryTestBase {
 
     private void deletePublicPropertyOnWorkspace() {
         entity1Vertex.markPropertyHidden("key9", "prop9", initialVisibility, new Visibility(WORKSPACE_ID),
-                                         workspaceAuthorizations
+                workspaceAuthorizations
         );
     }
 

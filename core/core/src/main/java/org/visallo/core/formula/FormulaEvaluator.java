@@ -12,7 +12,6 @@ import org.visallo.core.model.ontology.OntologyRepository;
 import org.visallo.core.util.ClientApiConverter;
 import org.visallo.core.util.VisalloLogger;
 import org.visallo.core.util.VisalloLoggerFactory;
-import org.visallo.web.clientapi.model.ClientApiElement;
 import org.visallo.web.clientapi.model.ClientApiOntology;
 import org.visallo.web.clientapi.model.ClientApiVertexiumObject;
 import org.visallo.web.clientapi.util.ObjectMapperFactory;
@@ -33,18 +32,13 @@ import java.util.concurrent.Executors;
  */
 public class FormulaEvaluator {
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(FormulaEvaluator.class);
-    public static final String CONFIGURATION_PARAMETER_MAX_THREADS = FormulaEvaluator.class.getName() + ".max.threads";
-    public static final int CONFIGURATION_DEFAULT_MAX_THREADS = 1;
+    private static final String CONFIGURATION_PARAMETER_MAX_THREADS = FormulaEvaluator.class.getName() + ".max.threads";
+    private static final int CONFIGURATION_DEFAULT_MAX_THREADS = 1;
     private Configuration configuration;
     private OntologyRepository ontologyRepository;
     private ExecutorService executorService;
 
-    private static final ThreadLocal<Map<String, Scriptable>> threadLocalScope = new ThreadLocal<Map<String, Scriptable>>() {
-        @Override
-        protected Map<String, Scriptable> initialValue() {
-            return new HashMap<>();
-        }
-    };
+    private static final ThreadLocal<Map<String, Scriptable>> threadLocalScope = ThreadLocal.withInitial(HashMap::new);
 
     @Inject
     public FormulaEvaluator(Configuration configuration, OntologyRepository ontologyRepository) {
@@ -161,8 +155,7 @@ public class FormulaEvaluator {
     }
 
     protected String getOntologyJson(String workspaceId) {
-        // FIXME: user?? workspace?
-        ClientApiOntology result = ontologyRepository.getClientApiObject();
+        ClientApiOntology result = ontologyRepository.getClientApiObject(workspaceId);
         try {
             return ObjectMapperFactory.getInstance().writeValueAsString(result);
         } catch (JsonProcessingException ex) {
@@ -255,7 +248,7 @@ public class FormulaEvaluator {
             String json = toJson(vertexiumObject, userContext.getWorkspaceId(), authorizations);
             Object func = scope.get("evaluate" + fieldName + "FormulaJson", scope);
 
-            if (func.equals(scope.NOT_FOUND)) {
+            if (func.equals(Scriptable.NOT_FOUND)) {
                 throw new VisalloException("formula function not found");
             }
 
@@ -268,8 +261,7 @@ public class FormulaEvaluator {
                         new Object[]{json, propertyKey, propertyName}
                 );
 
-                String strResult = (String) context.jsToJava(result, String.class);
-                return strResult;
+                return (String) context.jsToJava(result, String.class);
             }
 
             throw new VisalloException("Unknown result from formula");

@@ -11,6 +11,7 @@ import org.vertexium.Authorizations;
 import org.vertexium.TextIndexHint;
 import org.vertexium.util.IterableUtils;
 import org.visallo.core.exception.VisalloAccessDeniedException;
+import org.visallo.core.exception.VisalloException;
 import org.visallo.core.user.SystemUser;
 import org.visallo.core.user.User;
 import org.visallo.core.util.VisalloInMemoryTestBase;
@@ -27,14 +28,11 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase {
     private static final String TEST_OWL = "test.owl";
     private static final String TEST_CHANGED_OWL = "test_changed.owl";
     private static final String TEST01_OWL = "test01.owl";
-    private static final String GLYPH_ICON_FILE = "glyphicons_003_user@2x.png";
     private static final String TEST_IRI = "http://visallo.org/test";
 
     private static final String TEST_HIERARCHY_IRI = "http://visallo.org/testhierarchy";
@@ -248,15 +246,21 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         ClientApiOntology clientApiObject = getOntologyRepository().getClientApiObject("unknown-workspace");
 
         assertFalse(clientApiObject.getConcepts().stream().anyMatch(concept -> concept.getTitle().equals(SANDBOX_CONCEPT_IRI)));
-        ClientApiOntology.Concept publicApiConcept = clientApiObject.getConcepts().stream().filter(concept -> concept.getTitle().equals(PUBLIC_CONCEPT_IRI)).findFirst().get();
+        ClientApiOntology.Concept publicApiConcept = clientApiObject.getConcepts().stream()
+                .filter(concept -> concept.getTitle().equals(PUBLIC_CONCEPT_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public concept"));
         assertEquals(SandboxStatus.PUBLIC, publicApiConcept.getSandboxStatus());
 
         assertFalse(clientApiObject.getRelationships().stream().anyMatch(relationship -> relationship.getTitle().equals(SANDBOX_RELATIONSHIP_IRI)));
-        ClientApiOntology.Relationship publicApiRelationship = clientApiObject.getRelationships().stream().filter(relationship -> relationship.getTitle().equals(PUBLIC_RELATIONSHIP_IRI)).findFirst().get();
+        ClientApiOntology.Relationship publicApiRelationship = clientApiObject.getRelationships().stream()
+                .filter(relationship -> relationship.getTitle().equals(PUBLIC_RELATIONSHIP_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public relationship"));
         assertEquals(SandboxStatus.PUBLIC, publicApiRelationship.getSandboxStatus());
 
         assertFalse(clientApiObject.getProperties().stream().anyMatch(property -> property.getTitle().equals(SANDBOX_PROPERTY_IRI)));
-        ClientApiOntology.Property publicApiProperty = clientApiObject.getProperties().stream().filter(property -> property.getTitle().equals(PUBLIC_PROPERTY_IRI)).findFirst().get();
+        ClientApiOntology.Property publicApiProperty = clientApiObject.getProperties().stream()
+                .filter(property -> property.getTitle().equals(PUBLIC_PROPERTY_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public property"));
         assertEquals(SandboxStatus.PUBLIC, publicApiProperty.getSandboxStatus());
     }
 
@@ -267,15 +271,21 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         ClientApiOntology clientApiObject = getOntologyRepository().getClientApiObject(null);
 
         assertFalse(clientApiObject.getConcepts().stream().anyMatch(concept -> concept.getTitle().equals(SANDBOX_CONCEPT_IRI)));
-        ClientApiOntology.Concept publicApiConcept = clientApiObject.getConcepts().stream().filter(concept -> concept.getTitle().equals(PUBLIC_CONCEPT_IRI)).findFirst().get();
+        ClientApiOntology.Concept publicApiConcept = clientApiObject.getConcepts().stream()
+                .filter(concept -> concept.getTitle().equals(PUBLIC_CONCEPT_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public concept"));
         assertEquals(SandboxStatus.PUBLIC, publicApiConcept.getSandboxStatus());
 
         assertFalse(clientApiObject.getRelationships().stream().anyMatch(relationship -> relationship.getTitle().equals(SANDBOX_RELATIONSHIP_IRI)));
-        ClientApiOntology.Relationship publicApiRelationship = clientApiObject.getRelationships().stream().filter(relationship -> relationship.getTitle().equals(PUBLIC_RELATIONSHIP_IRI)).findFirst().get();
+        ClientApiOntology.Relationship publicApiRelationship = clientApiObject.getRelationships().stream()
+                .filter(relationship -> relationship.getTitle().equals(PUBLIC_RELATIONSHIP_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public relationship"));
         assertEquals(SandboxStatus.PUBLIC, publicApiRelationship.getSandboxStatus());
 
         assertFalse(clientApiObject.getProperties().stream().anyMatch(property -> property.getTitle().equals(SANDBOX_PROPERTY_IRI)));
-        ClientApiOntology.Property publicApiProperty = clientApiObject.getProperties().stream().filter(property -> property.getTitle().equals(PUBLIC_PROPERTY_IRI)).findFirst().get();
+        ClientApiOntology.Property publicApiProperty = clientApiObject.getProperties().stream()
+                .filter(property -> property.getTitle().equals(PUBLIC_PROPERTY_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public property"));
         assertEquals(SandboxStatus.PUBLIC, publicApiProperty.getSandboxStatus());
     }
 
@@ -285,19 +295,31 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         ClientApiOntology clientApiObject = getOntologyRepository().getClientApiObject(workspaceId);
 
-        ClientApiOntology.Concept sandboxApiConcept = clientApiObject.getConcepts().stream().filter(concept -> concept.getTitle().equals(SANDBOX_CONCEPT_IRI)).findFirst().get();
+        ClientApiOntology.Concept sandboxApiConcept = clientApiObject.getConcepts().stream()
+                .filter(concept -> concept.getTitle().equals(SANDBOX_CONCEPT_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load sandbox concept"));
         assertEquals(SandboxStatus.PRIVATE, sandboxApiConcept.getSandboxStatus());
-        ClientApiOntology.Concept publicApiConcept = clientApiObject.getConcepts().stream().filter(concept -> concept.getTitle().equals(PUBLIC_CONCEPT_IRI)).findFirst().get();
+        ClientApiOntology.Concept publicApiConcept = clientApiObject.getConcepts().stream()
+                .filter(concept -> concept.getTitle().equals(PUBLIC_CONCEPT_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public concept"));
         assertEquals(SandboxStatus.PUBLIC, publicApiConcept.getSandboxStatus());
 
-        ClientApiOntology.Relationship sandboxApiRelationship = clientApiObject.getRelationships().stream().filter(relationship -> relationship.getTitle().equals(SANDBOX_RELATIONSHIP_IRI)).findFirst().get();
+        ClientApiOntology.Relationship sandboxApiRelationship = clientApiObject.getRelationships().stream()
+                .filter(relationship -> relationship.getTitle().equals(SANDBOX_RELATIONSHIP_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load sandbox relationship"));
         assertEquals(SandboxStatus.PRIVATE, sandboxApiRelationship.getSandboxStatus());
-        ClientApiOntology.Relationship publicApiRelationship = clientApiObject.getRelationships().stream().filter(relationship -> relationship.getTitle().equals(PUBLIC_RELATIONSHIP_IRI)).findFirst().get();
+        ClientApiOntology.Relationship publicApiRelationship = clientApiObject.getRelationships().stream()
+                .filter(relationship -> relationship.getTitle().equals(PUBLIC_RELATIONSHIP_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public relationship"));
         assertEquals(SandboxStatus.PUBLIC, publicApiRelationship.getSandboxStatus());
 
-        ClientApiOntology.Property sandboxApiProperty = clientApiObject.getProperties().stream().filter(property -> property.getTitle().equals(SANDBOX_PROPERTY_IRI)).findFirst().get();
+        ClientApiOntology.Property sandboxApiProperty = clientApiObject.getProperties().stream()
+                .filter(property -> property.getTitle().equals(SANDBOX_PROPERTY_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load sandbox property"));
         assertEquals(SandboxStatus.PRIVATE, sandboxApiProperty.getSandboxStatus());
-        ClientApiOntology.Property publicApiProperty = clientApiObject.getProperties().stream().filter(property -> property.getTitle().equals(PUBLIC_PROPERTY_IRI)).findFirst().get();
+        ClientApiOntology.Property publicApiProperty = clientApiObject.getProperties().stream()
+                .filter(property -> property.getTitle().equals(PUBLIC_PROPERTY_IRI)).findFirst()
+                .orElseThrow(() -> new VisalloException("Unable to load public property"));
         assertEquals(SandboxStatus.PUBLIC, publicApiProperty.getSandboxStatus());
     }
 
@@ -643,7 +665,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals("First Met", firstMetProperty.getDisplayName());
         assertEquals(PropertyType.DATE, firstMetProperty.getDataType());
 
-        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor");
+        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor", null);
         assertEquals("Favorite Color", favColorProperty.getDisplayName());
         possibleValues = favColorProperty.getPossibleValues();
         assertEquals(2, possibleValues.size());
@@ -750,7 +772,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals("First Met", firstMetProperty.getDisplayName());
         assertEquals(PropertyType.DATE, firstMetProperty.getDataType());
 
-        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor");
+        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor", null);
         assertEquals("Favorite Color", favColorProperty.getDisplayName());
         possibleValues = favColorProperty.getPossibleValues();
         assertEquals(2, possibleValues.size());

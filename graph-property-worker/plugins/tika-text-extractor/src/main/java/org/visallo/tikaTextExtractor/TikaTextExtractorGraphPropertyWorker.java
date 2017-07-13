@@ -38,8 +38,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
 import java.util.Arrays;
@@ -51,9 +49,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * By default raw properties will be text extracted into "http://visallo.org#text" with a text description of "Extracted Text".
- *
+ * <p>
  * Configuration:
- *
+ * <p>
  * <pre><code>
  * org.visallo.tikaTextExtractor.TikaTextExtractorGraphPropertyWorker.textExtractMapping.prop1.rawPropertyName=http://my.org#prop1
  * org.visallo.tikaTextExtractor.TikaTextExtractorGraphPropertyWorker.textExtractMapping.prop1.extractedTextPropertyName=http://my.org#prop1
@@ -123,7 +121,7 @@ public class TikaTextExtractorGraphPropertyWorker extends GraphPropertyWorker {
             LOGGER.error("Could not load config: %s", PROPS_FILE);
         }
 
-        String pageCountPropertyIri = getOntologyRepository().getPropertyIRIByIntent("pageCount");
+        String pageCountPropertyIri = getOntologyRepository().getPropertyIRIByIntent("pageCount", null);
         if (pageCountPropertyIri != null) {
             pageCountProperty = new LongVisalloProperty(pageCountPropertyIri);
         }
@@ -139,10 +137,10 @@ public class TikaTextExtractorGraphPropertyWorker extends GraphPropertyWorker {
         authorKeys = Arrays.asList(tikaProperties.getProperty(AUTHOR_PROPERTY, "author").split(","));
         numberOfPagesKeys = Arrays.asList(tikaProperties.getProperty(NUMBER_OF_PAGES_PROPERTY, "xmpTPg:NPages").split(","));
 
-        authorPropertyIri = getOntologyRepository().getPropertyIRIByIntent("documentAuthor");
-        titlePropertyIri = getOntologyRepository().getPropertyIRIByIntent("documentTitle");
+        authorPropertyIri = getOntologyRepository().getPropertyIRIByIntent("documentAuthor", null);
+        titlePropertyIri = getOntologyRepository().getPropertyIRIByIntent("documentTitle", null);
         if (titlePropertyIri == null) {
-            titlePropertyIri = getOntologyRepository().getPropertyIRIByIntent("artifactTitle");
+            titlePropertyIri = getOntologyRepository().getPropertyIRIByIntent("artifactTitle", null);
         }
     }
 
@@ -366,17 +364,6 @@ public class TikaTextExtractorGraphPropertyWorker extends GraphPropertyWorker {
         return date;
     }
 
-    private Long extractRetrievalTime(Metadata metadata) {
-        Long retrievalTime = 0l;
-        String retrievalTimeKey = TikaMetadataUtils.findKey(retrievalTimestampKeys, metadata);
-
-        if (retrievalTimeKey != null) {
-            retrievalTime = Long.parseLong(metadata.get(retrievalTimeKey));
-        }
-
-        return retrievalTime;
-    }
-
     private String extractTextField(Metadata metadata, List<String> keys) {
         // find the title metadata property, if there is one
         String field = "";
@@ -390,25 +377,6 @@ public class TikaTextExtractorGraphPropertyWorker extends GraphPropertyWorker {
             field = field.trim();
         }
         return field;
-    }
-
-    private String extractUrl(Metadata metadata) {
-        // find the url metadata property, if there is one; strip down to domain name
-        String urlKey = TikaMetadataUtils.findKey(urlKeys, metadata);
-        String host = "";
-        if (urlKey != null) {
-            String url = metadata.get(urlKey);
-            try {
-                URL netUrl = new URL(url);
-                host = netUrl.getHost();
-                if (host.startsWith("www")) {
-                    host = host.substring("www".length() + 1);
-                }
-            } catch (MalformedURLException e) {
-                throw new RuntimeException("Bad url: " + url);
-            }
-        }
-        return host;
     }
 
     private boolean isHtml(String mimeType) {

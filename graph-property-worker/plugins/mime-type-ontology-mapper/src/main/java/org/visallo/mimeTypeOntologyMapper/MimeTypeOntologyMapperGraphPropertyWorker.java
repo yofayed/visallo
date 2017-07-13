@@ -73,12 +73,12 @@ public class MimeTypeOntologyMapperGraphPropertyWorker extends GraphPropertyWork
     private Concept getConceptFromMapping(Map<String, String> mapping) {
         String intent = mapping.get(MAPPING_INTENT_KEY);
         if (intent != null) {
-            return getOntologyRepository().getRequiredConceptByIntent(intent);
+            return getOntologyRepository().getRequiredConceptByIntent(intent, null);
         }
 
         String iri = mapping.get(MAPPING_IRI_KEY);
         if (iri != null) {
-            return getOntologyRepository().getRequiredConceptByIRI(iri);
+            return getOntologyRepository().getRequiredConceptByIRI(iri, null);
         }
 
         throw new VisalloException("Missing concept for mapping. Must specify " + MAPPING_INTENT_KEY + " or " + MAPPING_IRI_KEY + ".");
@@ -135,22 +135,17 @@ public class MimeTypeOntologyMapperGraphPropertyWorker extends GraphPropertyWork
             return false;
         }
 
-        String existingConceptType = VisalloProperties.CONCEPT_TYPE.getPropertyValue(element);
-        if (existingConceptType != null) {
-            return false;
-        }
-
-        return true;
+        return VisalloProperties.CONCEPT_TYPE.getPropertyValue(element) == null;
     }
 
     private static abstract class MimeTypeMatcher {
         private final Concept concept;
 
-        public MimeTypeMatcher(Concept concept) {
+        MimeTypeMatcher(Concept concept) {
             this.concept = concept;
         }
 
-        public Concept getConcept() {
+        Concept getConcept() {
             return concept;
         }
 
@@ -160,7 +155,7 @@ public class MimeTypeOntologyMapperGraphPropertyWorker extends GraphPropertyWork
     private static class RegexMimeTypeMatcher extends MimeTypeMatcher {
         private final Pattern regex;
 
-        public RegexMimeTypeMatcher(Concept concept, String regex) {
+        RegexMimeTypeMatcher(Concept concept, String regex) {
             super(concept);
             this.regex = Pattern.compile(regex);
         }

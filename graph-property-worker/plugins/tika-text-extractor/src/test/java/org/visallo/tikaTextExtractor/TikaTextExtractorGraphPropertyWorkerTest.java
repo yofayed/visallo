@@ -32,7 +32,7 @@ public class TikaTextExtractorGraphPropertyWorkerTest extends GraphPropertyWorke
 
     @Before
     public void before() throws Exception {
-        when(ontologyRepository.getPropertyIRIByIntent("documentTitle")).thenReturn(DOCUMENT_TITLE_PROPERTY_IRI);
+        when(ontologyRepository.getPropertyIRIByIntent("documentTitle", null)).thenReturn(DOCUMENT_TITLE_PROPERTY_IRI);
 
         Configuration config = new HashMapConfigurationLoader(getConfigurationMap()).createConfiguration();
         TikaTextExtractorGraphPropertyWorkerConfiguration tikaConfig = new TikaTextExtractorGraphPropertyWorkerConfiguration(config);
