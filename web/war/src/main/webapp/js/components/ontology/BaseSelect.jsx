@@ -68,11 +68,11 @@ define([
             const { key } = this.state;
             if (key && nextProps.iriKeys && nextProps.iriKeys[key]) {
                 const value = nextProps.iriKeys[key];
-                if ('error' in value) {
-                    this.setState({ key: false, showForm: true, error: value.error || 'Server Error' })
-                } else {
+                if (_.isString(value)) {
                     this.setState({ value, key: false, error: null })
                     this.props.onSelected(this.getOptionByValue(value));
+                } else if (_.isObject(value) && 'error' in value) {
+                    this.setState({ key: false, showForm: true, error: value.error || 'Server Error' })
                 }
             } else if (nextProps.value !== (this.state.value || this.props.value)) {
                 this.setState({ value: nextProps.value })
@@ -86,9 +86,10 @@ define([
             }
         },
         render() {
-            const { creating, showForm, value, CreateForm, selectComponent, key, error } = this.state;
+            const { creating, showForm, value, CreateForm, selectComponent, key, error, type } = this.state;
             const { formProps, value: defaultValue, creatable, createForm, disabled, placeholder, ...rest } = this.props;
             const hasKey = Boolean(key);
+            const extendedFormProps = { ...(formProps || {}), type };
             return (
                 <div>
                 {
@@ -98,7 +99,7 @@ define([
                             onCancel={this.onCancel}
                             onCreate={this.onCreate}
                             error={error}
-                            {...(formProps || {})} />
+                            {...extendedFormProps} />
                     ) : (
                         <VirtualizedSelect
                             ref={r => { this._virtualized = r}}
@@ -154,10 +155,11 @@ define([
         onCreate(option) {
             const key = keyCounter();
             this.props.onCreate(option, { key });
-            this.setState({ showForm: false, key })
+            const { type, displayName } = option;
+            this.setState({ showForm: false, key, creating: displayName, type })
         },
         onNewOptionClick(option) {
-            this.setState({ showForm: true, error: null, creating: option[this.props.labelKey] })
+            this.setState({ showForm: true, error: null, creating: option[this.props.labelKey], type: null })
             this.props.onSelected();
         }
     });

@@ -63,6 +63,8 @@ public class OntologyPropertySave extends OntologyBase {
         OntologyProperty property = ontologyRepository.getOrCreateProperty(def, user, workspaceId);
 
         ontologyRepository.clearCache(workspaceId);
+        
+        // FIXME have also push concept/relationship ids so those property lists are updated
         workQueueRepository.pushOntologyPropertiesChange(workspaceId, property.getId());
 
         return property.toClientApi();

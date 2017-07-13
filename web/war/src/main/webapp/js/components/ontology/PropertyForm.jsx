@@ -23,21 +23,24 @@ define([
             return _.isString(displayName) ? displayName : defaultValue;
         },
         componentDidMount() {
-            this.setState({ domain: this.props.domain })
+            this.setState({ domain: this.props.domain, type: this.props.type })
         },
         componentWillReceiveProps(nextProps) {
             if (nextProps.domain !== this.state.domain) {
                 this.setState({ domain: this.props.domain })
             }
+            if (nextProps.type !== this.state.type) {
+                this.setState({ type: nextProps.type })
+            }
         },
         render() {
-            const { domain } = this.state;
-            const { conceptId, relationshipId } = this.props;
+            const { domain, type } = this.state;
+            const { conceptId, relationshipId, error } = this.props;
             const value = this.getValue();
-            const disabled = _.isEmpty(value) || !this.state.type;
+            const disabled = _.isEmpty(value) || !type;
             return (
                 <div>
-                    { this.props.error ? (<Alert error={this.props.error} />) : null }
+                    { error ? (<Alert error={error} />) : null }
                     <input type="text"
                         onChange={this.onDisplayNameChange}
                         value={value} />
@@ -55,7 +58,7 @@ define([
                             onSelected={this.onDomainSelected} />)
                     }
 
-                    <select value={this.state.type} onChange={this.handleTypeChange}>
+                    <select value={type} onChange={this.handleTypeChange}>
                         <option value="">Select Data Format…</option>
                         <optgroup label="Text">
                             <option value="string">String</option>

@@ -130,7 +130,6 @@ define([
                     relationshipId: this.attr.data.label,
                     addable: true
                 },
-                clearable: false,
                 placeholder: i18n('property.form.field.selection.placeholder')
             });
         };
