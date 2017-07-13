@@ -473,7 +473,7 @@ define([
                 )
             }
 
-            this.savedQueries[searchType].status = status || {};
+            this.savedQueries[searchType].status = status || { success: true };
             this.updateTypeCss();
         };
 
