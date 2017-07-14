@@ -14,9 +14,8 @@ import org.visallo.web.clientapi.model.PropertyType;
 import org.visallo.web.parameterProviders.ActiveWorkspaceId;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OntologyPropertySave extends OntologyBase {
@@ -42,14 +41,14 @@ public class OntologyPropertySave extends OntologyBase {
             @Optional(name = "relationshipIris[]") String[] relationshipIris,
             @ActiveWorkspaceId String workspaceId,
             User user) throws Exception {
-        
+
         List<Concept> concepts = ontologyIrisToConcepts(conceptIris, workspaceId);
         List<Relationship> relationships = ontologyIrisToRelationships(relationshipIris, workspaceId);
 
         PropertyType type = convertDataTypeStringToPropertyType(dataType);
 
         if (propertyIri == null) {
-            propertyIri = ontologyRepository.generateDynamicIri(OntologyProperty.class, displayName, workspaceId);
+            propertyIri = ontologyRepository.generateDynamicIri(OntologyProperty.class, displayName, workspaceId, dataType);
         }
 
         OntologyPropertyDefinition def = new OntologyPropertyDefinition(concepts, relationships, propertyIri, displayName, type);
@@ -66,12 +65,10 @@ public class OntologyPropertySave extends OntologyBase {
         OntologyProperty property = ontologyRepository.getOrCreateProperty(def, user, workspaceId);
 
         ontologyRepository.clearCache(workspaceId);
-        
+
         Iterable<String> conceptIds = concepts.stream().map(Concept::getId).collect(Collectors.toList());
         Iterable<String> relationshipIds = relationships.stream().map(Relationship::getId).collect(Collectors.toList());
-        Set<String> propertyIds = new HashSet<>(1);
-        propertyIds.add(property.getId());
-        workQueueRepository.pushOntologyChange(workspaceId, conceptIds, relationshipIds, propertyIds);
+        workQueueRepository.pushOntologyChange(workspaceId, conceptIds, relationshipIds, Collections.singletonList(property.getId()));
 
         return property.toClientApi();
     }

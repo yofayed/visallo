@@ -558,7 +558,7 @@ public interface OntologyRepository {
 
     void updatePropertyDomainIris(OntologyProperty property, Set<String> domainIris, User user, String workspaceId);
 
-    String generateDynamicIri(Class type, String displayName, String workspaceId);
+    String generateDynamicIri(Class type, String displayName, String workspaceId, String... extended);
 
     void publishConcept(Concept concept, User user, String workspaceId);
 

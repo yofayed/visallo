@@ -23,7 +23,9 @@ import java.util.List;
 public abstract class OntologyRouteTestBase extends RouteTestBase {
     static final String WORKSPACE_ID = "junit-workspace";
     static final String PUBLIC_CONCEPT_IRI = "public-concept-a";
+    static final String PUBLIC_CONCEPT_IRI_B = "public-concept-b";
     static final String PUBLIC_RELATIONSHIP_IRI = "public-relationship";
+    static final String PUBLIC_RELATIONSHIP_IRI_B = "public-relationship-b";
     static final String PUBLIC_PROPERTY_IRI = "public-property";
 
     @Mock
@@ -56,7 +58,9 @@ public abstract class OntologyRouteTestBase extends RouteTestBase {
         hasEntityRel.addIntent("entityHasImage", systemAuthorizations);
 
         ontologyRepository.getOrCreateConcept(thingConcept, PUBLIC_CONCEPT_IRI, "Public A", null, systemUser, null);
+        ontologyRepository.getOrCreateConcept(thingConcept, PUBLIC_CONCEPT_IRI_B, "Public B", null, systemUser, null);
         ontologyRepository.getOrCreateRelationshipType(null, things, things, PUBLIC_RELATIONSHIP_IRI, true, systemUser, null);
+        ontologyRepository.getOrCreateRelationshipType(null, things, things, PUBLIC_RELATIONSHIP_IRI_B, true, systemUser, null);
 
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(things, PUBLIC_PROPERTY_IRI, "Public Property", PropertyType.DATE);
         ontologyRepository.getOrCreateProperty(ontologyPropertyDefinition, systemUser, null);

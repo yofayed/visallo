@@ -17,6 +17,7 @@ import org.visallo.web.clientapi.model.SandboxStatus;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -66,7 +67,8 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         assertNull(ontologyRepository.getPropertyByIRI(propertyIRI, null));
 
         // Make sure we let the front end know
-        Mockito.verify(workQueueRepository, Mockito.times(1)).pushOntologyPropertiesChange(WORKSPACE_ID, property.getId());
+        Mockito.verify(workQueueRepository, Mockito.times(1))
+                .pushOntologyChange(WORKSPACE_ID, Collections.singletonList(PUBLIC_CONCEPT_IRI), Collections.singletonList(PUBLIC_RELATIONSHIP_IRI), Collections.singletonList(property.getId()));
     }
 
     @Test(expected = VisalloAccessDeniedException.class)
@@ -140,17 +142,36 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
     public void testSaveNewPropertyWithGeneratedIri() throws Exception {
         when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
 
-        ClientApiOntology.Property response = route.handle(
-                "New Property",
-                "string",
-                null,
-                new String[]{PUBLIC_CONCEPT_IRI},
-                new String[]{PUBLIC_RELATIONSHIP_IRI},
-                WORKSPACE_ID,
-                user
-        );
+        String displayName = "New Property";
+        String dataType = "string";
+        String[] things = new String[]{ontologyRepository.getEntityConcept(null).getIRI()};
+        String[] relationships = new String[]{PUBLIC_RELATIONSHIP_IRI};
+        ClientApiOntology.Property response = route.handle(displayName, dataType, null, things, relationships, WORKSPACE_ID, user);
 
+        String originalIri = response.getTitle();
+        assertTrue(originalIri.matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_property#[a-z0-9]+"));
+
+        // ensure changing display name changes the iri
+        response = route.handle(displayName + "1", dataType, null, things, relationships, WORKSPACE_ID, user);
+        assertNotEquals(originalIri, response.getTitle());
+        assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_property1#[a-z0-9]+"));
+
+        // ensure changing data type changes the iri
+        response = route.handle(displayName, "integer", null, things, relationships, WORKSPACE_ID, user);
+        assertNotEquals(originalIri, response.getTitle());
         assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_property#[a-z0-9]+"));
-        assertNotNull(ontologyRepository.getPropertyByIRI(response.getTitle(), WORKSPACE_ID));
+
+        // ensure changing concepts does not change the iri
+        response = route.handle(displayName, dataType, null, new String[]{PUBLIC_CONCEPT_IRI}, relationships, WORKSPACE_ID, user);
+        assertEquals(originalIri, response.getTitle());
+
+        // ensure changing relationships does not change the iri
+        response = route.handle(displayName, dataType, null, things, new String[]{PUBLIC_RELATIONSHIP_IRI_B}, WORKSPACE_ID, user);
+        assertEquals(originalIri, response.getTitle());
+
+        // ensure changing workspace changes the iri
+        response = route.handle(displayName, dataType, null, things, relationships, "other-workspace", user);
+        assertNotEquals(originalIri, response.getTitle());
+        assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_property#[a-z0-9]+"));
     }
 }

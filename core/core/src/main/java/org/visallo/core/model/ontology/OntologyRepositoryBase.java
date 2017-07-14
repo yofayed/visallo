@@ -1325,12 +1325,17 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
     }
 
     @Override
-    public String generateDynamicIri(Class type, String displayName, String workspaceId) {
+    public String generateDynamicIri(Class type, String displayName, String workspaceId, String... extended) {
+        String typeIri = type.toString() + workspaceId + displayName;
+        if (extended != null && extended.length > 0) {
+            typeIri += Joiner.on("").join(extended);
+        }
+
         return OntologyRepositoryBase.BASE_OWL_IRI +
                 "/" +
                 displayName.replaceAll("\\s+", "_").toLowerCase() +
                 "#" +
-                Hashing.sha1().hashString(type.toString() + workspaceId + displayName, Charsets.UTF_8).toString();
+                Hashing.sha1().hashString(typeIri, Charsets.UTF_8).toString();
     }
 
     @Deprecated

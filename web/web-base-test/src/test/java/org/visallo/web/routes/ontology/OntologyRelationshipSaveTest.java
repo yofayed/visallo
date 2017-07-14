@@ -143,18 +143,35 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
     public void testSaveNewRelationshipWithGeneratedIri() throws Exception {
         when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
 
-        ClientApiOntology.Relationship response = route.handle(
-                "New Relationship",
-                new String[]{PUBLIC_CONCEPT_IRI},
-                new String[]{ontologyRepository.getEntityConcept(null).getIRI()},
-                null,
-                null,
-                WORKSPACE_ID,
-                workspaceAuthorizations,
-                user
-        );
+        String displayName = "New Relationship";
+        String[] sourceConcepts = {PUBLIC_CONCEPT_IRI};
+        String[] targetConcepts = {PUBLIC_CONCEPT_IRI_B};
+        ClientApiOntology.Relationship response = route.handle(displayName, sourceConcepts, targetConcepts, PUBLIC_RELATIONSHIP_IRI, null, WORKSPACE_ID, workspaceAuthorizations, user);
 
+        String originalIri = response.getTitle();
+        assertTrue(originalIri.matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_relationship#[a-z0-9]+"));
+
+        // ensure changing the display name changes the iri
+        response = route.handle(displayName + "1", sourceConcepts, targetConcepts, PUBLIC_RELATIONSHIP_IRI, null, WORKSPACE_ID, workspaceAuthorizations, user);
+        assertNotEquals(originalIri, response.getTitle());
+        assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_relationship1#[a-z0-9]+"));
+
+        // ensure changing the source concepts does not change the iri
+        response = route.handle(displayName, targetConcepts, targetConcepts, PUBLIC_RELATIONSHIP_IRI, null, WORKSPACE_ID, workspaceAuthorizations, user);
+        assertEquals(originalIri, response.getTitle());
+
+        // ensure changing the target concepts does not change the iri
+        response = route.handle(displayName, sourceConcepts, sourceConcepts, PUBLIC_RELATIONSHIP_IRI, null, WORKSPACE_ID, workspaceAuthorizations, user);
+        assertEquals(originalIri, response.getTitle());
+
+        // ensure changing the parent iri changes the iri
+        response = route.handle(displayName, sourceConcepts, targetConcepts, PUBLIC_RELATIONSHIP_IRI_B, null, WORKSPACE_ID, workspaceAuthorizations, user);
+        assertNotEquals(originalIri, response.getTitle());
         assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_relationship#[a-z0-9]+"));
-        assertNotNull(ontologyRepository.getRelationshipByIRI(response.getTitle(), WORKSPACE_ID));
+
+        // ensure changing the workspace id changes the iri
+        response = route.handle(displayName, sourceConcepts, targetConcepts, PUBLIC_RELATIONSHIP_IRI, null, "other-workspace", workspaceAuthorizations, user);
+        assertNotEquals(originalIri, response.getTitle());
+        assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_relationship#[a-z0-9]+"));
     }
 }

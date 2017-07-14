@@ -6,7 +6,10 @@ import com.v5analytics.webster.annotations.Optional;
 import com.v5analytics.webster.annotations.Required;
 import org.vertexium.Authorizations;
 import org.visallo.core.exception.VisalloException;
-import org.visallo.core.model.ontology.*;
+import org.visallo.core.model.ontology.Concept;
+import org.visallo.core.model.ontology.OntologyProperties;
+import org.visallo.core.model.ontology.OntologyRepository;
+import org.visallo.core.model.ontology.Relationship;
 import org.visallo.core.model.workQueue.WorkQueueRepository;
 import org.visallo.core.user.User;
 import org.visallo.web.clientapi.model.ClientApiOntology;
@@ -44,7 +47,7 @@ public class OntologyRelationshipSave extends OntologyBase {
         List<Concept> rangeConcepts = ontologyIrisToConcepts(targetIris, workspaceId);
 
         if (relationshipIri == null) {
-            relationshipIri = ontologyRepository.generateDynamicIri(Relationship.class, displayName, workspaceId);
+            relationshipIri = ontologyRepository.generateDynamicIri(Relationship.class, displayName, workspaceId, parentIri);
         }
 
         Relationship parent = null;

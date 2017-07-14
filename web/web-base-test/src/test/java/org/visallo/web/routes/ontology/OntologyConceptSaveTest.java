@@ -102,17 +102,37 @@ public class OntologyConceptSaveTest extends OntologyRouteTestBase {
     public void testSaveNewConceptWithGeneratedIri() throws Exception {
         when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
 
-        ClientApiOntology.Concept response = route.handle(
-                "New Concept",
-                null,
-                ontologyRepository.getEntityConcept(null).getIRI(),
-                "glyph.png",
-                "red",
-                WORKSPACE_ID,
-                user
-        );
+        String thingIri = ontologyRepository.getEntityConcept(null).getIRI();
 
+        String displayName = "New Concept";
+        String glyph = "glyph.png";
+        String color = "red";
+        ClientApiOntology.Concept response = route.handle(displayName,null, thingIri, glyph, color, WORKSPACE_ID, user);
+
+        String originalIri = response.getTitle();
+        assertTrue(originalIri.matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_concept#[a-z0-9]+"));
+
+        // ensure that the same details get the same iri
+        response = route.handle(displayName, null, thingIri, glyph, color, WORKSPACE_ID, user);
+        assertEquals(originalIri, response.getTitle());
+
+        // ensure that changing glyph and color don't change the iri
+        response = route.handle(displayName, null, thingIri, "other.png", "orange", WORKSPACE_ID, user);
+        assertEquals(originalIri, response.getTitle());
+
+        // ensure that changing display name changes the iri
+        response = route.handle(displayName + "1", null, thingIri, "other.png", "orange", WORKSPACE_ID, user);
+        assertNotEquals(originalIri, response.getTitle());
+        assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_concept1#[a-z0-9]+"));
+
+        // ensure that changing parent changes the iri
+        response = route.handle(displayName, null, PUBLIC_CONCEPT_IRI, "other.png", "orange", WORKSPACE_ID, user);
+        assertNotEquals(originalIri, response.getTitle());
         assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_concept#[a-z0-9]+"));
-        assertNotNull(ontologyRepository.getConceptByIRI(response.getId(), WORKSPACE_ID));
+
+        // ensure that changing workspace changes the iri
+        response = route.handle(displayName, null, thingIri, "other.png", "orange", "other-workspace", user);
+        assertNotEquals(originalIri, response.getTitle());
+        assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_concept#[a-z0-9]+"));
     }
 }

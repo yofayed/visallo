@@ -47,7 +47,7 @@ public class OntologyConceptSave implements ParameterizedHandler {
         }
 
         if (iri == null) {
-            iri = ontologyRepository.generateDynamicIri(Concept.class, displayName, workspaceId);
+            iri = ontologyRepository.generateDynamicIri(Concept.class, displayName, workspaceId, parentConcept);
         }
 
         Concept concept = ontologyRepository.getOrCreateConcept(parent, iri, displayName, glyphIconHref, color, null, user, workspaceId);
