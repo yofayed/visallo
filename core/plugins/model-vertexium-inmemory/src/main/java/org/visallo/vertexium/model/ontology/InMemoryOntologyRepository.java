@@ -3,6 +3,7 @@ package org.visallo.vertexium.model.ontology;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
 import org.semanticweb.owlapi.io.ReaderDocumentSource;
@@ -367,6 +368,12 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
                 InMemoryOntologyProperty sandboxProperty = sandboxedProperties.remove(property.getIri());
                 sandboxProperty.removeWorkspaceId();
                 propertiesCache.get(PUBLIC_ONTOLOGY_CACHE_KEY).put(property.getIri(), sandboxProperty);
+
+                Map<String, InMemoryConcept> publicConcepts = conceptsCache.get(PUBLIC_ONTOLOGY_CACHE_KEY);
+                sandboxProperty.getConcepts().forEach(c -> publicConcepts.get(c).getProperties().add(sandboxProperty));
+
+                Map<String, InMemoryRelationship> publicRelationships = relationshipsCache.get(PUBLIC_ONTOLOGY_CACHE_KEY);
+                sandboxProperty.getRelationships().forEach(r -> publicRelationships.get(r).getProperties().add(sandboxProperty));
             }
         }
     }
@@ -521,8 +528,21 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
         }
         concept.setProperty(OntologyProperties.TITLE.getPropertyName(), conceptIRI, null);
         concept.setProperty(OntologyProperties.DISPLAY_NAME.getPropertyName(), displayName, null);
-        concept.setProperty(OntologyProperties.COLOR.getPropertyName(), color, null);
-        concept.setProperty(OntologyProperties.GLYPH_ICON_FILE_NAME.getPropertyName(), glyphIconHref, null);
+
+        if (conceptIRI.equals(OntologyRepository.ENTITY_CONCEPT_IRI)) {
+            concept.setProperty(OntologyProperties.TITLE_FORMULA.getPropertyName(), "prop('http://visallo.org#title') || ''", null);
+
+            // TODO: change to ontology && ontology.displayName
+            concept.setProperty(OntologyProperties.SUBTITLE_FORMULA.getPropertyName(), "prop('http://visallo.org#source') || ''", null);
+            concept.setProperty(OntologyProperties.TIME_FORMULA.getPropertyName(), "''", null);
+        }
+
+        if (!StringUtils.isEmpty(glyphIconHref)) {
+            concept.setProperty(OntologyProperties.GLYPH_ICON_FILE_NAME.getPropertyName(), glyphIconHref, null);
+        }
+        if (!StringUtils.isEmpty(color)) {
+            concept.setProperty(OntologyProperties.COLOR.getPropertyName(), color, null);
+        }
 
         String cacheKey = workspaceId == null ? PUBLIC_ONTOLOGY_CACHE_KEY : workspaceId;
         Map<String, InMemoryConcept> workspaceCache = conceptsCache.compute(cacheKey, (k, v) -> v == null ? new HashMap<>() : v);
