@@ -31,6 +31,10 @@ public class InMemoryOntologyProperty extends OntologyProperty {
     private ImmutableList<String> dependentPropertyIris = ImmutableList.of();
     private List<String> intents = new ArrayList<>();
     private List<String> textIndexHints = new ArrayList<>();
+
+    private List<String> concepts = new ArrayList<>();
+    private List<String> relationships = new ArrayList<>();
+
     private String workspaceId;
 
     @Override
@@ -104,10 +108,14 @@ public class InMemoryOntologyProperty extends OntologyProperty {
     }
 
     @Override
-    public boolean getDeleteable() { return deleteable; }
+    public boolean getDeleteable() {
+        return deleteable;
+    }
 
     @Override
-    public boolean getUpdateable() { return updateable; }
+    public boolean getUpdateable() {
+        return updateable;
+    }
 
     public String[] getIntents() {
         return this.intents.toArray(new String[this.intents.size()]);
@@ -123,7 +131,7 @@ public class InMemoryOntologyProperty extends OntologyProperty {
         addTextIndexHints(textIndexHints);
     }
 
-    public void addTextIndexHints (String textIndexHints) {
+    public void addTextIndexHints(String textIndexHints) {
         this.textIndexHints.add(textIndexHints);
     }
 
@@ -187,9 +195,13 @@ public class InMemoryOntologyProperty extends OntologyProperty {
         this.dependentPropertyIris = dependentPropertyIris == null ? ImmutableList.<String>of() : ImmutableList.copyOf(dependentPropertyIris);
     }
 
-    public void setUpdateable(boolean updateable) { this.updateable = updateable; }
+    public void setUpdateable(boolean updateable) {
+        this.updateable = updateable;
+    }
 
-    public void setDeleteable(boolean deleteable) { this.deleteable = deleteable; }
+    public void setDeleteable(boolean deleteable) {
+        this.deleteable = deleteable;
+    }
 
     @Override
     public void setProperty(String name, Object value, Authorizations authorizations) {
@@ -252,6 +264,14 @@ public class InMemoryOntologyProperty extends OntologyProperty {
     @Override
     public void removeIntent(String intent, Authorizations authorizations) {
         this.intents.remove(intent);
+    }
+
+    public List<String> getConcepts() {
+        return concepts;
+    }
+
+    public List<String> getRelationships() {
+        return relationships;
     }
 
     public void setWorkspaceId(String workspaceId) {

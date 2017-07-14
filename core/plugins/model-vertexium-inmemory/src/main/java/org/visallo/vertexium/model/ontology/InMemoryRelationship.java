@@ -2,7 +2,6 @@ package org.visallo.vertexium.model.ontology;
 
 import org.vertexium.Authorizations;
 import org.vertexium.util.ConvertingIterable;
-import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.ontology.OntologyProperties;
 import org.visallo.core.model.ontology.OntologyProperty;
 import org.visallo.core.model.ontology.Relationship;
@@ -34,6 +33,31 @@ public class InMemoryRelationship extends Relationship {
         super(parentIRI, domainConceptIRIs, rangeConceptIRIs, properties);
         this.relationshipIRI = relationshipIRI;
         this.workspaceId = workspaceId;
+    }
+
+    InMemoryRelationship shallowCopy() {
+        InMemoryRelationship other = new InMemoryRelationship(
+                getParentIRI(),
+                getIRI(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                workspaceId);
+        other.getDomainConceptIRIs().addAll(getDomainConceptIRIs());
+        other.getRangeConceptIRIs().addAll(getRangeConceptIRIs());
+        other.getProperties().addAll(getProperties());
+
+        other.displayName = displayName;
+        other.inverseOfs.addAll(inverseOfs);
+        other.intents.addAll(intents);
+        other.userVisible = userVisible;
+        other.deleteable = deleteable;
+        other.updateable = updateable;
+        other.titleFormula = titleFormula;
+        other.subtitleFormula = subtitleFormula;
+        other.timeFormula = timeFormula;
+
+        return other;
     }
 
     @Override

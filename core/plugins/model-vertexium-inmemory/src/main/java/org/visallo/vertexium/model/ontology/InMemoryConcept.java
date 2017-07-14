@@ -38,6 +38,32 @@ public class InMemoryConcept extends Concept {
         this.workspaceId = workspaceId;
     }
 
+    InMemoryConcept shallowCopy() {
+        InMemoryConcept other = new InMemoryConcept(conceptIRI, getParentConceptIRI(), workspaceId);
+        other.getProperties().addAll(getProperties());
+        other.title = title;
+        other.color = color;
+        other.displayName = displayName;
+        other.displayType = displayType;
+        other.titleFormula = titleFormula;
+        other.subtitleFormula = subtitleFormula;
+        other.timeFormula = timeFormula;
+        other.addRelatedConceptWhiteList = addRelatedConceptWhiteList;
+        other.glyphIcon = glyphIcon;
+        other.glyphIconFilePath = glyphIconFilePath;
+        other.glyphIconSelected = glyphIconSelected;
+        other.glyphIconSelectedFilePath = glyphIconSelectedFilePath;
+        other.mapGlyphIcon = mapGlyphIcon;
+        other.userVisible = userVisible;
+        other.updateable = updateable;
+        other.deleteable = deleteable;
+        other.searchable = searchable;
+        other.addable = addable;
+        other.metadata.putAll(metadata);
+        other.intents.addAll(intents);
+        return other;
+    }
+
     @Override
     public String getIRI() {
         return this.conceptIRI;
