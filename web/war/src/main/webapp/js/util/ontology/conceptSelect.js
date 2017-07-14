@@ -35,12 +35,58 @@ define([
         })
 
         this.after('initialize', function() {
+
+            /**
+             * Clears the selected concept from the component. Will not fire
+             * conceptSelected.
+             *
+             * @event module:components/ConceptSelect#clearSelectedConcept
+             * @example
+             * ConceptSelect.attachTo($node)
+             * //...
+             * $node.trigger('clearSelectedConcept')
+             */
             this.on('clearSelectedConcept', function(event) {
                 this.attacher.params({ ...this.attacher._params, value: '' }).attach();
             })
+
+            /**
+             * Set the selected concept. Will not fire conceptSelected.
+             *
+             * If no conceptId is passed or it's empty it'll clear the
+             * selection.
+             *
+             * @event module:components/ConceptSelect#selectConceptId
+             * @property {object} data
+             * @property {string} [data.conceptId=''] The concept IRI to select
+             * @example
+             * ConceptSelect.attachTo($node)
+             * //...
+             * $node.trigger('selectConceptId', {
+             *     conceptId: 'http://www.visallo.org/minimal#person'
+             * })
+             */
             this.on('selectConceptId', function(event, { conceptId }) {
                 this.attacher.params({ ...this.attacher._params, value: conceptId }).attach();
             })
+
+            /**
+             * Enable / Disable the component. Only pass one property (enable
+             * or disable)
+             *
+             * @event module:components/ConceptSelect#enableConcept
+             * @property {object} data
+             * @property {boolean} data.enable Enable this component and allow user entry
+             * @property {boolean} data.disable Disable this component from user entry
+             * @example <caption>Disable</caption>
+             * ConceptSelect.attachTo($node)
+             * //...
+             * $node.trigger('enableConcept', { disable: true })
+             * @example <caption>Enable</caption>
+             * ConceptSelect.attachTo($node)
+             * //...
+             * $node.trigger('enableConcept', { enable: true })
+             */
             this.on('enableConcept', function(event, { disable, enable }) {
                 const disabled = disable === true || enable === false
                 this.attacher.params({ ...this.attacher._params, disabled }).attach();
@@ -76,6 +122,18 @@ define([
                 })
                 .behavior({
                     onSelected: (attacher, concept) => {
+                        /**
+                         * Triggered when the user selects a concept from the list.
+                         *
+                         * @event module:components/ConceptSelect#conceptSelected
+                         * @property {object} data
+                         * @property {object} data.concept The concept object that was selected
+                         * @example
+                         * $node.on('conceptSelected', function(event, data) {
+                         *     console.log(data.concept)
+                         * })
+                         * ConceptSelect.attachTo($node)
+                         */
                         this.trigger('conceptSelected', { concept })
                     }
                 })

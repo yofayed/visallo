@@ -76,29 +76,35 @@ define([
                 }
 
                 let test = true;
-                if (filter && filter.conceptId) {
+                if (filter && filter.properties) {
+                    test = test && p.title in filter.properties;
+                }
+                if (test && filter && filter.conceptId) {
                     const conceptProps = propertiesByConcept[filter.conceptId];
                     const conceptProp = conceptProps && conceptProps[p.title];
                     formProps.domain = filter.conceptId;
                     test = test && Boolean(conceptProp);
                 }
-                if (filter && filter.relationshipId) {
+                if (test && filter && filter.relationshipId) {
                     const relationshipProps = propertiesByRelationship[filter.relationshipId];
                     const relationshipProp = relationshipProps && relationshipProps[p.title];
                     formProps.domain = filter.relationshipId;
                     test = test && Boolean(relationshipProp);
                 }
-                if (filter && filter.rollupCompound && p.dependentPropertyIris) {
+                if (test && filter && filter.rollupCompound && p.dependentPropertyIris) {
                     dependentPropertyIris.push(...p.dependentPropertyIris);
                 }
-                FilterProps.forEach(fp => {
-                    if (filter && fp in filter) {
-                        // otherwise any value is valid
-                        if (filter[fp] !== undefined && filter[fp] !== null) {
-                            test = test && p[fp] === filter[fp];
+                if (test) {
+                    FilterProps.forEach(fp => {
+                        if (filter && fp in filter) {
+                            // otherwise any value is valid
+                            if (filter[fp] !== undefined && filter[fp] !== null) {
+                                test = test && p[fp] === filter[fp];
+                                console.log(test, fp, filter[fp], p[fp], p)
+                            }
                         }
-                    }
-                })
+                    })
+                }
                 return test;
             });
 
