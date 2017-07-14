@@ -37,6 +37,7 @@ define([
             const {
                 conceptAncestors,
                 concepts,
+                conceptsToConcepts,
                 filter,
                 privileges,
                 creatable,
@@ -56,7 +57,13 @@ define([
                     ) && (
                         filter.searchable === true ?
                             o.searchable !== false : true
-                    )/* TODO: add relatedToConceptId && (true)*/;
+                    ) && (
+                        filter.relatedToConceptId ?
+                            (
+                                conceptsToConcepts[filter.relatedToConceptId] &&
+                                conceptsToConcepts[filter.relatedToConceptId].includes(o.id)
+                            ) : true
+                    );
                 })
             }
             return (
@@ -71,11 +78,34 @@ define([
 
     return redux.connect(
         (state, props) => {
+            var otherFilters = props.filter;
+            var concepts = ontologySelectors.getVisibleConceptsList(state);
+            var conceptsToConcepts;
+            var depthKey = 'depth';
+            var pathKey = 'path';
+
+            if (otherFilters) {
+                const { userVisible, ...rest } = otherFilters;
+                otherFilters = rest;
+                const showAdmin = userVisible === null;
+                if (showAdmin) {
+                    concepts = ontologySelectors.getConceptsList(state);
+                    depthKey = 'fullDepth';
+                    pathKey = 'fullPath';
+                }
+                if (otherFilters.relatedToConceptId) {
+                    conceptsToConcepts = ontologySelectors.getConceptsByRelatedConcept(state);
+                }
+            }
             return {
                 privileges: userSelectors.getPrivileges(state),
-                concepts: ontologySelectors.getVisibleConcepts(state),
+                concepts,
                 conceptAncestors: ontologySelectors.getConceptAncestors(state),
                 iriKeys: ontologySelectors.getConceptKeyIris(state),
+                filter: otherFilters,
+                conceptsToConcepts,
+                depthKey,
+                pathKey,
                 ...props
             };
         },

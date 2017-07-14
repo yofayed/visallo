@@ -57,17 +57,19 @@ define([
 
                 this.enterShouldSubmit = 'addButtonSelector';
 
+                this.limitParentConceptId = F.vertex.prop(
+                    _.isArray(this.attr.vertex) ? this.attr.vertex[0] : this.attr.vertex,
+                    'conceptType'
+                );
                 ConceptSelector.attachTo(self.popover.find('.concept'), {
                     focus: true,
                     defaultText: i18n('popovers.add_related.concept.default_text'),
-                    limitRelatedToConceptId: F.vertex.prop(
-                        _.isArray(this.attr.vertex) ? this.attr.vertex[0] : this.attr.vertex,
-                        'conceptType'
-                    )
+                    limitRelatedToConceptId: this.limitParentConceptId
                 });
 
                 RelationshipSelector.attachTo(self.popover.find('.relationship'), {
-                    defaultText: i18n('popovers.add_related.relationship.default_text')
+                    defaultText: i18n('popovers.add_related.relationship.default_text'),
+                    limitParentConceptId: this.limitParentConceptId
                 });
 
                 this.positionDialog();

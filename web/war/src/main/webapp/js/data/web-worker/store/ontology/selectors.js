@@ -1,27 +1,28 @@
 define(['reselect'], function(reselect) {
     const { createSelector } = reselect;
 
+    const THING = 'http://www.w3.org/2002/07/owl#Thing';
+    const ROOT = 'http://visallo.org#root';
+    const EDGE_THING = 'http://www.w3.org/2002/07/owl#topObjectProperty';
+
     const _visible = (item, options = {}) => {
         const { rootItemsHidden = true } = options;
         return item &&
             item.userVisible !== false &&
-            (!rootItemsHidden || (
-                item.id !== 'http://www.w3.org/2002/07/owl#Thing' &&
-                item.id !== 'http://visallo.org#root'
-            )) &&
+            (!rootItemsHidden || (item.id !== EDGE_THING && item.id !== THING && item.id !== ROOT)) &&
             item.displayName;
     };
     const _collectParents = (concepts, { parentKey, extraKeys = [], defaults = {} } = {}) => concept => {
         const collecting = {
             path: [],
-            pathIris: [],
+            fullPath: [],
             properties: [],
             ...(_.object(extraKeys.map(k => [k, null])))
         };
         _collect(concept);
         const {
             path,
-            pathIris,
+            fullPath,
             properties,
             ...override } = collecting;
         _.each(override, (v, k) => {
@@ -32,9 +33,10 @@ define(['reselect'], function(reselect) {
         const newConcept = {
             ...concept,
             path: '/' + path.reverse().join('/'),
-            pathIris,
+            fullPath: '/' + fullPath.reverse().join('/'),
             properties: _.uniq(properties),
             depth: path.length - 1,
+            fullDepth: fullPath.length - 1,
             ...override
         };
         return newConcept;
@@ -43,9 +45,11 @@ define(['reselect'], function(reselect) {
             extraKeys.forEach(k => {
                 collecting[k] = collecting[k] || concept[k];
             })
+            if (_visible(concept, { rootItemsHidden: false })) {
+                collecting.fullPath.push(concept.displayName)
+            }
             if (_visible(concept)) {
                 collecting.path.push(concept.displayName)
-                collecting.pathIris.push(concept.title)
             }
             collecting.properties = collecting.properties.concat(concept.properties);
 
@@ -108,6 +112,36 @@ define(['reselect'], function(reselect) {
             .value()
     })
 
+    const getVisibleRelationshipsByConcept = createSelector([getVisibleRelationships], relationships => {
+        const result = {};
+        relationships.forEach(r => {
+            ['domainConceptIris', 'rangeConceptIris'].forEach(key => {
+                r[key].forEach(iri => {
+                    if (!result[iri]) result[iri] = [];
+                    if (!result[iri].includes(r.title)) {
+                        result[iri].push(r.title);
+                    }
+                })
+            })
+        })
+        return result;
+    })
+
+    const getOtherConcepts = createSelector([getVisibleRelationships], relationships => {
+        const result = {};
+        relationships.forEach(r => {
+            r.domainConceptIris.forEach(d => {
+                if (!result[d]) result[d] = [];
+                result[d].push(...r.rangeConceptIris)
+            })
+            r.rangeConceptIris.forEach(d => {
+                if (!result[d]) result[d] = [];
+                result[d].push(...r.domainConceptIris)
+            })
+        })
+        return result;
+    })
+
     const getRelationshipAncestors = createSelector([getRelationships], relationships => {
         const byParent = _.groupBy(relationships, 'parentIri');
         const collectAncestors = (list, r, skipFirst) => {
@@ -150,12 +184,34 @@ define(['reselect'], function(reselect) {
         return _.mapObject(concepts, c => collectDescendents([], c, true));
     })
 
-    const getVisibleConcepts = createSelector([getConcepts], concepts => {
+    const getConceptsList = createSelector([getConcepts], concepts => {
         return _.chain(concepts)
-            .map()
-            .filter(_visible)
+            .filter(c => _visible(c, { rootItemsHidden: false }))
+            .sortBy('fullPath')
+            .value()
+    })
+
+    const getVisibleConceptsList = createSelector([getConcepts], concepts => {
+        return _.chain(concepts)
+            .filter(c => _visible(c))
             .sortBy('path')
             .value()
+    })
+
+    const getConceptsByRelatedConcept = createSelector([getVisibleConceptsList, getConceptAncestors, getOtherConcepts], (concepts, ancestors, otherConcepts) => {
+        return _.chain(concepts)
+            .map(topConcept => {
+                var concepts = [];
+                [topConcept.id, ...ancestors[topConcept.id]].forEach(iri => {
+                    const other = otherConcepts[iri];
+                    if (other) {
+                        concepts.push(..._.uniq(other));
+                    }
+                })
+                return [topConcept.id, concepts];
+            })
+            .object()
+            .value();
     })
 
     const getConceptKeyIris = state => state.ontology.iris && state.ontology.iris.concept
@@ -234,7 +290,9 @@ define(['reselect'], function(reselect) {
         getConceptKeyIris,
         getConceptDescendents,
         getConceptAncestors,
-        getVisibleConcepts,
+        getConceptsList,
+        getConceptsByRelatedConcept,
+        getVisibleConceptsList,
 
         getProperties,
         getPropertyKeyIris,
@@ -247,6 +305,7 @@ define(['reselect'], function(reselect) {
         getRelationships,
         getRelationshipAncestors,
         getRelationshipKeyIris,
-        getVisibleRelationships
+        getVisibleRelationships,
+        getVisibleRelationshipsByConcept
     }
 });

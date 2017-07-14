@@ -11,7 +11,6 @@
  * @attr {string} [selectedConceptId=''] Default the selection to this concept IRI
  * @attr {string} [selectedConceptIntent=''] Default the selection to this the first concept with this intent defined in ontology
  * @attr {boolean} [focus=false] Activate the field for focus when finished rendering
- * @attr {number} [maxItems=-1] Limit the maximum items that are shown in search list (-1 signifies no limit)
  * @fires module:components/ConceptSelect#conceptSelected
  * @listens module:components/ConceptSelect#clearSelectedConcept
  * @listens module:components/ConceptSelect#selectConceptId
@@ -49,13 +48,22 @@ define([
 
             const filter = {};
             if (this.attr.showAdminConcepts === true) {
-                filter.userVisible = undefined;
+                filter.userVisible = null;
             }
             if (this.attr.onlySearchable === true) {
                 filter.searchable = true;
             }
             if (this.attr.restrictConcept) {
                 filter.conceptId = this.attr.restrictConcept;
+            }
+            if (this.attr.limitRelatedToConceptId) {
+                filter.relatedToConceptId = this.attr.limitRelatedToConceptId;
+            }
+            if ('maxItems' in this.attr) {
+                console.warn('maxItems is no longer supported');
+            }
+            if ('selectedConceptIntent' in this.attr) {
+                console.warn('selectedConceptIntent is no longer supported');
             }
 
             this.attacher = attacher()

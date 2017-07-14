@@ -30,10 +30,41 @@ define([
         this.after('initialize', function() {
             if (this.attr.maxItems) console.warn('maxItems is no longer supported');
             var self = this;
+
+            /**
+             * Trigger to change the list of relationships to filter with this concept.
+             *
+             * If `conceptId` is specifed source/target should not be.
+             *
+             * @event module:components/RelationshipSelect#limitParentConceptId
+             * @property {object} data
+             * @property {string} [data.conceptId=''] The concept IRI to limit by
+             * @property {string} [data.sourceConceptId=''] The source concept IRI to limit by
+             * @property {string} [data.targetConceptId=''] The dest concept IRI to limit by
+             * @example
+             * RelationshipSelect.attachTo($node)
+             * //...
+             * $node.trigger('limitParentConceptId', { conceptId: 'http://www.visallo.org/minimal#person' })
+             */
             this.on('limitParentConceptId', function(event, data) {
-                const { conceptId, sourceConcept: sourceId, targetConcept: targetId } = data;
-                self.attacher.params({ ...self.attacher._params, conceptId, sourceId, targetId }).attach();
+                const { conceptId, sourceConceptId: sourceId, targetConceptId: targetId } = data;
+                const params = self.attacher._params;
+                self.attacher.params({ ...params, filter: { ...params.filter, conceptId, sourceId, targetId }}).attach();
             })
+
+            /**
+             * Trigger to change the list of properties the component works with.
+             *
+             * @event module:components/RelationshipSelect#selectRelationshipId
+             * @property {object} data
+             * @property {string} [data.relationshipId=''] The relationship IRI to select or nothing to clear
+             * @example
+             * RelationshipSelect.attachTo($node)
+             * //...
+             * $node.trigger('selectRelationshipId', { relationshipId: '' })
+             * @example <caption>Clear selection</caption>
+             * $node.trigger('selectRelationshipId')
+             */
             this.on('selectRelationshipId', function(event, data) {
                 const relationshipId = data && data.relationshipId || '';
                 self.attacher.params({ ...self.attacher._params, value: relationshipId }).attach()
@@ -52,6 +83,18 @@ define([
                 })
                 .behavior({
                     onSelected: (attacher, relationship) => {
+                        /**
+                         * Triggered when the user selects a relationship from the list.
+                         *
+                         * @event module:components/RelationshipSelect#relationshipSelected
+                         * @property {object} data
+                         * @property {object} data.relationship The ontology relationship object that was selected
+                         * @example
+                         * $node.on('relationshipSelected', function(event, data) {
+                         *     console.log(data.relationship)
+                         * })
+                         * RelationshipSelect.attachTo($node)
+                         */
                         this.trigger('relationshipSelected', { relationship })
                     }
                 })
