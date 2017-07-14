@@ -61,7 +61,7 @@ define([
                 cache.elements.length !== elements.length ||
                 _.any(cache.elements, (ce, i) => ce !== elements[i])
             ) : cache.elements !== elements
-        ); 
+        );
         if (cache && !vertexChanged) {
             return cache.value
         }
@@ -1128,11 +1128,11 @@ define([
                 return data;
             }, startingData);
         });
-        
+
         if (hovering === vertex.id) {
             return { ...result, truncatedTitle: title }
         }
-            
+
         return result;
     }
     const mapVertexToData = (id, vertices, transformers, hovering) => {

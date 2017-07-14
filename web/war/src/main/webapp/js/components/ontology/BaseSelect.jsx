@@ -69,12 +69,10 @@ define([
             if (key && nextProps.iriKeys && nextProps.iriKeys[key]) {
                 const value = nextProps.iriKeys[key];
                 if (_.isString(value)) {
-                    this.setState({ value, key: false, error: null })
-                    const option = this.getOptionByValue(value);
+                    const option = this.getOptionByValue(value, nextProps);
                     if (option) {
+                        this.setState({ value, key: false, error: null })
                         this.props.onSelected(option);
-                    } else {
-                        console.warn('Unable to select new option', value, this.props.options.map(o => o[this.props.valueKey]));
                     }
                 } else if (_.isObject(value) && 'error' in value) {
                     this.setState({ key: false, showForm: true, error: value.error || 'Server Error' })
