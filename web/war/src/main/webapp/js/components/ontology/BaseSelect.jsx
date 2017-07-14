@@ -127,7 +127,7 @@ define([
                             value={_.isString(value) ? value : defaultValue}
                             onChange={this.updateValue}
                             onNewOptionClick={this.onNewOptionClick}
-                            optionRenderer={NameOptionRenderer}
+                            optionRenderer={nameOptionRenderer(this.props.depthKey, this.props.pathKey)}
                             optionHeight={28}
                             matchProp="label"
                             {...rest}
@@ -171,72 +171,74 @@ define([
 
     return BaseSelect;
 
-    function NameOptionRenderer ({
-        focusedOption, focusedOptionIndex, focusOption,
-        key, labelKey,
-        option, optionIndex, options,
-        selectValue,
-        style,
-        valueArray
-    }) {
-        const className = ['VirtualizedSelectOption']
-        if (option.className) {
-            className.push(option.className);
-        }
-        if (option === focusedOption) {
-            className.push('VirtualizedSelectFocusedOption')
-        }
-        if (option.disabled) {
-            className.push('VirtualizedSelectDisabledOption')
-        }
-        if (option.header) {
-            className.push('VirtualizedSelectHeader');
-        }
-        if (valueArray && valueArray.indexOf(option) >= 0) {
-            className.push('VirtualizedSelectSelectedOption')
-        }
-        const events = option.disabled ? {} : {
-            onClick: () => selectValue(option),
-            onMouseOver: () => focusOption(option)
-        };
-        const indent = (option.depth || 0) * 15;
+    function nameOptionRenderer(depthKey = 'depth', pathKey = 'path') {
+        return function NameOptionRenderer({
+            focusedOption, focusedOptionIndex, focusOption,
+            key, labelKey,
+            option, optionIndex, options,
+            selectValue,
+            style,
+            valueArray
+        }) {
+            const className = ['VirtualizedSelectOption']
+            if (option.className) {
+                className.push(option.className);
+            }
+            if (option === focusedOption) {
+                className.push('VirtualizedSelectFocusedOption')
+            }
+            if (option.disabled) {
+                className.push('VirtualizedSelectDisabledOption')
+            }
+            if (option.header) {
+                className.push('VirtualizedSelectHeader');
+            }
+            if (valueArray && valueArray.indexOf(option) >= 0) {
+                className.push('VirtualizedSelectSelectedOption')
+            }
+            const events = option.disabled ? {} : {
+                onClick: () => selectValue(option),
+                onMouseOver: () => focusOption(option)
+            };
+            const indent = (option[depthKey] || 0) * 15;
 
-        if (option.header) {
-            //TODO divider
+            if (option.header) {
+                //TODO divider
+                return (
+                    <div
+                        className={className.join(' ')}
+                        key={key}
+                        style={style}
+                    >
+                        {option[labelKey]}
+                    </div>
+                );
+            }
+
+            const iconStyles = option.domainGlyphIconHref ? { backgroundSize: 'auto 80%' } : {};
+
             return (
-                <div
-                    className={className.join(' ')}
+                <div className={className.join(' ')}
                     key={key}
-                    style={style}
-                >
+                    style={{ ...style, paddingLeft: `${indent}px` }}
+                    title={`${option[pathKey]}${ option.displayNameSub ? `\n${option.displayNameSub}` : ''}`}
+                    {...events}>
+                    {
+                        option.glyphIconHref ? (
+                            <div className="icon" style={{ ...iconStyles, backgroundImage: `url(${option.glyphIconHref})` }} />
+                        ) : (option.domainGlyphIconHref && option.rangeGlyphIconHref) ? (
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div className="icon" style={{ ...iconStyles, margin: '0 0 0 5px', backgroundImage: `url(${option.domainGlyphIconHref})` }} />
+                            →
+                            <div className="icon" style={{ ...iconStyles, margin: '0 5px 0 0', backgroundImage: `url(${option.rangeGlyphIconHref})` }} />
+                            </div>
+                        ) : (
+                            <div className="icon" style={{ width: '6px', margin: '0' }} />
+                        )
+                    }
                     {option[labelKey]}
                 </div>
             );
         }
-
-        const iconStyles = option.domainGlyphIconHref ? { backgroundSize: 'auto 80%' } : {};
-
-        return (
-            <div className={className.join(' ')}
-                key={key}
-                style={{ ...style, paddingLeft: `${indent}px` }}
-                title={`${option.path}${ option.displayNameSub ? `\n${option.displayNameSub}` : ''}`}
-                {...events}>
-                {
-                    option.glyphIconHref ? (
-                        <div className="icon" style={{ ...iconStyles, backgroundImage: `url(${option.glyphIconHref})` }} />
-                    ) : (option.domainGlyphIconHref && option.rangeGlyphIconHref) ? (
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <div className="icon" style={{ ...iconStyles, margin: '0 0 0 5px', backgroundImage: `url(${option.domainGlyphIconHref})` }} />
-                        →
-                        <div className="icon" style={{ ...iconStyles, margin: '0 5px 0 0', backgroundImage: `url(${option.rangeGlyphIconHref})` }} />
-                        </div>
-                    ) : (
-                        <div className="icon" style={{ width: '6px', margin: '0' }} />
-                    )
-                }
-                {option[labelKey]}
-            </div>
-        );
     }
 });
