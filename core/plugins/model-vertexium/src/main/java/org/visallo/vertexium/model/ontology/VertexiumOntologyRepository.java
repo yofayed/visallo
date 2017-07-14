@@ -246,38 +246,12 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
         }
 
         try {
-            ClientApiOntology published = this.clientApiCache.get(cacheKey(null), new TimingCallable<ClientApiOntology>("getClientApiObject") {
+            return this.clientApiCache.get(cacheKey(workspaceId), new TimingCallable<ClientApiOntology>("getClientApiObject") {
                 @Override
                 protected ClientApiOntology callWithTime() throws Exception {
-                    return VertexiumOntologyRepository.super.getClientApiObject(null);
+                    return VertexiumOntologyRepository.super.getClientApiObject(workspaceId);
                 }
             });
-
-
-            if (workspaceId != null) {
-                Authorizations authorizations = getAuthorizations(workspaceId, WorkspaceRepository.VISIBILITY_STRING);
-                Vertex workspace = graph.getVertex(workspaceId, authorizations);
-                if (workspace != null) {
-                    Iterable<Vertex> vertices = Lists.newArrayList(workspace.getVertices(Direction.OUT, WorkspaceProperties.WORKSPACE_TO_ONTOLOGY_RELATIONSHIP_IRI, authorizations));
-
-                    ClientApiOntology workspaceOntology = published.merge(
-                            transformConcepts(vertices, workspaceId)
-                                    .stream().map(Concept::toClientApi).collect(Collectors.toList()),
-                            transformProperties(vertices, workspaceId)
-                                    .stream().map(OntologyProperty::toClientApi).collect(Collectors.toList()),
-                            transformRelationships(vertices, workspaceId)
-                                    .stream().map(Relationship::toClientApi).collect(Collectors.toList())
-                    );
-
-                    if (workspaceOntology != null) {
-                        this.clientApiCache.put(key, workspaceOntology);
-                    }
-
-                    return workspaceOntology;
-                }
-            }
-
-            return published;
         } catch (ExecutionException e) {
             throw new VisalloException("Unable to load published ontology", e);
         }
