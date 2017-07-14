@@ -34,7 +34,6 @@ import org.visallo.core.model.user.AuthorizationRepository;
 import org.visallo.core.model.user.GraphAuthorizationRepository;
 import org.visallo.core.model.workQueue.Priority;
 import org.visallo.core.model.workspace.WorkspaceProperties;
-import org.visallo.core.model.workspace.WorkspaceRepository;
 import org.visallo.core.security.VisalloVisibility;
 import org.visallo.core.security.VisibilityTranslator;
 import org.visallo.core.user.User;
@@ -42,7 +41,10 @@ import org.visallo.core.util.JSONUtil;
 import org.visallo.core.util.TimingCallable;
 import org.visallo.core.util.VisalloLogger;
 import org.visallo.core.util.VisalloLoggerFactory;
-import org.visallo.web.clientapi.model.*;
+import org.visallo.web.clientapi.model.ClientApiOntology;
+import org.visallo.web.clientapi.model.PropertyType;
+import org.visallo.web.clientapi.model.SandboxStatus;
+import org.visallo.web.clientapi.model.VisibilityJson;
 
 import java.io.*;
 import java.util.*;
@@ -592,11 +594,9 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
                 OntologyProperties.ONTOLOGY_TITLE.updateProperty(elemCtx, conceptIRI, metadata, visibility);
                 OntologyProperties.DISPLAY_NAME.updateProperty(elemCtx, displayName, metadata, visibility);
                 if (conceptIRI.equals(OntologyRepository.ENTITY_CONCEPT_IRI)) {
-                    OntologyProperties.TITLE_FORMULA.updateProperty(elemCtx, "prop('http://visallo.org#title') || ''", metadata, visibility);
-
-                    // TODO: change to ontology && ontology.displayName
-                    OntologyProperties.SUBTITLE_FORMULA.updateProperty(elemCtx, "prop('http://visallo.org#source') || ''", metadata, visibility);
-                    OntologyProperties.TIME_FORMULA.updateProperty(elemCtx, "''", metadata, visibility);
+                    OntologyProperties.TITLE_FORMULA.updateProperty(elemCtx, "prop('http://visallo.org#title') || ('Untitled ' + ontology && ontology.displayName) ", metadata, visibility);
+                    OntologyProperties.SUBTITLE_FORMULA.updateProperty(elemCtx, "(ontology && ontology.displayName) || prop('http://visallo.org#source') || ''", metadata, visibility);
+                    OntologyProperties.TIME_FORMULA.updateProperty(elemCtx, "prop('http://visallo.org#modifiedDate') || ''", metadata, visibility);
                 }
                 if (!StringUtils.isEmpty(glyphIconHref)) {
                     OntologyProperties.GLYPH_ICON_FILE_NAME.updateProperty(elemCtx, glyphIconHref, metadata, visibility);
