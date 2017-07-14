@@ -60,7 +60,7 @@ define([
                             onSelected={this.onDomainSelected} />)
                     }
 
-                    <select value={type} onChange={this.handleTypeChange}>
+                    <select value={type || ''} onChange={this.handleTypeChange}>
                         <option value="">Select Data Format…</option>
                         <optgroup label="Text">
                             <option value="string">String</option>
