@@ -65,9 +65,9 @@ public class WorkspaceHelperTest {
         authorizationsRepository = new InMemoryGraphAuthorizationRepository();
         termMentionRepository = new TermMentionRepository(graph, authorizationsRepository);
 
-        when(ontologyRepository.getRelationshipIRIByIntent(eq("entityHasImage"))).thenReturn(
+        when(ontologyRepository.getRelationshipIRIByIntent("entityHasImage", null)).thenReturn(
                 "http://visallo.org/test#entityHasImage");
-        when(ontologyRepository.getRelationshipIRIByIntent(eq("artifactContainsImageOfEntity"))).thenReturn(
+        when(ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity", null)).thenReturn(
                 "http://visallo.org/test#artifactContainsImageOfEntity");
         workspaceHelper = new WorkspaceHelper(
                 termMentionRepository,

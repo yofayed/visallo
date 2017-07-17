@@ -41,12 +41,12 @@ public class ArtifactThumbnailRepository {
         this.simpleOrmSession = simpleOrmSession;
         this.userRepository = userRepository;
 
-        String yAxisFlippedPropertyIri = ontologyRepository.getPropertyIRIByIntent("media.yAxisFlipped");
+        String yAxisFlippedPropertyIri = ontologyRepository.getPropertyIRIByIntent("media.yAxisFlipped", null);
         if (yAxisFlippedPropertyIri != null) {
             this.yAxisFlippedProperty = new BooleanVisalloProperty(yAxisFlippedPropertyIri);
         }
 
-        String clockwiseRotationPropertyIri = ontologyRepository.getPropertyIRIByIntent("media.clockwiseRotation");
+        String clockwiseRotationPropertyIri = ontologyRepository.getPropertyIRIByIntent("media.clockwiseRotation", null);
         if (clockwiseRotationPropertyIri != null) {
             this.clockwiseRotationProperty = new IntegerVisalloProperty(clockwiseRotationPropertyIri);
         }

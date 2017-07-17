@@ -40,7 +40,7 @@ public class OntologyPropertySave extends OntologyBase {
             @Optional(name = "conceptIris[]") String[] conceptIris,
             @Optional(name = "relationshipIris[]") String[] relationshipIris,
             @ActiveWorkspaceId String workspaceId,
-            User user) throws Exception {
+            User user) {
 
         List<Concept> concepts = ontologyIrisToConcepts(conceptIris, workspaceId);
         List<Relationship> relationships = ontologyIrisToRelationships(relationshipIris, workspaceId);

@@ -40,7 +40,7 @@ public class OntologyRelationshipSave extends OntologyBase {
             @Optional(name = "iri", allowEmpty = false) String relationshipIri,
             @ActiveWorkspaceId String workspaceId,
             Authorizations authorizations,
-            User user) throws Exception {
+            User user) {
 
 
         List<Concept> domainConcepts = ontologyIrisToConcepts(sourceIris, workspaceId);

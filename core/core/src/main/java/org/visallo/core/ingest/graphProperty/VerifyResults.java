@@ -11,7 +11,7 @@ public class VerifyResults {
     private List<Failure> failures = new ArrayList<>();
 
     public boolean verifyRequiredPropertyIntent(OntologyRepository ontologyRepository, String intentName) {
-        String propertyIri = ontologyRepository.getPropertyIRIByIntent(intentName);
+        String propertyIri = ontologyRepository.getPropertyIRIByIntent(intentName, null);
         if (propertyIri == null || propertyIri.length() == 0) {
             addFailure(new RequiredPropertyIntentFailure(intentName));
             return false;

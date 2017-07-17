@@ -60,11 +60,11 @@ public class RdfXmlImportHelper {
         this.workspaceRepository = workspaceRepository;
         this.visibilityTranslator = visibilityTranslator;
 
-        hasEntityIri = ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity");
+        hasEntityIri = ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity", null);
 
         // rdfConceptTypeIri is not required because the
         // concept type on the vertex could have been set somewhere else
-        rdfConceptTypeIri = ontologyRepository.getConceptIRIByIntent("rdf");
+        rdfConceptTypeIri = ontologyRepository.getConceptIRIByIntent("rdf", null);
     }
 
     public void importRdfXml(

@@ -6,7 +6,6 @@ import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.ontology.Concept;
 import org.visallo.core.model.ontology.OntologyRepository;
 import org.visallo.core.model.ontology.OntologyRepositoryTestBase;
-import org.visallo.core.model.user.AuthorizationRepository;
 import org.visallo.core.model.user.PrivilegeRepository;
 import org.visallo.core.user.SystemUser;
 

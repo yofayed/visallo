@@ -2,10 +2,7 @@ package org.visallo.core.model.longRunningProcess;
 
 import com.google.inject.Inject;
 import org.json.JSONObject;
-import org.vertexium.Authorizations;
-import org.vertexium.Graph;
-import org.vertexium.Path;
-import org.vertexium.ProgressCallback;
+import org.vertexium.*;
 import org.visallo.core.model.Description;
 import org.visallo.core.model.Name;
 import org.visallo.core.util.ClientApiConverter;
@@ -49,7 +46,10 @@ public class FindPathLongRunningProcessWorker extends LongRunningProcessWorker {
                 longRunningProcessRepository.reportProgress(longRunningProcessQueueItem, progressPercent, step.formatMessage(edgeIndex, vertexCount));
             }
         };
-        Iterable<Path> paths = graph.findPaths(findPath.getOutVertexId(), findPath.getInVertexId(), labels, hops, progressCallback, authorizations);
+        FindPathOptions findPathOptions = new FindPathOptions(findPath.getOutVertexId(), findPath.getInVertexId(), hops);
+        findPathOptions.setLabels(labels);
+        findPathOptions.setProgressCallback(progressCallback);
+        Iterable<Path> paths = graph.findPaths(findPathOptions, authorizations);
         for (Path path : paths) {
             List<String> clientApiVertexPath = new ArrayList<>();
             for (String s : path) {

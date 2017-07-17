@@ -167,43 +167,43 @@ public class FileImport {
 
     @Deprecated
     public Vertex importFile(
-        File f,
-        boolean queueDuplicates,
-        String conceptId,
-        ClientApiImportProperty[] properties,
-        String visibilitySource,
-        Workspace workspace,
-        boolean addToWorkspace,
-        boolean findExistingByFileHash,
-        Priority priority,
-        User user,
-        Authorizations authorizations
+            File f,
+            boolean queueDuplicates,
+            String conceptId,
+            ClientApiImportProperty[] properties,
+            String visibilitySource,
+            Workspace workspace,
+            boolean addToWorkspace,
+            boolean findExistingByFileHash,
+            Priority priority,
+            User user,
+            Authorizations authorizations
     ) throws Exception {
         return importFile(
-            f,
-            queueDuplicates,
-            conceptId,
-            properties,
-            visibilitySource,
-            workspace,
-            findExistingByFileHash,
-            priority,
-            user,
-            authorizations
+                f,
+                queueDuplicates,
+                conceptId,
+                properties,
+                visibilitySource,
+                workspace,
+                findExistingByFileHash,
+                priority,
+                user,
+                authorizations
         );
     }
 
     public Vertex importFile(
-        File f,
-        boolean queueDuplicates,
-        String conceptId,
-        ClientApiImportProperty[] properties,
-        String visibilitySource,
-        Workspace workspace,
-        boolean findExistingByFileHash,
-        Priority priority,
-        User user,
-        Authorizations authorizations
+            File f,
+            boolean queueDuplicates,
+            String conceptId,
+            ClientApiImportProperty[] properties,
+            String visibilitySource,
+            Workspace workspace,
+            boolean findExistingByFileHash,
+            Priority priority,
+            User user,
+            Authorizations authorizations
     ) throws Exception {
         Vertex vertex;
         ensureInitialized();
@@ -360,14 +360,12 @@ public class FileImport {
 
     private void addProperties(ClientApiImportProperty[] properties, List<VisalloPropertyUpdate> changedProperties, VertexBuilder vertexBuilder, VisibilityJson visibilityJson, Workspace workspace, User user) throws ParseException {
         for (ClientApiImportProperty property : properties) {
-            OntologyProperty ontologyProperty = ontologyRepository.getPropertyByIRI(property.getName());
+            OntologyProperty ontologyProperty = ontologyRepository.getPropertyByIRI(property.getName(), workspace.getWorkspaceId());
             if (ontologyProperty == null) {
-                ontologyProperty = ontologyRepository.getRequiredPropertyByIntent(property.getName());
+                ontologyProperty = ontologyRepository.getRequiredPropertyByIntent(property.getName(), workspace.getWorkspaceId());
             }
             Object value = ontologyProperty.convertString(property.getValue());
             VisalloProperty prop = ontologyProperty.getVisalloProperty();
-            VisibilityJson propertyVisibilityJson = VisibilityJson.updateVisibilitySourceAndAddWorkspaceId(null, property.getVisibilitySource(), workspace == null ? null : workspace.getWorkspaceId());
-            VisalloVisibility propertyVisibility = visibilityTranslator.toVisibility(propertyVisibilityJson);
             PropertyMetadata propMetadata = new PropertyMetadata(user, visibilityJson, visibilityTranslator.getDefaultVisibility());
             for (Map.Entry<String, Object> metadataEntry : property.getMetadata().entrySet()) {
                 propMetadata.add(metadataEntry.getKey(), metadataEntry.getValue(), visibilityTranslator.getDefaultVisibility());

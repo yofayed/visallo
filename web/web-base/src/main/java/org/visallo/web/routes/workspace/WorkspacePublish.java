@@ -12,7 +12,6 @@ import org.visallo.core.util.VisalloLogger;
 import org.visallo.core.util.VisalloLoggerFactory;
 import org.visallo.web.clientapi.model.ClientApiPublishItem;
 import org.visallo.web.clientapi.model.ClientApiWorkspacePublishResponse;
-import org.visallo.web.clientapi.util.ObjectMapperFactory;
 import org.visallo.web.parameterProviders.ActiveWorkspaceId;
 
 public class WorkspacePublish implements ParameterizedHandler {

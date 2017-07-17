@@ -15,34 +15,34 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class OntologyBase implements ParameterizedHandler {
+abstract class OntologyBase implements ParameterizedHandler {
     private final OntologyRepository ontologyRepository;
 
-    public OntologyBase(OntologyRepository ontologyRepository) {
+    OntologyBase(OntologyRepository ontologyRepository) {
         this.ontologyRepository = ontologyRepository;
     }
 
-    protected List<Concept> ontologyIrisToConcepts(String[] iris, String workspaceId) {
+    List<Concept> ontologyIrisToConcepts(String[] iris, String workspaceId) {
         return getOntologyObjects(iris, ontologyRepository::getConceptsByIRI, Concept::getIRI, "concept", workspaceId);
     }
 
-    protected List<Relationship> ontologyIrisToRelationships(String[] iris, String workspaceId) {
+    List<Relationship> ontologyIrisToRelationships(String[] iris, String workspaceId) {
         return getOntologyObjects(iris, ontologyRepository::getRelationshipsByIRI, Relationship::getIRI, "relationship", workspaceId);
     }
 
-    protected List<OntologyProperty> ontologyIrisToProperties(String[] iris, String workspaceId) {
+    List<OntologyProperty> ontologyIrisToProperties(String[] iris, String workspaceId) {
         return getOntologyObjects(iris, ontologyRepository::getPropertiesByIRI, OntologyProperty::getId, "property", workspaceId);
     }
 
-    protected List<Concept> ontologyIdsToConcepts(String[] ids, String workspaceId) {
+    List<Concept> ontologyIdsToConcepts(String[] ids, String workspaceId) {
         return getOntologyObjects(ids, ontologyRepository::getConcepts, Concept::getIRI, "concept", workspaceId);
     }
 
-    protected List<Relationship> ontologyIdsToRelationships(String[] ids, String workspaceId) {
+    List<Relationship> ontologyIdsToRelationships(String[] ids, String workspaceId) {
         return getOntologyObjects(ids, ontologyRepository::getRelationships, Relationship::getIRI, "relationship", workspaceId);
     }
 
-    protected List<OntologyProperty> ontologyIdsToProperties(String[] ids, String workspaceId) {
+    List<OntologyProperty> ontologyIdsToProperties(String[] ids, String workspaceId) {
         return getOntologyObjects(ids, ontologyRepository::getProperties, OntologyProperty::getId, "property", workspaceId);
     }
 

@@ -25,7 +25,7 @@ public class OntologyGet extends OntologyBase {
             @Optional(name = "conceptIds[]") String[] conceptIds,
             @Optional(name = "relationshipIds[]") String[] relationshipIds,
             @ActiveWorkspaceId String workspaceId
-    ) throws Exception {
+    ) {
         ClientApiOntology clientApiOntology = new ClientApiOntology();
 
         List<Concept> concepts = ontologyIdsToConcepts(conceptIds, workspaceId);

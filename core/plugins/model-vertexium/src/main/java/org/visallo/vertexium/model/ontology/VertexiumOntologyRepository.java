@@ -647,7 +647,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     }
 
     protected void findOrAddEdge(Vertex fromVertex, final Vertex toVertex, String edgeLabel, User user, String workspaceId) {
-        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, null, getAuthorizations(workspaceId))) {
+        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, user, getAuthorizations(workspaceId))) {
             ctx.setPushOnQueue(false);
             findOrAddEdge(ctx, fromVertex, toVertex, edgeLabel);
         } catch (Exception e) {

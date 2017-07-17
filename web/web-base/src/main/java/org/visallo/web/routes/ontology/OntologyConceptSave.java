@@ -35,7 +35,7 @@ public class OntologyConceptSave implements ParameterizedHandler {
             @Optional(name = "color", allowEmpty = false) String color,
             @ActiveWorkspaceId String workspaceId,
             User user
-    ) throws Exception {
+    ) {
         Concept parent;
         if (parentConcept == null) {
             parent = ontologyRepository.getEntityConcept(workspaceId);

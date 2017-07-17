@@ -62,11 +62,11 @@ public abstract class GraphPropertyWorkerTestSetupBase {
         configuration.put("ontology.intent.concept.phoneNumber", "http://visallo.org/test#phoneNumber");
         configuration.put("ontology.intent.relationship.artifactHasEntity", "http://visallo.org/test#artifactHasEntity");
 
-        when(ontologyRepository.getRequiredConceptIRIByIntent("location")).thenReturn("http://visallo.org/test#location");
-        when(ontologyRepository.getRequiredConceptIRIByIntent("organization")).thenReturn("http://visallo.org/test#organization");
-        when(ontologyRepository.getRequiredConceptIRIByIntent("person")).thenReturn("http://visallo.org/test#person");
-        when(ontologyRepository.getRequiredConceptIRIByIntent("phoneNumber")).thenReturn("http://visallo.org/test#phoneNumber");
-        when(ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity")).thenReturn("http://visallo.org/test#artifactHasEntity");
+        when(ontologyRepository.getRequiredConceptIRIByIntent("location", null)).thenReturn("http://visallo.org/test#location");
+        when(ontologyRepository.getRequiredConceptIRIByIntent("organization", null)).thenReturn("http://visallo.org/test#organization");
+        when(ontologyRepository.getRequiredConceptIRIByIntent("person", null)).thenReturn("http://visallo.org/test#person");
+        when(ontologyRepository.getRequiredConceptIRIByIntent("phoneNumber", null)).thenReturn("http://visallo.org/test#phoneNumber");
+        when(ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity", null)).thenReturn("http://visallo.org/test#artifactHasEntity");
 
         when(user.getUserId()).thenReturn("USER123");
 
