@@ -276,6 +276,7 @@ function(jQuery,
                     require([
                         'util/requirejs/promise!util/service/propertiesPromise',
                         'util/formatters',
+                        'util/jquery/bootstrapTypeaheadScrollFix',
                         'bootstrap',
                         'easing',
                         'jquery-scrollstop',
@@ -283,9 +284,11 @@ function(jQuery,
                         'bootstrap-timepicker',
                         'util/visibility/util',
                         'util/handlebars/after_auth_helpers'
-                    ], function(config, F) {
+                    ], function(config, F, bootstrapTypeaheadScrollFix) {
 
                         configureDateFormats(config, F)
+
+                        bootstrapTypeaheadScrollFix();
 
                         if (popoutDetails) {
                             visalloData.isFullscreen = true;
