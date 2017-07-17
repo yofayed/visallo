@@ -99,6 +99,19 @@ public class OntologyConceptSaveTest extends OntologyRouteTestBase {
     }
 
     @Test
+    public void testSaveNewConceptWithGeneratedIriAndNoParent() throws Exception {
+        when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
+
+        String displayName = "New Concept";
+        String glyph = "glyph.png";
+        String color = "red";
+        ClientApiOntology.Concept response = route.handle(displayName, null, null, glyph, color, WORKSPACE_ID, user);
+
+        String originalIri = response.getTitle();
+        assertTrue(originalIri.matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_concept#[a-z0-9]+"));
+    }
+
+    @Test
     public void testSaveNewConceptWithGeneratedIri() throws Exception {
         when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
 

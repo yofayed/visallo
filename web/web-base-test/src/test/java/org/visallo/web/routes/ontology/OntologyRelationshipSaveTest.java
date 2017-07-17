@@ -140,6 +140,19 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
     }
 
     @Test
+    public void testSaveNewRelationshipWithGeneratedIriAndNoParent() throws Exception {
+        when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
+
+        String displayName = "New Relationship";
+        String[] sourceConcepts = {PUBLIC_CONCEPT_IRI};
+        String[] targetConcepts = {PUBLIC_CONCEPT_IRI_B};
+        ClientApiOntology.Relationship response = route.handle(displayName, sourceConcepts, targetConcepts, null, null, WORKSPACE_ID, workspaceAuthorizations, user);
+
+        String originalIri = response.getTitle();
+        assertTrue(originalIri.matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_relationship#[a-z0-9]+"));
+    }
+
+    @Test
     public void testSaveNewRelationshipWithGeneratedIri() throws Exception {
         when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
 

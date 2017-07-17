@@ -47,7 +47,11 @@ public class OntologyRelationshipSave extends OntologyBase {
         List<Concept> rangeConcepts = ontologyIrisToConcepts(targetIris, workspaceId);
 
         if (relationshipIri == null) {
-            relationshipIri = ontologyRepository.generateDynamicIri(Relationship.class, displayName, workspaceId, parentIri);
+            if (parentIri != null) {
+                relationshipIri = ontologyRepository.generateDynamicIri(Relationship.class, displayName, workspaceId, parentIri);
+            } else {
+                relationshipIri = ontologyRepository.generateDynamicIri(Relationship.class, displayName, workspaceId);
+            }
         }
 
         Relationship parent = null;

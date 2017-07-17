@@ -39,6 +39,7 @@ public class OntologyConceptSave implements ParameterizedHandler {
         Concept parent;
         if (parentConcept == null) {
             parent = ontologyRepository.getEntityConcept(workspaceId);
+            parentConcept = parent.getIRI();
         } else {
             parent = ontologyRepository.getConceptByIRI(parentConcept, workspaceId);
             if (parent == null) {
