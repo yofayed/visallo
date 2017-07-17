@@ -243,6 +243,8 @@ define([
                 visibility.hide();
                 justification.hide();
                 return;
+            } else {
+                config.show();
             }
 
             this.currentProperty = property;
