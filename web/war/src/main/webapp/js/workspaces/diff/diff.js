@@ -173,16 +173,17 @@ define([
                                 if (concept) {
                                     outputItem.conceptImage = concept.glyphIconHref;
                                     outputItem.selectedConceptImage = concept.glyphIconSelectedHref || concept.glyphIconHref;
-                                    outputItem.conceptSandboxStatus = concept.sandboxStatus;
-                                    outputItem.conceptDisplayName = concept.displayName;
+                                    if (concept.sandboxStatus !== 'PUBLIC') {
+                                        outputItem.requiresOntologyPublish = true;
+                                        outputItem.concept = concept;
+                                    }
                                 }
                             }
                         } else {
                             outputItem.edgeId = elementId;
                             outputItem.edge = edgesById[elementId];
                             if (outputItem.edge) {
-                                outputItem.edgeLabel = self.ontologyRelationships.byTitle[outputItem.edge.label]
-                                .displayName;
+                                outputItem.edgeLabel = self.ontologyRelationships.byTitle[outputItem.edge.label].displayName;
                             } else {
                                 outputItem.edge = {
                                     id: elementId,
@@ -207,6 +208,7 @@ define([
                                     diff.id = elementId;
                                     diff.publish = outputItem.publish;
                                     diff.undo = outputItem.undo;
+                                    diff.requiresOntologyPublish = outputItem.requiresOntologyPublish;
                                     outputItem.action = diff.deleted ? actionTypes.DELETE : actionTypes.CREATE;
                                     self.diffsForElementId[elementId] = diff;
                                     self.diffsById[elementId] = diff;
@@ -226,6 +228,8 @@ define([
                                             addDiffDependency(diff.elementId, diff);
                                             diff.className = F.className.to(diff.id);
                                         }
+
+                                        diff.requiresOntologyPublish = outputItem.requiresOntologyPublish;
 
                                         if (compoundProperty &&
                                             F.vertex.hasProperty(outputItem.vertex, compoundProperty)) {
@@ -351,9 +355,13 @@ define([
         };
 
         this.onSelectAll = function(action) {
+            const canPublishOntology = Boolean(visalloData.currentUser.privilegesHelper.ONTOLOGY_PUBLISH);
+
             var self = this;
             this.diffs
-                .filter(function(diff) { return diff.action.type !== 'update' })
+                .filter(function(diff) {
+                    return allowSelect(diff) && diff.action.type !== 'update'
+                })
                 .forEach(function(diff) {
                     selectAction(diff, action);
                     diff.properties.forEach(function(property) {
@@ -361,18 +369,29 @@ define([
                     });
                 });
             Object.keys(this.diffsById).forEach(function(id) {
-                selectAction(self.diffsById[id], action);
+                if (allowSelect(self.diffsById[id])) {
+                    selectAction(self.diffsById[id], action);
+                }
             });
             this.render();
 
+            function allowSelect(diff) {
+                return !diff.requiresOntologyPublish || canPublishOntology;
+            }
             function selectAction(diff, action) {
                 diff.publish = false;
                 diff.undo = false;
                 diff[action] = true;
             }
         };
+
         this.onSelectAllPublish = _.partial(this.onSelectAll, 'publish');
         this.onSelectAllUndo = _.partial(this.onSelectAll, 'undo');
+
+        this.handleSchemaChanges = function(toPublish) {
+            console.log(toPublish)
+            return false;
+        };
 
         this.onApplyAll = function(type, publishOntology) {
             var self = this,
@@ -381,10 +400,14 @@ define([
             if (publishing && !publishOntology) {
                 var ontologyToPublish = this.buildOntologyToPublish();
                 if (_.some(ontologyToPublish, _.size)) {
-                    var shouldPublishOntology = true; console.log('Display the warning prompt with info here.');
-                    if (shouldPublishOntology) {
-                        this.onApplyAll(type, true);
-                    }
+                    Promise.resolve(this.handleSchemaChanges(ontologyToPublish))
+                        .then(shouldPublishOntology => {
+                            if (shouldPublishOntology) {
+                                this.onApplyAll(type, true);
+                            //} else {
+
+                            }
+                        })
                     return;
                 }
             }
@@ -450,12 +473,19 @@ define([
         this.onApplyUndoClick = _.partial(this.onApplyAll, 'undo', false);
 
         this.buildOntologyToPublish = function() {
-            var diffsByPrivateConcept = _.chain(this.diffs)
-             .filter(function(diff) { return diff.publish && diff.conceptSandboxStatus !== 'PUBLIC'; })
-             .groupBy(_.property('conceptDisplayName'))
-             .value();
+            const concepts = [];
+            const relationships = [];
+            const properties = [];
+            this.diffs.forEach(diff => {
+                if (diff.publish) {
+                    if (diff.conceptSandboxStatus && diff.conceptSandboxStatus !== 'PUBLIC') {
+                        concepts.push(diff)
+                    }
 
-             return { concepts: diffsByPrivateConcept, relationships: { /* TODO */ }, properties: { /* TODO */ }};
+                }
+            })
+
+            return { concepts, relationships, properties };
         };
 
         this.buildDiffsToSend = function(applyType) {
@@ -598,8 +628,13 @@ define([
             var self = this,
                 diff = this.diffsById[diffId],
                 deps = this.diffDependencies[diffId] || [],
+                canPublishOntology = Boolean(visalloData.currentUser.privilegesHelper.ONTOLOGY_PUBLISH),
                 vertexDiff;
             state = state === undefined ? !diff.undo : state;
+
+            if (diff.requiresOntologyPublish && !canPublishOntology) {
+                return;
+            }
 
             switch (diff.type) {
                 case 'VertexDiffItem':
@@ -688,8 +723,13 @@ define([
         this.onMarkPublish = function(diffId, state) {
             var self = this,
                 diff = this.diffsById[diffId],
+                canPublishOntology = Boolean(visalloData.currentUser.privilegesHelper.ONTOLOGY_PUBLISH),
                 vertexDiff;
             state = state === undefined ? !diff.publish : state;
+
+            if (diff.requiresOntologyPublish && !canPublishOntology) {
+                return;
+            }
 
             switch (diff.type) {
 
