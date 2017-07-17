@@ -229,6 +229,54 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
     }
 
     @Override
+    public void addPropertyToConcepts(OntologyProperty property, List<Concept> concepts, User user, String workspaceId) {
+        InMemoryOntologyProperty inMemoryProperty = (InMemoryOntologyProperty) property;
+        List<Concept> missingConcepts = concepts.stream()
+                .filter(c -> !inMemoryProperty.getConcepts().contains(c.getIRI()))
+                .collect(Collectors.toList());
+
+        if (property.getSandboxStatus() == SandboxStatus.PRIVATE) {
+            inMemoryProperty.getConcepts().addAll(missingConcepts.stream().map(Concept::getIRI).collect(Collectors.toList()));
+        }
+        for (Concept concept : missingConcepts) {
+            if (concept.getSandboxStatus() == SandboxStatus.PRIVATE) {
+                concept.getProperties().add(property);
+            } else if (property.getSandboxStatus() == SandboxStatus.PUBLIC) {
+                InMemoryConcept inMemoryConcept = ((InMemoryConcept) concept).shallowCopy();
+                inMemoryConcept.getProperties().add(property);
+                inMemoryConcept.setWorkspaceId(workspaceId);
+
+                Map<String, InMemoryConcept> workspaceCache = conceptsCache.compute(workspaceId, (k, v) -> v == null ? new HashMap<>() : v);
+                workspaceCache.put(inMemoryConcept.getIRI(), inMemoryConcept);
+            }
+        }
+    }
+
+    @Override
+    public void addPropertyToRelationships(OntologyProperty property, List<Relationship> relationships, User user, String workspaceId) {
+        InMemoryOntologyProperty inMemoryProperty = (InMemoryOntologyProperty) property;
+        List<Relationship> missingRelationships = relationships.stream()
+                .filter(r -> !inMemoryProperty.getRelationships().contains(r.getIRI()))
+                .collect(Collectors.toList());
+
+        if (property.getSandboxStatus() == SandboxStatus.PRIVATE) {
+            inMemoryProperty.getRelationships().addAll(missingRelationships.stream().map(Relationship::getIRI).collect(Collectors.toList()));
+        }
+        for (Relationship relationship : missingRelationships) {
+            if (relationship.getSandboxStatus() == SandboxStatus.PRIVATE) {
+                relationship.getProperties().add(property);
+            } else if (property.getSandboxStatus() == SandboxStatus.PUBLIC) {
+                InMemoryRelationship inMemoryRelationship = ((InMemoryRelationship) relationship).shallowCopy();
+                inMemoryRelationship.getProperties().add(property);
+                inMemoryRelationship.setWorkspaceId(workspaceId);
+
+                Map<String, InMemoryRelationship> workspaceCache = relationshipsCache.compute(workspaceId, (k, v) -> v == null ? new HashMap<>() : v);
+                workspaceCache.put(inMemoryRelationship.getIRI(), inMemoryRelationship);
+            }
+        }
+    }
+
+    @Override
     protected OntologyProperty addPropertyTo(
             List<Concept> concepts,
             List<Relationship> relationships,

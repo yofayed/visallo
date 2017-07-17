@@ -10,6 +10,7 @@ import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.ontology.Concept;
 import org.visallo.core.model.ontology.OntologyProperty;
 import org.visallo.core.model.ontology.OntologyRepositoryBase;
+import org.visallo.core.model.ontology.Relationship;
 import org.visallo.web.clientapi.model.ClientApiOntology;
 import org.visallo.web.clientapi.model.Privilege;
 import org.visallo.web.clientapi.model.PropertyType;
@@ -60,8 +61,13 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         assertEquals("New Property", property.getDisplayName());
         assertEquals(SandboxStatus.PRIVATE, property.getSandboxStatus());
 
+        // make sure it was properly added to the concept
         Concept publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID);
         assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+
+        // make sure it was properly added to the relationship
+        Relationship publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, WORKSPACE_ID);
+        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
 
         // ensure it's not public
         assertNull(ontologyRepository.getPropertyByIRI(propertyIRI, null));
@@ -136,6 +142,34 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         } catch (VisalloException ve) {
             assertEquals("Unknown property type: unknown-type", ve.getMessage());
         }
+    }
+
+    @Test
+    public void testAddAdditionalConceptAndRelationshipToNewProperty() throws Exception {
+        when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
+
+        String propertyIRI = "junit-property";
+        String displayName = "New Property";
+        String dataType = "string";
+        route.handle(displayName, dataType, propertyIRI, new String[]{PUBLIC_CONCEPT_IRI}, new String[]{PUBLIC_RELATIONSHIP_IRI}, WORKSPACE_ID, user);
+
+        Concept publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID);
+        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+
+        Relationship publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, WORKSPACE_ID);
+        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+
+        route.handle(displayName, dataType, propertyIRI, new String[]{PUBLIC_CONCEPT_IRI_B}, new String[]{PUBLIC_RELATIONSHIP_IRI_B}, WORKSPACE_ID, user);
+
+        publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID);
+        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI_B, WORKSPACE_ID);
+        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+
+        publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, WORKSPACE_ID);
+        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI_B, WORKSPACE_ID);
+        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
     }
 
     @Test

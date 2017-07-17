@@ -181,6 +181,10 @@ public class InMemoryRelationship extends Relationship {
         workspaceId = null;
     }
 
+    void setWorkspaceId(String workspaceId) {
+        this.workspaceId = workspaceId;
+    }
+
     @Override
     public SandboxStatus getSandboxStatus() {
         return workspaceId == null ? SandboxStatus.PUBLIC : SandboxStatus.PRIVATE;

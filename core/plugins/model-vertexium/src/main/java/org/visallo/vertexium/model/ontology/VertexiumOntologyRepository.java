@@ -674,6 +674,34 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     }
 
     @Override
+    public void addPropertyToConcepts(OntologyProperty property, List<Concept> concepts, User user, String workspaceId) {
+        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, null, getAuthorizations(workspaceId))) {
+            ctx.setPushOnQueue(false);
+            Vertex propertyVertex = ((VertexiumOntologyProperty) property).getVertex();
+            for (Concept concept : concepts) {
+                checkNotNull(concept, "concepts cannot have null values");
+                findOrAddEdge(ctx, ((VertexiumConcept) concept).getVertex(), propertyVertex, LabelName.HAS_PROPERTY.toString());
+            }
+        } catch (Exception e) {
+            throw new VisalloException("Could not findOrAddEdge", e);
+        }
+    }
+
+    @Override
+    public void addPropertyToRelationships(OntologyProperty property, List<Relationship> relationships, User user, String workspaceId) {
+        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, null, getAuthorizations(workspaceId))) {
+            ctx.setPushOnQueue(false);
+            Vertex propertyVertex = ((VertexiumOntologyProperty) property).getVertex();
+            for (Relationship relationship : relationships) {
+                checkNotNull(relationships, "relationships cannot have null values");
+                findOrAddEdge(ctx, ((VertexiumRelationship) relationship).getVertex(), propertyVertex, LabelName.HAS_PROPERTY.toString());
+            }
+        } catch (Exception e) {
+            throw new VisalloException("Could not findOrAddEdge", e);
+        }
+    }
+
+    @Override
     protected OntologyProperty addPropertyTo(
             List<Concept> concepts,
             List<Relationship> relationships,
@@ -1097,13 +1125,13 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
 
     @Override
     protected void deleteChangeableProperties(OntologyProperty property, Authorizations authorizations) {
-        Vertex vertex = ((VertexiumOntologyProperty)property).getVertex();
+        Vertex vertex = ((VertexiumOntologyProperty) property).getVertex();
         deleteChangeableProperties(vertex, authorizations);
     }
 
     @Override
     protected void deleteChangeableProperties(OntologyElement element, Authorizations authorizations) {
-        Vertex vertex = element instanceof VertexiumConcept ? ((VertexiumConcept) element).getVertex() :((VertexiumRelationship) element).getVertex();
+        Vertex vertex = element instanceof VertexiumConcept ? ((VertexiumConcept) element).getVertex() : ((VertexiumRelationship) element).getVertex();
         deleteChangeableProperties(vertex, authorizations);
     }
 
@@ -1188,7 +1216,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
 
     @Override
     public void internalPublishConcept(Concept concept, User user, String workspaceId) {
-        assert(concept instanceof VertexiumConcept);
+        assert (concept instanceof VertexiumConcept);
         if (concept.getSandboxStatus() != SandboxStatus.PUBLIC) {
             Vertex vertex = ((VertexiumConcept) concept).getVertex();
             VisibilityJson visibilityJson = VisalloProperties.VISIBILITY_JSON.getPropertyValue(vertex);
@@ -1208,7 +1236,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
 
     @Override
     public void internalPublishRelationship(Relationship relationship, User user, String workspaceId) {
-        assert(relationship instanceof VertexiumRelationship);
+        assert (relationship instanceof VertexiumRelationship);
         if (relationship.getSandboxStatus() != SandboxStatus.PUBLIC) {
             Vertex vertex = ((VertexiumRelationship) relationship).getVertex();
             VisibilityJson visibilityJson = VisalloProperties.VISIBILITY_JSON.getPropertyValue(vertex);
@@ -1228,7 +1256,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
 
     @Override
     public void internalPublishProperty(OntologyProperty property, User user, String workspaceId) {
-        assert(property instanceof VertexiumOntologyProperty);
+        assert (property instanceof VertexiumOntologyProperty);
         if (property.getSandboxStatus() != SandboxStatus.PUBLIC) {
             Vertex vertex = ((VertexiumOntologyProperty) property).getVertex();
             VisibilityJson visibilityJson = VisalloProperties.VISIBILITY_JSON.getPropertyValue(vertex);

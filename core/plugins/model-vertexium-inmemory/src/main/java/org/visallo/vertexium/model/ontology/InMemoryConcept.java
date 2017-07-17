@@ -218,7 +218,7 @@ public class InMemoryConcept extends Concept {
             } else {
                 this.deleteable = Boolean.parseBoolean((String) value);
             }
-        } else if (value != null){
+        } else if (value != null) {
             metadata.put(name, value.toString());
         }
     }
@@ -263,7 +263,7 @@ public class InMemoryConcept extends Concept {
             this.deleteable = true;
         } else if (OntologyProperties.INTENT.getPropertyName().equals(name)) {
             intents.clear();
-        } else if (metadata.containsKey(name)){
+        } else if (metadata.containsKey(name)) {
             metadata.remove(name);
         }
     }
@@ -303,6 +303,10 @@ public class InMemoryConcept extends Concept {
 
     public void removeWorkspaceId() {
         workspaceId = null;
+    }
+
+    void setWorkspaceId(String workspaceId) {
+        this.workspaceId = workspaceId;
     }
 
     @Override

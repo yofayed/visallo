@@ -51,18 +51,24 @@ public class OntologyPropertySave extends OntologyBase {
             propertyIri = ontologyRepository.generateDynamicIri(OntologyProperty.class, displayName, workspaceId, dataType);
         }
 
-        OntologyPropertyDefinition def = new OntologyPropertyDefinition(concepts, relationships, propertyIri, displayName, type);
-        def.setAddable(true);
-        def.setDeleteable(true);
-        def.setSearchable(true);
-        def.setSortable(true);
-        def.setUserVisible(true);
-        def.setUpdateable(true);
-        if (type.equals(PropertyType.STRING)) {
-            def.setTextIndexHints(TextIndexHint.ALL);
-        }
+        OntologyProperty property = ontologyRepository.getPropertyByIRI(propertyIri, workspaceId);
+        if (property == null) {
+            OntologyPropertyDefinition def = new OntologyPropertyDefinition(concepts, relationships, propertyIri, displayName, type);
+            def.setAddable(true);
+            def.setDeleteable(true);
+            def.setSearchable(true);
+            def.setSortable(true);
+            def.setUserVisible(true);
+            def.setUpdateable(true);
+            if (type.equals(PropertyType.STRING)) {
+                def.setTextIndexHints(TextIndexHint.ALL);
+            }
 
-        OntologyProperty property = ontologyRepository.getOrCreateProperty(def, user, workspaceId);
+            property = ontologyRepository.getOrCreateProperty(def, user, workspaceId);
+        } else {
+            ontologyRepository.addPropertyToConcepts(property, concepts, user, workspaceId);
+            ontologyRepository.addPropertyToRelationships(property, relationships, user, workspaceId);
+        }
 
         ontologyRepository.clearCache(workspaceId);
 
