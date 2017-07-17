@@ -3,7 +3,6 @@ package org.visallo.vertexium.model.ontology;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.vertexium.Authorizations;
-import org.vertexium.Property;
 import org.vertexium.Vertex;
 import org.vertexium.mutation.ElementMutation;
 import org.vertexium.property.StreamingPropertyValue;
@@ -19,32 +18,14 @@ import org.visallo.core.util.SandboxStatusUtil;
 import org.visallo.web.clientapi.model.SandboxStatus;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class VertexiumConcept extends Concept {
-    private static Set<String> PROPERTIES_NOT_IN_METADATA = new HashSet<>();
     private final Vertex vertex;
     private final String workspaceId;
-
-    static {
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.DISPLAY_NAME.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.DISPLAY_TYPE.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.GLYPH_ICON.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.GLYPH_ICON_SELECTED.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.ONTOLOGY_TITLE.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(VisalloProperties.CONCEPT_TYPE.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.COLOR.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.SUBTITLE_FORMULA.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.TITLE_FORMULA.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.TIME_FORMULA.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.ADD_RELATED_CONCEPT_WHITE_LIST.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.SEARCHABLE.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.ADDABLE.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.USER_VISIBLE.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.ONTOLOGY_FILE.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.UPDATEABLE.getPropertyName());
-        PROPERTIES_NOT_IN_METADATA.add(OntologyProperties.DELETEABLE.getPropertyName());
-    }
 
     public VertexiumConcept(Vertex vertex, String workspaceId) {
         this(vertex, null, null, workspaceId);
@@ -154,11 +135,13 @@ public class VertexiumConcept extends Concept {
     @Override
     public Map<String, String> getMetadata() {
         Map<String, String> metadata = new HashMap<>();
-        for (Property p : vertex.getProperties()) {
-            if (PROPERTIES_NOT_IN_METADATA.contains(p.getName())) {
-                continue;
+        if (getSandboxStatus() == SandboxStatus.PRIVATE) {
+            if (VisalloProperties.MODIFIED_BY.hasProperty(vertex)) {
+                metadata.put(VisalloProperties.MODIFIED_BY.getPropertyName(), VisalloProperties.MODIFIED_BY.getPropertyValue(vertex));
             }
-            metadata.put(p.getName(), p.getValue().toString());
+            if (VisalloProperties.MODIFIED_DATE.hasProperty(vertex)) {
+                metadata.put(VisalloProperties.MODIFIED_DATE.getPropertyName(), VisalloProperties.MODIFIED_DATE.getPropertyValue(vertex).toString());
+            }
         }
         return metadata;
     }
@@ -214,7 +197,7 @@ public class VertexiumConcept extends Concept {
             throw new VisalloResourceNotFoundException("Could not retrieve glyph icon selected");
         }
     }
-    
+
     @Override
     public String getGlyphIconFilePath() {
         return OntologyProperties.GLYPH_ICON_FILE_NAME.getPropertyValue(getVertex());

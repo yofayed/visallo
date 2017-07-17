@@ -21,6 +21,7 @@ public class InMemoryRelationship extends Relationship {
     private String subtitleFormula;
     private String timeFormula;
     private String workspaceId;
+    private Map<String, String> metadata = new HashMap<>();
 
     protected InMemoryRelationship(
             String parentIRI,
@@ -145,6 +146,8 @@ public class InMemoryRelationship extends Relationship {
             this.deleteable = (Boolean) value;
         } else if (OntologyProperties.UPDATEABLE.getPropertyName().equals(name)) {
             this.updateable = (Boolean) value;
+        } else if (value != null) {
+            metadata.put(name, value.toString());
         }
     }
 
@@ -166,7 +169,14 @@ public class InMemoryRelationship extends Relationship {
             this.updateable = false;
         } else if (OntologyProperties.INTENT.getPropertyName().equals(name)) {
             intents.clear();
+        } else {
+            metadata.remove(name);
         }
+    }
+
+    @Override
+    public Map<String, String> getMetadata() {
+        return metadata;
     }
 
     public void addInverseOf(Relationship inverseOfRelationship) {

@@ -8,12 +8,14 @@ import org.vertexium.util.IterableUtils;
 import org.visallo.core.model.ontology.OntologyProperties;
 import org.visallo.core.model.ontology.OntologyProperty;
 import org.visallo.core.model.ontology.OntologyRepository;
+import org.visallo.core.model.properties.VisalloProperties;
 import org.visallo.core.util.JSONUtil;
 import org.visallo.core.util.SandboxStatusUtil;
 import org.visallo.web.clientapi.model.PropertyType;
 import org.visallo.web.clientapi.model.SandboxStatus;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class VertexiumOntologyProperty extends OntologyProperty {
@@ -141,6 +143,20 @@ public class VertexiumOntologyProperty extends OntologyProperty {
             return true;
         }
         return b;
+    }
+
+    @Override
+    public Map<String, String> getMetadata() {
+        Map<String, String> metadata = new HashMap<>();
+        if (getSandboxStatus() == SandboxStatus.PRIVATE) {
+            if (VisalloProperties.MODIFIED_BY.hasProperty(vertex)) {
+                metadata.put(VisalloProperties.MODIFIED_BY.getPropertyName(), VisalloProperties.MODIFIED_BY.getPropertyValue(vertex));
+            }
+            if (VisalloProperties.MODIFIED_DATE.hasProperty(vertex)) {
+                metadata.put(VisalloProperties.MODIFIED_DATE.getPropertyName(), VisalloProperties.MODIFIED_DATE.getPropertyValue(vertex).toString());
+            }
+        }
+        return metadata;
     }
 
     public PropertyType getDataType() {

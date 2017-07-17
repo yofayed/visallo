@@ -112,6 +112,8 @@ public abstract class OntologyProperty {
         return results;
     }
 
+    public abstract Map<String, String> getMetadata();
+
     public ClientApiOntology.Property toClientApi() {
         try {
             ClientApiOntology.Property result;
@@ -149,6 +151,9 @@ public abstract class OntologyProperty {
             }
             if (getTextIndexHints() != null) {
                 result.getTextIndexHints().addAll(Arrays.asList(getTextIndexHints()));
+            }
+            for (Map.Entry<String, String> additionalProperty : getMetadata().entrySet()) {
+                result.getMetadata().put(additionalProperty.getKey(), additionalProperty.getValue());
             }
             return result;
         } catch (JSONException e) {
