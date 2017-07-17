@@ -3,7 +3,7 @@ define([
 ], function(defineComponent) {
     'use strict';
 
-    var PRIVILEGES = 'COMMENT EDIT PUBLISH ADMIN'.split(' '),
+    var PRIVILEGES = 'COMMENT EDIT PUBLISH ADMIN ONTOLOGY_ADD ONTOLOGY_PUBLISH'.split(' '),
         Component = defineComponent(Privileges);
 
     return Component;

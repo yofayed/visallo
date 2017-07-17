@@ -257,6 +257,12 @@
           padding: 0em 0.5em;
           margin: 0 0 0 30px;
       }
+      .action-subtype {
+        margin: 0 0 0 30px;
+        font-weight: normal;
+        font-style: italic;
+        font-size: 90%;        
+      }
       .property-label, .edge-label {
         text-align: right;
         font-weight: bold;
@@ -274,6 +280,9 @@
       }
       .property-value, .edge-value {
         word-break: break-word;
+        .action-subtype {
+          margin: 0;
+        }
 
         &.deleted {
           text-decoration: line-through;
