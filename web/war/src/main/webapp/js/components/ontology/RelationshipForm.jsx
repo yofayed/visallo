@@ -23,9 +23,9 @@ define([
                 <div>
                     { this.props.error ? (<Alert error={this.props.error} />) : null }
                     <ConceptsSelector
-                        value={_.isString(this.state.sourceConcept) ? this.state.sourceConcept : this.props.sourceConcept}
+                        value={_.isString(this.state.sourceId) ? this.state.sourceId : this.props.sourceId}
                         placeholder="From Concept"
-                        filter={{conceptId: this.props.sourceConcept, showAncestors: true }}
+                        filter={{conceptId: this.props.sourceId, showAncestors: true }}
                         creatable={false}
                         clearable={false}
                         onSelected={this.onSourceConceptSelected} />
@@ -36,8 +36,8 @@ define([
                         value={value} />
 
                     <ConceptsSelector
-                        value={_.isString(this.state.targetConcept) ? this.state.targetConcept : this.props.targetConcept}
-                        filter={{conceptId: this.props.targetConcept, showAncestors: true }}
+                        value={_.isString(this.state.targetId) ? this.state.targetId : this.props.targetId}
+                        filter={{conceptId: this.props.targetId, showAncestors: true }}
                         placeholder="To Concept"
                         clearable={false}
                         creatable={false}
@@ -63,15 +63,15 @@ define([
             this.setState({ displayName: event.target.value });
         },
         onSourceConceptSelected(concept) {
-            this.setState({ sourceConcept: concept })
+            this.setState({ sourceId: concept.id })
         },
         onTargetConceptSelected(concept) {
-            this.setState({ targetConcept: concept })
+            this.setState({ targetId: concept.id })
         },
         onCreate() {
             this.props.onCreate({
-                sourceIris: [this.state.sourceConcept || this.props.sourceConcept],
-                targetIris: [this.state.targetConcept || this.props.targetConcept],
+                sourceIris: [this.state.sourceId || this.props.sourceId],
+                targetIris: [this.state.targetId || this.props.targetId],
                 displayName: this.getValue()
             })
         }
