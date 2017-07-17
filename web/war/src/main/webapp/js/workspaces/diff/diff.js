@@ -171,11 +171,11 @@ define([
                             if (diffs[0].conceptType) {
                                 var concept = self.ontologyConcepts.byId[diffs[0].conceptType];
                                 if (concept) {
+                                    outputItem.concept = concept;
                                     outputItem.conceptImage = concept.glyphIconHref;
                                     outputItem.selectedConceptImage = concept.glyphIconSelectedHref || concept.glyphIconHref;
                                     if (concept.sandboxStatus !== 'PUBLIC') {
                                         outputItem.requiresOntologyPublish = true;
-                                        outputItem.concept = concept;
                                     }
                                 }
                             }
@@ -191,6 +191,16 @@ define([
                                     'http://visallo.org#visibilityJson': diffs[0].visibilityJson
                                 };
                                 outputItem.edgeLabel = self.ontologyRelationships.byTitle[diffs[0].label].displayName;
+                            }
+
+                            if (diffs[0].label) {
+                                const relationship = self.ontologyRelationships.byId[diffs[0].label];
+                                if (relationship) {
+                                    outputItem.relationship = relationship;
+                                    if (relationship.sandboxStatus !== 'PUBLIC') {
+                                        outputItem.requiresOntologyPublish = true;
+                                    }
+                                }
                             }
 
                             var sourceId = diffs[0].outVertexId,
@@ -229,7 +239,9 @@ define([
                                             diff.className = F.className.to(diff.id);
                                         }
 
-                                        diff.requiresOntologyPublish = outputItem.requiresOntologyPublish;
+                                        diff.requiresOntologyPublish = outputItem.requiresOntologyPublish || (
+                                            ontologyProperty.sandboxStatus !== 'PUBLIC'
+                                        );
 
                                         if (compoundProperty &&
                                             F.vertex.hasProperty(outputItem.vertex, compoundProperty)) {
@@ -273,6 +285,7 @@ define([
                                     diff.outVertex = verticesById[diff.outVertexId];
                                     diff.className = F.className.to(diff.edgeId);
                                     diff.displayLabel = self.ontologyRelationships.byTitle[diff.label].displayName;
+                                    diff.requiresOntologyPublish = outputItem.requiresOntologyPublish;
                                     self.diffsForElementId[diff.edgeId] = diff;
                                     outputItem.action = diff.deleted ? actionTypes.DELETE : actionTypes.CREATE;
                                     addDiffDependency(diff.inVertexId, diff);

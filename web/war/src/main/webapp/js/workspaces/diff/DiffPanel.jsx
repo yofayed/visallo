@@ -147,7 +147,7 @@ define([
         },
 
         renderRequiresOntologyPublish(diff) {
-            return diff.requiresOntologyPublish && Privileges.missingONTOLOGY_PUBLISH ?
+            return Privileges.canPUBLISH && diff.requiresOntologyPublish && Privileges.missingONTOLOGY_PUBLISH ?
                 (<div title={ i18n('workspaces.diff.requires.ontology.publish.title') } className="action-subtype">{ i18n('workspaces.diff.requires.ontology.publish') }</div>) : null;
         },
 
