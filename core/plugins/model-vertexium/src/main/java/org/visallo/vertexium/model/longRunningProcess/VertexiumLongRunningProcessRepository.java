@@ -216,7 +216,7 @@ public class VertexiumLongRunningProcessRepository extends LongRunningProcessRep
         if (vertex != null) {
             json = LongRunningProcessProperties.QUEUE_ITEM_JSON_PROPERTY.getPropertyValue(vertex);
         }
-        this.graph.softDeleteVertex(vertex, authorizations);
+        this.graph.deleteVertex(vertex, authorizations);
         this.graph.flush();
 
         if (json != null) {
