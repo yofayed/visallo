@@ -92,14 +92,22 @@
         padding: 0.5em 1.5em 0.5em 0.5em;
         position: relative;
         box-sizing: border-box;
-        overflow: hidden;
-        button {
+        overflow: auto;
+        & > button.close {
           position: absolute;
           right: 4px;
         }
         ul {
           margin: 0;
           padding: 0 0 0 19px;
+        }
+      }
+      .schema-warning {
+        p:last-child {
+          font-weight: bold;
+          font-style: italic;
+          text-align: center;
+          font-size: 110%;
         }
       }
     }

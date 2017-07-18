@@ -444,7 +444,8 @@ define([
 
             this.select('visibilityInputSelector').toggleClass('invalid', !data.valid);
             this.visibilitySource = data;
-            this.modified.visibility = this.currentProperty.metadata ? visibilityModified() : !!this.visibilitySource.value;
+            const metadata = this.currentProperty.metadata;
+            this.modified.visibility = metadata && 'http://visallo.org#visibilityJson' in metadata ? visibilityModified() : !!this.visibilitySource.value;
             this.checkValid();
 
             function visibilityModified() {
@@ -468,7 +469,8 @@ define([
             var self = this;
 
             this.justification = data;
-            this.modified.justification = this.currentProperty.metadata ? justificationModified() : !!this.justification.justificationText;
+            const metadata = this.currentProperty.metadata;
+            this.modified.justification = metadata && 'http://visallo.org#visibilityJson' in metadata ? justificationModified() : !!this.justification.justificationText;
             this.checkValid();
 
             function justificationModified() {

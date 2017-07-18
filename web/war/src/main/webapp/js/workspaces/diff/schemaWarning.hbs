@@ -1,0 +1,16 @@
+<div class="schema-warning">
+  <p>These published changes include schema changes, by publishing the changes you are also applying these schema updates:
+  <ul style="list-style: none; padding: 0">
+    {{#each types}}
+      <li><span style="font-weight: bold">{{ displayName }}:</span>
+      <ul style="list-style: none;">
+        {{#each list}}
+          <li data-diff-ids="{{ diffs }}" style="display: inline-block; margin-right: 1em"><label><input class="schema-type" style="vertical-align: top" type="checkbox" checked> {{ displayName }} ({{ usages }})</label></li>
+        {{/each}}
+      </ul>
+      </li>
+    {{/each}}
+  </ul>
+
+  <p style="margin-bottom: 0">Click Publish to Confirm
+</div>
