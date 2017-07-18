@@ -194,7 +194,7 @@ define([
             const oldExtendedData = this.props.product.extendedData;
             if (newExtendedData) {
                 let shouldClear = false;
-                const ignoredExtendedDataKeys = ['vertices', 'edges', 'unauthorizedEdgeIds'];
+                const ignoredExtendedDataKeys = ['vertices', 'edges', 'unauthorizedEdgeIds', 'compoundNodes'];
                 Object.keys(newExtendedData).forEach(key => {
                     if (shouldClear || ignoredExtendedDataKeys.includes(key)) return;
                     if (!oldExtendedData || newExtendedData[key] !== oldExtendedData[key]) {
@@ -202,7 +202,12 @@ define([
                     }
                 })
                 if (shouldClear) {
-                    memoizeClear('vertexToCyNode');
+                    memoizeClear(
+                        'vertexToCyNode',
+                        'org.visallo.graph.edge.class',
+                        'org.visallo.graph.edge.transformer',
+                        'org.visallo.graph.node.class'
+                    );
                 }
             }
             if (nextProps.product.id === this.props.product.id) {
