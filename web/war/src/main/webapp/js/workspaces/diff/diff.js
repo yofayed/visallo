@@ -450,9 +450,9 @@ define([
                 }
                 const html = tpl({
                     types: _.compact([
-                        makeList('concepts', 'Entity Types', 'vertexId', this.ontologyConcepts.byId),
-                        makeList('relationships', 'Relation Types', 'edgeId', this.ontologyRelationships.byTitle),
-                        makeList('properties', 'Properties', 'id', this.ontologyProperties.byTitle)
+                        makeList('concepts', i18n('workspaces.diff.schema.warning.type.vertex'), 'vertexId', this.ontologyConcepts.byId),
+                        makeList('relationships', i18n('workspaces.diff.schema.warning.type.edge'), 'edgeId', this.ontologyRelationships.byTitle),
+                        makeList('properties', i18n('workspaces.diff.schema.warning.type.property'), 'id', this.ontologyProperties.byTitle)
                     ])
                 })
 

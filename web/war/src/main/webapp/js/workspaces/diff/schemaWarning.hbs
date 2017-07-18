@@ -1,5 +1,5 @@
 <div class="schema-warning">
-  <p>These published changes include schema changes, by publishing the changes you are also applying these schema updates:
+  <p>{{ i18n 'workspaces.diff.schema.warning' }}
   <ul style="list-style: none; padding: 0">
     {{#each types}}
       <li><span style="font-weight: bold">{{ displayName }}:</span>
@@ -12,5 +12,5 @@
     {{/each}}
   </ul>
 
-  <p style="margin-bottom: 0">Click Publish to Confirm
+  <p style="margin-bottom: 0">{{ i18n 'workspaces.diff.schema.warning.subtitle' }}</p>
 </div>
