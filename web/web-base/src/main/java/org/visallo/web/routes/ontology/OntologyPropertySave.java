@@ -70,8 +70,12 @@ public class OntologyPropertySave extends OntologyBase {
         } else {
             HashSet<String> domainIris = Sets.newHashSet(property.getConceptIris());
             domainIris.addAll(property.getRelationshipIris());
-            Collections.addAll(domainIris, conceptIris);
-            Collections.addAll(domainIris, relationshipIris);
+            if (conceptIris != null && conceptIris.length > 0) {
+                Collections.addAll(domainIris, conceptIris);
+            }
+            if (relationshipIris != null && relationshipIris.length > 0) {
+                Collections.addAll(domainIris, relationshipIris);
+            }
             ontologyRepository.updatePropertyDomainIris(property, domainIris, user, workspaceId);
         }
 
