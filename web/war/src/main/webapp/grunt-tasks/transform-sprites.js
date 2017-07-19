@@ -4,19 +4,7 @@ module.exports = function(grunt) {
 
     var cp = require('child_process'),
         _ = grunt.util._,
-        fs = require('fs'),
-        log = grunt.log,
-        path = require('path'),
-        verbose = grunt.verbose,
-        copyOptions = {
-            process: function(file, srcPath, destPath) {
-                var matches = (/^.*\.(scss|less|css|js|map|png|jpg|eot|svg|ttf|woff)$/).test(srcPath);
-                if (!matches) {
-                    return false;
-                }
-                return file;
-            }
-        };
+        fs = require('fs');
 
     grunt.registerMultiTask('transform-sprite', function() {
         var src = this.data;

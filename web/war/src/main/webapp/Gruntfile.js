@@ -154,11 +154,12 @@ module.exports = function(grunt) {
             }
         },
 
-        sprite:{
+        sprite: {
             all: {
                 src: 'img/glyphicons/*@2x.png',
                 dest: 'imgc/sprites/glyphicons.png',
-                destCss: 'imgc/sprites/glyphicons.json'
+                destCss: 'imgc/sprites/glyphicons.json',
+                padding: 2
             }
         },
 
