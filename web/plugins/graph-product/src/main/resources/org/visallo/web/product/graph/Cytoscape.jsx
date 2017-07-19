@@ -86,6 +86,7 @@ define([
             initialProductDisplay: PropTypes.bool,
             hasPreview: PropTypes.bool,
             editable: PropTypes.bool,
+            onCollapseSelectedNodes: PropTypes.func.isRequired,
             ...eventPropTypes
         },
 
@@ -402,6 +403,12 @@ define([
             this.fit();
         },
 
+        onMenuCollapseSelectedNodes() {
+            const { cy } = this.state;
+            const selectedNodes = cy.nodes().filter(':selected');
+            this.props.onCollapseSelectedNodes(selectedNodes);
+        },
+
         onMenuSelect(select) {
             const { cy } = this.state;
 
@@ -468,9 +475,9 @@ define([
             this.moving = _.indexBy([...Object.keys(this.moving), ...ids]);
 
             if (onlySelected) {
-                elements.layout(opts);
+                elements.layout(opts).run();
             } else {
-                cy.layout(opts);
+                cy.layout(opts).run();
             }
 
         },
@@ -503,7 +510,7 @@ define([
         fit(nodes, options = {}) {
             const { animate = true } = options;
             const { cy } = this.state;
-            const cyNodes = nodes || cy.nodes('node.v,node.partial,.decoration');
+            const cyNodes = nodes || cy.nodes('node.c,node.v,node.partial,.decoration');
 
             if (cyNodes.size() === 0) {
                 cy.reset();

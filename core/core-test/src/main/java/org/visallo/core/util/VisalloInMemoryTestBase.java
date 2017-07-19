@@ -219,7 +219,11 @@ public abstract class VisalloInMemoryTestBase {
         if (!(workQueueRepository instanceof TestWorkQueueRepository)) {
             throw new VisalloException("Can only get work queue items from " + TestWorkQueueRepository.class.getName());
         }
-        return ((TestWorkQueueRepository) workQueueRepository).getWorkQueue(queueName);
+        List<byte[]> items = ((TestWorkQueueRepository) workQueueRepository).getWorkQueue(queueName);
+        if (items == null) {
+            return new ArrayList<>();
+        }
+        return items;
     }
 
     protected void clearWorkQueues() {
@@ -304,7 +308,7 @@ public abstract class VisalloInMemoryTestBase {
     }
 
     protected void setPrivileges(User user, Set<String> privileges) {
-        ((UserPropertyPrivilegeRepository)getPrivilegeRepository()).setPrivileges(user, privileges, getUserRepository().getSystemUser());
+        ((UserPropertyPrivilegeRepository) getPrivilegeRepository()).setPrivileges(user, privileges, getUserRepository().getSystemUser());
     }
 
     protected PrivilegeRepository getPrivilegeRepository() {

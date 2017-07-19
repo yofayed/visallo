@@ -12,10 +12,10 @@ define(['../actions'], function(actions) {
             updateTitle: (productId, title) => ({ productId, title }),
             updateData: (productId, key, value) => ({ productId, key, value }),
             updateExtendedData: (productId, key, value) => ({ productId, key, value }),
+            updateLocalData: (productId, key, value) => ({ productId, key, value }),
 
             updatePreview: (productId, dataUrl) => ({ productId, dataUrl }),
             updateViewport: (productId, { pan, zoom }) => ({ productId, pan, zoom }),
-            removeElements: (productId, elements, { undoable } = {}) => ({ productId, elements, undoable }),
             selectAll: (productId) => ({ productId })
         }
     })

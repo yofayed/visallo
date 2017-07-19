@@ -1,6 +1,6 @@
 - [ ] joeferner
 - [ ] sfeng88
-- [ ] mwizeman joeybrk372 rygim jharwig EvanOxfeld
+- [ ] mwizeman joeybrk372 jharwig
 
 Testing Instructions:
 

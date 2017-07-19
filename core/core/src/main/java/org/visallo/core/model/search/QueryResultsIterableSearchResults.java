@@ -6,14 +6,14 @@ import org.vertexium.query.QueryResultsIterable;
 public class QueryResultsIterableSearchResults extends VertexiumObjectsSearchResults implements AutoCloseable {
     private final QueryResultsIterable<? extends VertexiumObject> searchResults;
     private final VertexiumObjectSearchRunnerBase.QueryAndData queryAndData;
-    private final long offset;
-    private final long size;
+    private final Long offset;
+    private final Long size;
 
     public QueryResultsIterableSearchResults(
             QueryResultsIterable<? extends VertexiumObject> searchResults,
             VertexiumObjectSearchRunnerBase.QueryAndData queryAndData,
-            long offset,
-            long size
+            Long offset,
+            Long size
     ) {
         this.searchResults = searchResults;
         this.queryAndData = queryAndData;
@@ -29,11 +29,11 @@ public class QueryResultsIterableSearchResults extends VertexiumObjectsSearchRes
         return queryAndData;
     }
 
-    public long getOffset() {
+    public Long getOffset() {
         return offset;
     }
 
-    public long getSize() {
+    public Long getSize() {
         return size;
     }
 

@@ -952,7 +952,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
                     findOrAddEdge(ctx, ((VertexiumConcept) concept).getVertex(), propertyVertex, LabelName.HAS_PROPERTY.toString());
                 }
                 for (Relationship relationship : relationships) {
-                    checkNotNull(relationships, "relationships cannot have null values");
+                    checkNotNull(relationship, "relationships cannot have null values");
                     findOrAddEdge(ctx, ((VertexiumRelationship) relationship).getVertex(), propertyVertex, LabelName.HAS_PROPERTY.toString());
                 }
 
