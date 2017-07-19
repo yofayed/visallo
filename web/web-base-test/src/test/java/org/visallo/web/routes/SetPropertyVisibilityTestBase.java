@@ -2,9 +2,11 @@ package org.visallo.web.routes;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.vertexium.Authorizations;
 import org.vertexium.Element;
 import org.visallo.core.exception.VisalloResourceNotFoundException;
+import org.visallo.core.model.graph.GraphRepository;
 import org.visallo.core.user.ProxyUser;
 import org.visallo.web.BadRequestException;
 import org.visallo.web.clientapi.model.VisibilityJson;
@@ -23,6 +25,7 @@ public abstract class SetPropertyVisibilityTestBase extends RouteTestBase {
     @Before
     public void before() throws IOException {
         super.before();
+        graphRepository = Mockito.mock(GraphRepository.class);
         authorizations = graph.createAuthorizations("A");
     }
 

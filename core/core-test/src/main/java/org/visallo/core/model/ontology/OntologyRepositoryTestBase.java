@@ -586,6 +586,32 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(SANDBOX_RELATIONSHIP_IRI, publicRelationship.getIRI());
     }
 
+    @Test
+    public void testAddingPublicConceptsToPublicRelationships() {
+        setPrivileges(user, Collections.singleton(Privilege.ONTOLOGY_ADD));
+
+        getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
+
+        Concept publicConcept = createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
+        Concept publicConceptB = createConcept(PUBLIC_CONCEPT_IRI + 'b', PUBLIC_DISPLAY_NAME, null);
+        createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
+
+        getOntologyRepository().clearCache();
+
+        try {
+            getOntologyRepository().addDomainConceptsToRelationshipType(PUBLIC_RELATIONSHIP_IRI, Collections.singletonList(publicConcept.getIRI()), systemUser, workspaceId);
+            fail();
+        } catch (UnsupportedOperationException uoe) {
+            // this shouldn't be supported yet
+        }
+        try {
+            getOntologyRepository().addRangeConceptsToRelationshipType(PUBLIC_RELATIONSHIP_IRI, Collections.singletonList(publicConceptB.getIRI()), systemUser, workspaceId);
+            fail();
+        } catch (UnsupportedOperationException uoe) {
+            // this shouldn't be supported yet
+        }
+    }
+
     @Test(expected = VisalloAccessDeniedException.class)
     public void testCreatingPropertyWithNoUserOrWorkspace() {
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
@@ -676,24 +702,18 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
 
-        Concept publicConcept = createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
-        Relationship publicRelationship = createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
-        OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, publicConcept, publicRelationship, null);
+        createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
+        createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
+        OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, null);
 
         getOntologyRepository().clearCache();
 
-        getOntologyRepository().addPropertyToConcepts(publicProperty, Collections.singletonList(publicConcept), systemUser, workspaceId);
-        getOntologyRepository().addPropertyToRelationships(publicProperty, Collections.singletonList(publicRelationship), systemUser, workspaceId);
-
-        getOntologyRepository().clearCache();
-
-        publicConcept = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, workspaceId);
-        assertEquals(1, publicConcept.getProperties().size());
-        assertEquals(PUBLIC_PROPERTY_IRI, publicConcept.getProperties().iterator().next().getIri());
-
-        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, workspaceId);
-        assertEquals(1, publicRelationship.getProperties().size());
-        assertEquals(PUBLIC_PROPERTY_IRI, publicRelationship.getProperties().iterator().next().getIri());
+        try {
+            getOntologyRepository().updatePropertyDomainIris(publicProperty, Sets.newHashSet(PUBLIC_CONCEPT_IRI, PUBLIC_RELATIONSHIP_IRI), systemUser, workspaceId);
+            fail();
+        } catch (UnsupportedOperationException uoe) {
+            // this shouldn't be supported yet
+        }
     }
 
     @Test
@@ -702,24 +722,31 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
 
-        Concept publicConcept = createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
-        Relationship publicRelationship = createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
+        createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
+        createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
         OntologyProperty sandboxedProperty = createProperty(SANDBOX_PROPERTY_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
 
         getOntologyRepository().clearCache();
 
-        getOntologyRepository().addPropertyToConcepts(sandboxedProperty, Collections.singletonList(publicConcept), systemUser, workspaceId);
-        getOntologyRepository().addPropertyToRelationships(sandboxedProperty, Collections.singletonList(publicRelationship), systemUser, workspaceId);
+        getOntologyRepository().updatePropertyDomainIris(sandboxedProperty, Sets.newHashSet(PUBLIC_CONCEPT_IRI, PUBLIC_RELATIONSHIP_IRI), systemUser, workspaceId);
 
         getOntologyRepository().clearCache();
 
-        publicConcept = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, workspaceId);
+        // ensure that it's there in the sandbox
+        Concept publicConcept = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, workspaceId);
         assertEquals(1, publicConcept.getProperties().size());
         assertEquals(SANDBOX_PROPERTY_IRI, publicConcept.getProperties().iterator().next().getIri());
 
-        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, workspaceId);
+        Relationship publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, workspaceId);
         assertEquals(1, publicRelationship.getProperties().size());
         assertEquals(SANDBOX_PROPERTY_IRI, publicRelationship.getProperties().iterator().next().getIri());
+
+        // ensure that it's not there outside the sandbox
+        publicConcept = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, null);
+        assertEquals(0, publicConcept.getProperties().size());
+
+        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, null);
+        assertEquals(0, publicRelationship.getProperties().size());
     }
 
     @Test
@@ -728,24 +755,18 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
 
-        Concept sandboxedConcept = createConcept(SANDBOX_CONCEPT_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
-        Relationship sandboxedRelationship = createRelationship(SANDBOX_RELATIONSHIP_IRI, workspaceId);
+        createConcept(SANDBOX_CONCEPT_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
+        createRelationship(SANDBOX_RELATIONSHIP_IRI, workspaceId);
         OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, null);
 
         getOntologyRepository().clearCache();
 
-        getOntologyRepository().addPropertyToConcepts(publicProperty, Collections.singletonList(sandboxedConcept), systemUser, workspaceId);
-        getOntologyRepository().addPropertyToRelationships(publicProperty, Collections.singletonList(sandboxedRelationship), systemUser, workspaceId);
-
-        getOntologyRepository().clearCache();
-
-        sandboxedConcept = getOntologyRepository().getConceptByIRI(SANDBOX_CONCEPT_IRI, workspaceId);
-        assertEquals(1, sandboxedConcept.getProperties().size());
-        assertEquals(PUBLIC_PROPERTY_IRI, sandboxedConcept.getProperties().iterator().next().getIri());
-
-        sandboxedRelationship = getOntologyRepository().getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, workspaceId);
-        assertEquals(1, sandboxedRelationship.getProperties().size());
-        assertEquals(PUBLIC_PROPERTY_IRI, sandboxedRelationship.getProperties().iterator().next().getIri());
+        try {
+            getOntologyRepository().updatePropertyDomainIris(publicProperty, Sets.newHashSet(SANDBOX_CONCEPT_IRI, SANDBOX_RELATIONSHIP_IRI), systemUser, workspaceId);
+            fail();
+        } catch (UnsupportedOperationException uoe) {
+            // this shouldn't be supported yet
+        }
     }
 
     @Test
@@ -754,22 +775,21 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
 
-        Concept sandboxedConcept = createConcept(SANDBOX_CONCEPT_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
-        Relationship sandboxedRelationship = createRelationship(SANDBOX_RELATIONSHIP_IRI, workspaceId);
+        createConcept(SANDBOX_CONCEPT_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
+        createRelationship(SANDBOX_RELATIONSHIP_IRI, workspaceId);
         OntologyProperty sandboxedProperty = createProperty(SANDBOX_PROPERTY_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
 
         getOntologyRepository().clearCache();
 
-        getOntologyRepository().addPropertyToConcepts(sandboxedProperty, Collections.singletonList(sandboxedConcept), systemUser, workspaceId);
-        getOntologyRepository().addPropertyToRelationships(sandboxedProperty, Collections.singletonList(sandboxedRelationship), systemUser, workspaceId);
+        getOntologyRepository().updatePropertyDomainIris(sandboxedProperty, Sets.newHashSet(SANDBOX_CONCEPT_IRI, SANDBOX_RELATIONSHIP_IRI), systemUser, workspaceId);
 
         getOntologyRepository().clearCache();
 
-        sandboxedConcept = getOntologyRepository().getConceptByIRI(SANDBOX_CONCEPT_IRI, workspaceId);
+        Concept sandboxedConcept = getOntologyRepository().getConceptByIRI(SANDBOX_CONCEPT_IRI, workspaceId);
         assertEquals(1, sandboxedConcept.getProperties().size());
         assertEquals(SANDBOX_PROPERTY_IRI, sandboxedConcept.getProperties().iterator().next().getIri());
 
-        sandboxedRelationship = getOntologyRepository().getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, workspaceId);
+        Relationship sandboxedRelationship = getOntologyRepository().getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, workspaceId);
         assertEquals(1, sandboxedRelationship.getProperties().size());
         assertEquals(SANDBOX_PROPERTY_IRI, sandboxedRelationship.getProperties().iterator().next().getIri());
     }

@@ -66,7 +66,7 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
 
         if (workspaceId != null && propertiesCache.containsKey(workspaceId)) {
             propertiesCache.get(workspaceId).values().forEach(workspaceProperty ->
-                    workspaceProperty.getConcepts().forEach(conceptIri -> {
+                    workspaceProperty.getConceptIris().forEach(conceptIri -> {
                         InMemoryConcept concept = workspaceConcepts.get(conceptIri);
                         if (concept.getSandboxStatus() == SandboxStatus.PUBLIC) {
                             concept = concept.shallowCopy();
@@ -84,7 +84,7 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
 
         if (workspaceId != null && propertiesCache.containsKey(workspaceId)) {
             propertiesCache.get(workspaceId).values().forEach(workspaceProperty ->
-                    workspaceProperty.getRelationships().forEach(relationshipIri -> {
+                    workspaceProperty.getRelationshipIris().forEach(relationshipIri -> {
                         InMemoryRelationship relationship = workspaceRelationships.get(relationshipIri);
                         if (relationship.getSandboxStatus() == SandboxStatus.PUBLIC) {
                             relationship = relationship.shallowCopy();
@@ -194,6 +194,10 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
 
     @Override
     public void updatePropertyDependentIris(OntologyProperty property, Collection<String> dependentPropertyIris, User user, String workspaceId) {
+        if (workspaceId != null || property.getSandboxStatus() == SandboxStatus.PRIVATE) {
+            throw new UnsupportedOperationException("Sandboxed updating of dependent iris is not currently supported for properties");
+        }
+
         InMemoryOntologyProperty inMemoryOntologyProperty = (InMemoryOntologyProperty) property;
         inMemoryOntologyProperty.setDependentPropertyIris(dependentPropertyIris);
     }
@@ -229,50 +233,46 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
     }
 
     @Override
-    public void addPropertyToConcepts(OntologyProperty property, List<Concept> concepts, User user, String workspaceId) {
-        InMemoryOntologyProperty inMemoryProperty = (InMemoryOntologyProperty) property;
-        List<Concept> missingConcepts = concepts.stream()
-                .filter(c -> !inMemoryProperty.getConcepts().contains(c.getIRI()))
+    public void addDomainConceptsToRelationshipType(String relationshipIri, List<String> conceptIris, User user, String workspaceId) {
+        InMemoryRelationship relationship = computeRelationshipCacheForWorkspace(workspaceId).get(relationshipIri);
+        if (workspaceId != null && relationship.getSandboxStatus() != SandboxStatus.PRIVATE) {
+            throw new UnsupportedOperationException("Sandboxed updating of domain iris is not currently supported for published relationships");
+        }
+
+        List<String> missingConcepts = conceptIris.stream()
+                .filter(c -> !relationship.getDomainConceptIRIs().contains(c))
                 .collect(Collectors.toList());
 
-        if (property.getSandboxStatus() == SandboxStatus.PRIVATE) {
-            inMemoryProperty.getConcepts().addAll(missingConcepts.stream().map(Concept::getIRI).collect(Collectors.toList()));
-        }
-        for (Concept concept : missingConcepts) {
-            if (concept.getSandboxStatus() == SandboxStatus.PRIVATE) {
-                concept.getProperties().add(property);
-            } else if (property.getSandboxStatus() == SandboxStatus.PUBLIC) {
-                InMemoryConcept inMemoryConcept = ((InMemoryConcept) concept).shallowCopy();
-                inMemoryConcept.getProperties().add(property);
-                inMemoryConcept.setWorkspaceId(workspaceId);
+        if (relationship.getSandboxStatus() == SandboxStatus.PRIVATE) {
+            relationship.getDomainConceptIRIs().addAll(missingConcepts);
+        } else {
+            InMemoryRelationship inMemoryRelationship = relationship.shallowCopy();
+            inMemoryRelationship.getDomainConceptIRIs().addAll(missingConcepts);
 
-                Map<String, InMemoryConcept> workspaceCache = conceptsCache.compute(workspaceId, (k, v) -> v == null ? new HashMap<>() : v);
-                workspaceCache.put(inMemoryConcept.getIRI(), inMemoryConcept);
-            }
+            Map<String, InMemoryRelationship> workspaceCache = relationshipsCache.compute(workspaceId, (k, v) -> v == null ? new HashMap<>() : v);
+            workspaceCache.put(inMemoryRelationship.getIRI(), inMemoryRelationship);
         }
     }
 
     @Override
-    public void addPropertyToRelationships(OntologyProperty property, List<Relationship> relationships, User user, String workspaceId) {
-        InMemoryOntologyProperty inMemoryProperty = (InMemoryOntologyProperty) property;
-        List<Relationship> missingRelationships = relationships.stream()
-                .filter(r -> !inMemoryProperty.getRelationships().contains(r.getIRI()))
+    public void addRangeConceptsToRelationshipType(String relationshipIri, List<String> conceptIris, User user, String workspaceId) {
+        InMemoryRelationship relationship = computeRelationshipCacheForWorkspace(workspaceId).get(relationshipIri);
+        if (workspaceId != null && relationship.getSandboxStatus() != SandboxStatus.PRIVATE) {
+            throw new UnsupportedOperationException("Sandboxed updating of range iris is not currently supported for published relationships");
+        }
+
+        List<String> missingConcepts = conceptIris.stream()
+                .filter(c -> !relationship.getRangeConceptIRIs().contains(c))
                 .collect(Collectors.toList());
 
-        if (property.getSandboxStatus() == SandboxStatus.PRIVATE) {
-            inMemoryProperty.getRelationships().addAll(missingRelationships.stream().map(Relationship::getIRI).collect(Collectors.toList()));
-        }
-        for (Relationship relationship : missingRelationships) {
-            if (relationship.getSandboxStatus() == SandboxStatus.PRIVATE) {
-                relationship.getProperties().add(property);
-            } else if (property.getSandboxStatus() == SandboxStatus.PUBLIC) {
-                InMemoryRelationship inMemoryRelationship = ((InMemoryRelationship) relationship).shallowCopy();
-                inMemoryRelationship.getProperties().add(property);
-                inMemoryRelationship.setWorkspaceId(workspaceId);
+        if (relationship.getSandboxStatus() == SandboxStatus.PRIVATE) {
+            relationship.getRangeConceptIRIs().addAll(missingConcepts);
+        } else {
+            InMemoryRelationship inMemoryRelationship = relationship.shallowCopy();
+            inMemoryRelationship.getRangeConceptIRIs().addAll(missingConcepts);
 
-                Map<String, InMemoryRelationship> workspaceCache = relationshipsCache.compute(workspaceId, (k, v) -> v == null ? new HashMap<>() : v);
-                workspaceCache.put(inMemoryRelationship.getIRI(), inMemoryRelationship);
-            }
+            Map<String, InMemoryRelationship> workspaceCache = relationshipsCache.compute(workspaceId, (k, v) -> v == null ? new HashMap<>() : v);
+            workspaceCache.put(inMemoryRelationship.getIRI(), inMemoryRelationship);
         }
     }
 
@@ -352,14 +352,14 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
         workspaceCache.put(propertyIri, property);
 
         for (Concept concept : concepts) {
-            property.getConcepts().add(concept.getIRI());
+            property.getConceptIris().add(concept.getIRI());
             if (workspaceId == null || concept.getSandboxStatus() == SandboxStatus.PRIVATE) {
                 concept.getProperties().add(property);
             }
         }
 
         for (Relationship relationship : relationships) {
-            property.getRelationships().add(relationship.getIRI());
+            property.getRelationshipIris().add(relationship.getIRI());
             if (workspaceId == null || relationship.getSandboxStatus() == SandboxStatus.PRIVATE) {
                 relationship.getProperties().add(property);
             }
@@ -371,16 +371,51 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
 
     @Override
     public void updatePropertyDomainIris(OntologyProperty property, Set<String> domainIris, User user, String workspaceId) {
+        if (workspaceId != null && property.getSandboxStatus() != SandboxStatus.PRIVATE) {
+            throw new UnsupportedOperationException("Sandboxed updating of domain iris is not currently supported for published properties");
+        }
+
+        InMemoryOntologyProperty inMemoryProperty = (InMemoryOntologyProperty) property;
+
         for (Concept concept : getConceptsWithProperties(workspaceId)) {
             if (concept.getProperties().contains(property)) {
                 if (!domainIris.remove(concept.getIRI())) {
-                    concept.getProperties().remove(property);
+                    if (workspaceId == null || concept.getSandboxStatus() == SandboxStatus.PRIVATE) {
+                        concept.getProperties().remove(property);
+                    }
+                    inMemoryProperty.getConceptIris().remove(concept.getIRI());
+                }
+            }
+        }
+        for (Relationship relationship : getRelationships(workspaceId)) {
+            if (relationship.getProperties().contains(property)) {
+                if (!domainIris.remove(relationship.getIRI())) {
+                    if (workspaceId == null || relationship.getSandboxStatus() == SandboxStatus.PRIVATE) {
+                        relationship.getProperties().remove(property);
+                    }
+                    inMemoryProperty.getRelationshipIris().remove(relationship.getIRI());
                 }
             }
         }
 
         for (String domainIri : domainIris) {
-            getConceptByIRI(domainIri, workspaceId).getProperties().add(property);
+            InMemoryConcept concept = getConceptByIRI(domainIri, workspaceId);
+            if (concept != null) {
+                if (workspaceId == null || concept.getSandboxStatus() == SandboxStatus.PRIVATE) {
+                    concept.getProperties().add(property);
+                }
+                inMemoryProperty.getConceptIris().add(concept.getIRI());
+            } else {
+                InMemoryRelationship relationship = getRelationshipByIRI(domainIri, workspaceId);
+                if (relationship != null) {
+                    if (workspaceId == null || relationship.getSandboxStatus() == SandboxStatus.PRIVATE) {
+                        relationship.getProperties().add(property);
+                    }
+                    inMemoryProperty.getRelationshipIris().add(relationship.getIRI());
+                } else {
+                    throw new VisalloException("Could not find domain with IRI " + domainIri);
+                }
+            }
         }
     }
 
@@ -418,10 +453,10 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
                 propertiesCache.get(PUBLIC_ONTOLOGY_CACHE_KEY).put(property.getIri(), sandboxProperty);
 
                 Map<String, InMemoryConcept> publicConcepts = conceptsCache.get(PUBLIC_ONTOLOGY_CACHE_KEY);
-                sandboxProperty.getConcepts().forEach(c -> publicConcepts.get(c).getProperties().add(sandboxProperty));
+                sandboxProperty.getConceptIris().forEach(c -> publicConcepts.get(c).getProperties().add(sandboxProperty));
 
                 Map<String, InMemoryRelationship> publicRelationships = relationshipsCache.get(PUBLIC_ONTOLOGY_CACHE_KEY);
-                sandboxProperty.getRelationships().forEach(r -> publicRelationships.get(r).getProperties().add(sandboxProperty));
+                sandboxProperty.getRelationshipIris().forEach(r -> publicRelationships.get(r).getProperties().add(sandboxProperty));
             }
         }
     }

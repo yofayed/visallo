@@ -88,6 +88,10 @@ public abstract class OntologyProperty {
 
     public abstract void removeIntent(String intent, Authorizations authorizations);
 
+    public abstract List<String> getConceptIris();
+
+    public abstract List<String> getRelationshipIris();
+
     public void updateIntents(String[] newIntents, Authorizations authorizations) {
         ArrayList<String> toBeRemovedIntents = Lists.newArrayList(getIntents());
         for (String newIntent : newIntents) {

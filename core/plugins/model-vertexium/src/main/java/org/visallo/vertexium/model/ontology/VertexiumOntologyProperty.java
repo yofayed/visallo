@@ -3,8 +3,11 @@ package org.visallo.vertexium.model.ontology;
 import com.google.common.collect.ImmutableList;
 import org.json.JSONObject;
 import org.vertexium.Authorizations;
+import org.vertexium.Direction;
 import org.vertexium.Vertex;
+import org.vertexium.util.CloseableUtils;
 import org.vertexium.util.IterableUtils;
+import org.visallo.core.model.ontology.LabelName;
 import org.visallo.core.model.ontology.OntologyProperties;
 import org.visallo.core.model.ontology.OntologyProperty;
 import org.visallo.core.model.ontology.OntologyRepository;
@@ -16,7 +19,10 @@ import org.visallo.web.clientapi.model.SandboxStatus;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class VertexiumOntologyProperty extends OntologyProperty {
     private final Vertex vertex;
@@ -195,5 +201,25 @@ public class VertexiumOntologyProperty extends OntologyProperty {
     @Override
     public SandboxStatus getSandboxStatus() {
         return SandboxStatusUtil.getSandboxStatus(this.vertex, this.workspaceId);
+    }
+
+    @Override
+    public List<String> getConceptIris() {
+        return getAssociatedElements(OntologyRepository.TYPE_CONCEPT);
+    }
+
+    @Override
+    public List<String> getRelationshipIris() {
+        return getAssociatedElements(OntologyRepository.TYPE_RELATIONSHIP);
+    }
+
+    private List<String> getAssociatedElements(String elementType) {
+        Iterable<Vertex> vertices = vertex.getVertices(Direction.BOTH, LabelName.HAS_PROPERTY.toString(), vertex.getAuthorizations());
+        List<String> result = StreamSupport.stream(vertices.spliterator(), false)
+                .filter(v -> elementType.equals(VisalloProperties.CONCEPT_TYPE.getPropertyValue(v)))
+                .map(OntologyProperties.ONTOLOGY_TITLE::getPropertyValue)
+                .collect(Collectors.toList());
+        CloseableUtils.closeQuietly(vertices);
+        return result;
     }
 }

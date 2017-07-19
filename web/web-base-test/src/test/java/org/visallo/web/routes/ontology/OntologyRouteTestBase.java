@@ -3,22 +3,26 @@ package org.visallo.web.routes.ontology;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.vertexium.Authorizations;
+import org.visallo.core.config.Configuration;
 import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.lock.NonLockingLockRepository;
 import org.visallo.core.model.ontology.Concept;
 import org.visallo.core.model.ontology.OntologyPropertyDefinition;
 import org.visallo.core.model.ontology.Relationship;
+import org.visallo.core.model.user.InMemoryGraphAuthorizationRepository;
 import org.visallo.core.model.user.PrivilegeRepository;
 import org.visallo.core.security.VisalloVisibility;
 import org.visallo.core.user.SystemUser;
 import org.visallo.core.user.User;
-import org.visallo.vertexium.model.ontology.InMemoryOntologyRepository;
+import org.visallo.vertexium.model.ontology.VertexiumOntologyRepository;
 import org.visallo.web.clientapi.model.PropertyType;
 import org.visallo.web.routes.RouteTestBase;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+
+import static org.visallo.core.model.user.UserRepository.USER_CONCEPT_IRI;
 
 public abstract class OntologyRouteTestBase extends RouteTestBase {
     static final String WORKSPACE_ID = "junit-workspace";
@@ -38,8 +42,18 @@ public abstract class OntologyRouteTestBase extends RouteTestBase {
         super.before();
 
         NonLockingLockRepository nonLockingLockRepository = new NonLockingLockRepository();
+        InMemoryGraphAuthorizationRepository graphAuthorizationRepository = new InMemoryGraphAuthorizationRepository();
         try {
-            ontologyRepository = new InMemoryOntologyRepository(graph, configuration, nonLockingLockRepository) {
+            ontologyRepository = new VertexiumOntologyRepository(graph, graphRepository, visibilityTranslator, configuration, graphAuthorizationRepository, nonLockingLockRepository) {
+                @Override
+                public void loadOntologies(Configuration config, Authorizations authorizations) throws Exception {
+                    SystemUser systemUser = new SystemUser();
+                    Concept rootConcept = getOrCreateConcept(null, ROOT_CONCEPT_IRI, "root", null, systemUser, null);
+                    getOrCreateConcept(rootConcept, ENTITY_CONCEPT_IRI, "thing", null, systemUser, null);
+                    getOrCreateConcept(null, USER_CONCEPT_IRI, "visalloUser", null, false, systemUser, null);
+                    clearCache();
+                }
+
                 @Override
                 protected PrivilegeRepository getPrivilegeRepository() {
                     return OntologyRouteTestBase.this.privilegeRepository;
@@ -64,6 +78,8 @@ public abstract class OntologyRouteTestBase extends RouteTestBase {
 
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(things, PUBLIC_PROPERTY_IRI, "Public Property", PropertyType.DATE);
         ontologyRepository.getOrCreateProperty(ontologyPropertyDefinition, systemUser, null);
+
+        ontologyRepository.clearCache();
 
         workspaceAuthorizations = graph.createAuthorizations(WORKSPACE_ID);
     }

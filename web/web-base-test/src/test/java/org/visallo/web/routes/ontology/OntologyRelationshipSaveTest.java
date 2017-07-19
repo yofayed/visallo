@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.visallo.core.exception.VisalloAccessDeniedException;
 import org.visallo.core.exception.VisalloException;
+import org.visallo.core.model.ontology.Concept;
 import org.visallo.core.model.ontology.OntologyRepositoryBase;
 import org.visallo.core.model.ontology.Relationship;
 import org.visallo.web.clientapi.model.ClientApiOntology;
@@ -20,6 +21,8 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
+    private static final String SANDBOX_RELATIONSHIP_IRI = "sandbox-relationship";
+
     private OntologyRelationshipSave route;
 
     @Before
@@ -150,6 +153,51 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
 
         String originalIri = response.getTitle();
         assertTrue(originalIri.matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_relationship#[a-z0-9]+"));
+    }
+
+    @Test
+    public void testAddAdditionalConceptsToNewRelationship() throws Exception {
+        when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
+
+        Concept thing = ontologyRepository.getEntityConcept(null);
+        String displayName = "New Relationship";
+        String[] sourceConcepts = {thing.getIRI()};
+        String[] targetConcepts = {PUBLIC_CONCEPT_IRI};
+        ClientApiOntology.Relationship response = route.handle(displayName, sourceConcepts, targetConcepts, null, SANDBOX_RELATIONSHIP_IRI, WORKSPACE_ID, workspaceAuthorizations, user);
+
+        assertEquals(1, response.getDomainConceptIris().size());
+        assertEquals(thing.getIRI(), response.getDomainConceptIris().get(0));
+        assertEquals(1, response.getRangeConceptIris().size());
+        assertEquals(PUBLIC_CONCEPT_IRI, response.getRangeConceptIris().get(0));
+
+        Relationship relationship = ontologyRepository.getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, WORKSPACE_ID);
+        assertEquals(1, relationship.getDomainConceptIRIs().size());
+        assertEquals(thing.getIRI(), relationship.getDomainConceptIRIs().get(0));
+        assertEquals(1, relationship.getRangeConceptIRIs().size());
+        assertEquals(PUBLIC_CONCEPT_IRI, relationship.getRangeConceptIRIs().get(0));
+
+        String sanboxConceptIri = "sandbox-concept-iri";
+        ontologyRepository.getOrCreateConcept(thing, sanboxConceptIri, "Sandbox Concept", null, user, WORKSPACE_ID);
+        ontologyRepository.clearCache();
+
+        sourceConcepts = new String[]{PUBLIC_CONCEPT_IRI_B};
+        targetConcepts = new String[]{sanboxConceptIri};
+        response = route.handle(displayName, sourceConcepts, targetConcepts, null, SANDBOX_RELATIONSHIP_IRI, WORKSPACE_ID, workspaceAuthorizations, user);
+
+        assertEquals(2, response.getDomainConceptIris().size());
+        assertTrue(response.getDomainConceptIris().contains(thing.getIRI()));
+        assertTrue(response.getDomainConceptIris().contains(PUBLIC_CONCEPT_IRI_B));
+        assertEquals(2, response.getRangeConceptIris().size());
+        assertTrue(response.getRangeConceptIris().contains(PUBLIC_CONCEPT_IRI));
+        assertTrue(response.getRangeConceptIris().contains(sanboxConceptIri));
+
+        relationship = ontologyRepository.getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, WORKSPACE_ID);
+        assertEquals(2, relationship.getDomainConceptIRIs().size());
+        assertTrue(relationship.getDomainConceptIRIs().contains(thing.getIRI()));
+        assertTrue(relationship.getDomainConceptIRIs().contains(PUBLIC_CONCEPT_IRI_B));
+        assertEquals(2, relationship.getRangeConceptIRIs().size());
+        assertTrue(relationship.getRangeConceptIRIs().contains(PUBLIC_CONCEPT_IRI));
+        assertTrue(relationship.getRangeConceptIRIs().contains(sanboxConceptIri));
     }
 
     @Test

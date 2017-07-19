@@ -50,6 +50,8 @@ public class OntologyGetTest extends OntologyRouteTestBase {
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(things, sandboxedPropertyIri, "Sandboxed Property", PropertyType.DATE);
         ontologyRepository.getOrCreateProperty(ontologyPropertyDefinition, user, WORKSPACE_ID);
 
+        ontologyRepository.clearCache();
+
         doRouteTest(sandboxConceptIri, 1, sandboxRelationshipIri, 1, sandboxedPropertyIri, 1);
     }
 
@@ -71,38 +73,38 @@ public class OntologyGetTest extends OntologyRouteTestBase {
     @Test
     public void testGetPublicOntologyElementsWithUnknownConcept() throws Exception {
         try {
-            doRouteTest("unknown-iri", 0, null, 0, null, 0);
-            fail("Expected route to fail due to unknown concept iri");
+            route.handle(null, new String[]{"unknown-id"}, null, WORKSPACE_ID);
+            fail("Expected route to fail due to unknown concept id");
         } catch (VisalloException ve) {
-            assertEquals("Unable to load concept with IRI: unknown-iri", ve.getMessage());
+            assertEquals("Unable to load concept with IRI: unknown-id", ve.getMessage());
         }
     }
 
     @Test
     public void testGetPublicOntologyElementsWithUnknownRelationship() throws Exception {
         try {
-            doRouteTest(null, 0, "unknown-iri", 0, null, 0);
-            fail("Expected route to fail due to unknown relationship iri");
+            route.handle(null, null, new String[]{"unknown-id"}, WORKSPACE_ID);
+            fail("Expected route to fail due to unknown relationship id");
         } catch (VisalloException ve) {
-            assertEquals("Unable to load relationship with IRI: unknown-iri", ve.getMessage());
+            assertEquals("Unable to load relationship with IRI: unknown-id", ve.getMessage());
         }
     }
 
     @Test
     public void testGetPublicOntologyElementsWithUnknownProperty() throws Exception {
         try {
-            doRouteTest(null, 0, null, 0, "unknown-iri", 0);
-            fail("Expected route to fail due to unknown property iri");
+            route.handle(new String[]{"unknown-id"}, null, null, WORKSPACE_ID);
+            fail("Expected route to fail due to unknown property id");
         } catch (VisalloException ve) {
-            assertEquals("Unable to load property with IRI: unknown-iri", ve.getMessage());
+            assertEquals("Unable to load property with IRI: unknown-id", ve.getMessage());
         }
     }
 
     private void doRouteTest(String conceptIri, int expectedConcepts, String relationshipIri, int expectedRelationships, String propertyIri, int expectedProperties) throws Exception {
         ClientApiOntology response = route.handle(
-                propertyIri == null ? null : new String[]{propertyIri},
-                conceptIri == null ? null : new String[]{conceptIri},
-                relationshipIri == null ? null : new String[]{relationshipIri},
+                propertyIri == null ? null : new String[]{ontologyRepository.getPropertyByIRI(propertyIri, WORKSPACE_ID).getId()},
+                conceptIri == null ? null : new String[]{ontologyRepository.getConceptByIRI(conceptIri, WORKSPACE_ID).getId()},
+                relationshipIri == null ? null : new String[]{ontologyRepository.getRelationshipByIRI(relationshipIri, WORKSPACE_ID).getId()},
                 WORKSPACE_ID
         );
 

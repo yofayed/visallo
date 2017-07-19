@@ -69,7 +69,6 @@ public abstract class RouteTestBase {
     @Mock
     protected WorkspaceHelper workspaceHelper;
 
-    @Mock
     protected GraphRepository graphRepository;
 
     @Mock
@@ -108,6 +107,8 @@ public abstract class RouteTestBase {
         graph = createGraph();
         visibilityTranslator = createVisibilityTranslator();
         resourceBundle = createResourceBundle();
+
+        graphRepository = new GraphRepository(graph, visibilityTranslator, termMentionRepository, workQueueRepository);
 
         String currentWorkspaceId = null;
         nonProxiedUser = new InMemoryUser("jdoe", "Jane Doe", "jane.doe@email.com", currentWorkspaceId);

@@ -1,5 +1,6 @@
 package org.visallo.web.routes.ontology;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.v5analytics.webster.annotations.Handle;
 import com.v5analytics.webster.annotations.Optional;
@@ -15,6 +16,7 @@ import org.visallo.web.parameterProviders.ActiveWorkspaceId;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,8 +68,11 @@ public class OntologyPropertySave extends OntologyBase {
 
             property = ontologyRepository.getOrCreateProperty(def, user, workspaceId);
         } else {
-            ontologyRepository.addPropertyToConcepts(property, concepts, user, workspaceId);
-            ontologyRepository.addPropertyToRelationships(property, relationships, user, workspaceId);
+            HashSet<String> domainIris = Sets.newHashSet(property.getConceptIris());
+            domainIris.addAll(property.getRelationshipIris());
+            Collections.addAll(domainIris, conceptIris);
+            Collections.addAll(domainIris, relationshipIris);
+            ontologyRepository.updatePropertyDomainIris(property, domainIris, user, workspaceId);
         }
 
         ontologyRepository.clearCache(workspaceId);

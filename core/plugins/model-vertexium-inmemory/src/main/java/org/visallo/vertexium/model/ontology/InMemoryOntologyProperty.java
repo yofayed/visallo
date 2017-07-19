@@ -30,8 +30,8 @@ public class InMemoryOntologyProperty extends OntologyProperty {
     private List<String> textIndexHints = new ArrayList<>();
     private Map<String, String> metadata = new HashMap<>();
 
-    private List<String> concepts = new ArrayList<>();
-    private List<String> relationships = new ArrayList<>();
+    private List<String> conceptIris = new ArrayList<>();
+    private List<String> relationshipIris = new ArrayList<>();
 
     private String workspaceId;
 
@@ -273,12 +273,14 @@ public class InMemoryOntologyProperty extends OntologyProperty {
         return metadata;
     }
 
-    public List<String> getConcepts() {
-        return concepts;
+    @Override
+    public List<String> getConceptIris() {
+        return conceptIris;
     }
 
-    public List<String> getRelationships() {
-        return relationships;
+    @Override
+    public List<String> getRelationshipIris() {
+        return relationshipIris;
     }
 
     public void setWorkspaceId(String workspaceId) {

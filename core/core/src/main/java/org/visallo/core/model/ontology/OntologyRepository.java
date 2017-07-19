@@ -279,6 +279,10 @@ public interface OntologyRepository {
             String workspaceId
     );
 
+    void addDomainConceptsToRelationshipType(String relationshipIri, List<String> conceptIris, User user, String workspaceId);
+
+    void addRangeConceptsToRelationshipType(String relationshipIri, List<String> conceptIris, User user, String workspaceId);
+
     /**
      * @deprecated With the addition of ontology sandboxing, ontology elements must now be retrieved with
      * the context of a user and a workspace</br>
@@ -288,10 +292,6 @@ public interface OntologyRepository {
     OntologyProperty getOrCreateProperty(OntologyPropertyDefinition ontologyPropertyDefinition);
 
     OntologyProperty getOrCreateProperty(OntologyPropertyDefinition ontologyPropertyDefinition, User user, String workspaceId);
-
-    void addPropertyToConcepts(OntologyProperty property, List<Concept> concepts, User user, String workspaceId);
-
-    void addPropertyToRelationships(OntologyProperty property, List<Relationship> relationships, User user, String workspaceId);
 
     OWLOntologyManager createOwlOntologyManager(OWLOntologyLoaderConfiguration config, IRI excludeDocumentIRI) throws Exception;
 

@@ -19,6 +19,7 @@ import org.visallo.web.clientapi.model.SandboxStatus;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.TreeSet;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -52,7 +53,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         assertEquals(propertyIRI, response.getTitle());
         assertEquals("New Property", response.getDisplayName());
         assertEquals(PropertyType.STRING, response.getDataType());
-        assertEquals(Arrays.asList("FULL_TEXT", "EXACT_MATCH"), response.getTextIndexHints());
+        assertEquals(new TreeSet<>(Arrays.asList("EXACT_MATCH", "FULL_TEXT")), new TreeSet<>(response.getTextIndexHints()));
         assertEquals(SandboxStatus.PRIVATE, response.getSandboxStatus());
 
         // make sure it's sandboxed in the ontology now
@@ -63,18 +64,21 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
 
         // make sure it was properly added to the concept
         Concept publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID);
-        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
 
         // make sure it was properly added to the relationship
         Relationship publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, WORKSPACE_ID);
-        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
 
         // ensure it's not public
         assertNull(ontologyRepository.getPropertyByIRI(propertyIRI, null));
 
         // Make sure we let the front end know
-        Mockito.verify(workQueueRepository, Mockito.times(1))
-                .pushOntologyChange(WORKSPACE_ID, Collections.singletonList(PUBLIC_CONCEPT_IRI), Collections.singletonList(PUBLIC_RELATIONSHIP_IRI), Collections.singletonList(property.getId()));
+        Mockito.verify(workQueueRepository, Mockito.times(1)).pushOntologyChange(
+                WORKSPACE_ID,
+                Collections.singletonList(ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID).getId()),
+                Collections.singletonList(ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, WORKSPACE_ID).getId()),
+                Collections.singletonList(property.getId()));
     }
 
     @Test(expected = VisalloAccessDeniedException.class)
@@ -154,22 +158,22 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         route.handle(displayName, dataType, propertyIRI, new String[]{PUBLIC_CONCEPT_IRI}, new String[]{PUBLIC_RELATIONSHIP_IRI}, WORKSPACE_ID, user);
 
         Concept publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID);
-        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
 
         Relationship publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, WORKSPACE_ID);
-        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
 
         route.handle(displayName, dataType, propertyIRI, new String[]{PUBLIC_CONCEPT_IRI_B}, new String[]{PUBLIC_RELATIONSHIP_IRI_B}, WORKSPACE_ID, user);
 
         publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID);
-        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
         publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI_B, WORKSPACE_ID);
-        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
 
         publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, WORKSPACE_ID);
-        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
         publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI_B, WORKSPACE_ID);
-        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getId().equals(propertyIRI)));
+        assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
     }
 
     @Test

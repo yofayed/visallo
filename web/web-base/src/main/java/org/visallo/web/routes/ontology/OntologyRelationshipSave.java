@@ -16,6 +16,7 @@ import org.visallo.web.clientapi.model.ClientApiOntology;
 import org.visallo.web.parameterProviders.ActiveWorkspaceId;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OntologyRelationshipSave extends OntologyBase {
     private final OntologyRepository ontologyRepository;
@@ -62,12 +63,20 @@ public class OntologyRelationshipSave extends OntologyBase {
             }
         }
 
-        Relationship relationship = ontologyRepository.getOrCreateRelationshipType(parent, domainConcepts, rangeConcepts, relationshipIri, displayName, false, user, workspaceId);
+        Relationship relationship = ontologyRepository.getRelationshipByIRI(relationshipIri, workspaceId);
+        if (relationship == null) {
+            relationship = ontologyRepository.getOrCreateRelationshipType(parent, domainConcepts, rangeConcepts, relationshipIri, displayName, false, user, workspaceId);
+        } else {
+            List<String> foundDomainIris = domainConcepts.stream().map(Concept::getIRI).collect(Collectors.toList());
+            List<String> foundRangeIris = rangeConcepts.stream().map(Concept::getIRI).collect(Collectors.toList());
+            ontologyRepository.addDomainConceptsToRelationshipType(relationshipIri, foundDomainIris, user, workspaceId);
+            ontologyRepository.addRangeConceptsToRelationshipType(relationshipIri, foundRangeIris, user, workspaceId);
+        }
         relationship.setProperty(OntologyProperties.DISPLAY_NAME.getPropertyName(), displayName, authorizations);
 
         ontologyRepository.clearCache(workspaceId);
         workQueueRepository.pushOntologyRelationshipsChange(workspaceId, relationship.getId());
 
-        return relationship.toClientApi();
+        return ontologyRepository.getRelationshipByIRI(relationshipIri, workspaceId).toClientApi();
     }
 }

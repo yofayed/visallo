@@ -674,30 +674,39 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     }
 
     @Override
-    public void addPropertyToConcepts(OntologyProperty property, List<Concept> concepts, User user, String workspaceId) {
-        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, null, getAuthorizations(workspaceId))) {
+    public void addDomainConceptsToRelationshipType(String relationshipIri, List<String> conceptIris, User user, String workspaceId) {
+        checkPrivileges(user, workspaceId);
+        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, user, getAuthorizations(workspaceId))) {
             ctx.setPushOnQueue(false);
-            Vertex propertyVertex = ((VertexiumOntologyProperty) property).getVertex();
+            VertexiumRelationship relationship = (VertexiumRelationship) getRelationshipByIRI(relationshipIri, workspaceId);
+            Vertex relationshipVertex = relationship.getVertex();
+            if (workspaceId != null && relationship.getSandboxStatus() != SandboxStatus.PRIVATE) {
+                throw new UnsupportedOperationException("Sandboxed updating of domain iris is not currently supported for published relationships");
+            }
+
+            Iterable<Concept> concepts = getConceptsByIRI(conceptIris, workspaceId);
             for (Concept concept : concepts) {
                 checkNotNull(concept, "concepts cannot have null values");
-                findOrAddEdge(ctx, ((VertexiumConcept) concept).getVertex(), propertyVertex, LabelName.HAS_PROPERTY.toString());
+                findOrAddEdge(ctx, ((VertexiumConcept) concept).getVertex(), relationshipVertex, LabelName.HAS_EDGE.toString());
             }
-        } catch (Exception e) {
-            throw new VisalloException("Could not findOrAddEdge", e);
         }
     }
 
     @Override
-    public void addPropertyToRelationships(OntologyProperty property, List<Relationship> relationships, User user, String workspaceId) {
-        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, null, getAuthorizations(workspaceId))) {
+    public void addRangeConceptsToRelationshipType(String relationshipIri, List<String> conceptIris, User user, String workspaceId) {
+        checkPrivileges(user, workspaceId);
+        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, user, getAuthorizations(workspaceId))) {
             ctx.setPushOnQueue(false);
-            Vertex propertyVertex = ((VertexiumOntologyProperty) property).getVertex();
-            for (Relationship relationship : relationships) {
-                checkNotNull(relationships, "relationships cannot have null values");
-                findOrAddEdge(ctx, ((VertexiumRelationship) relationship).getVertex(), propertyVertex, LabelName.HAS_PROPERTY.toString());
+            VertexiumRelationship relationship = (VertexiumRelationship) getRelationshipByIRI(relationshipIri, workspaceId);
+            Vertex relationshipVertex = relationship.getVertex();
+            if (workspaceId != null && relationship.getSandboxStatus() != SandboxStatus.PRIVATE) {
+                throw new UnsupportedOperationException("Sandboxed updating of range iris is not currently supported for published relationships");
             }
-        } catch (Exception e) {
-            throw new VisalloException("Could not findOrAddEdge", e);
+            Iterable<Concept> concepts = getConceptsByIRI(conceptIris, workspaceId);
+            for (Concept concept : concepts) {
+                checkNotNull(concept, "concepts cannot have null values");
+                findOrAddEdge(ctx, relationshipVertex, ((VertexiumConcept) concept).getVertex(), LabelName.HAS_EDGE.toString());
+            }
         }
     }
 
@@ -956,7 +965,6 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
                     findOrAddEdge(ctx, ((VertexiumRelationship) relationship).getVertex(), propertyVertex, LabelName.HAS_PROPERTY.toString());
                 }
 
-
                 if (workspaceId != null) {
                     findOrAddEdge(ctx, workspaceId, propertyVertex.getId(), WorkspaceProperties.WORKSPACE_TO_ONTOLOGY_RELATIONSHIP_IRI);
                 }
@@ -1002,6 +1010,10 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     @Override
     public void updatePropertyDependentIris(OntologyProperty property, Collection<String> newDependentPropertyIris, User user, String workspaceId) {
         VertexiumOntologyProperty vertexiumProperty = (VertexiumOntologyProperty) property;
+        if (workspaceId != null || property.getSandboxStatus() == SandboxStatus.PRIVATE) {
+            throw new UnsupportedOperationException("Sandboxed updating of dependent iris is not currently supported for properties");
+        }
+
         saveDependentProperties(vertexiumProperty.getVertex().getId(), newDependentPropertyIris, user, workspaceId);
         graph.flush();
         vertexiumProperty.setDependentProperties(newDependentPropertyIris);
@@ -1010,6 +1022,9 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     @Override
     public void updatePropertyDomainIris(OntologyProperty property, Set<String> domainIris, User user, String workspaceId) {
         VertexiumOntologyProperty vertexiumProperty = (VertexiumOntologyProperty) property;
+        if (workspaceId != null && property.getSandboxStatus() != SandboxStatus.PRIVATE) {
+            throw new UnsupportedOperationException("Sandboxed updating of domain iris is not currently supported for published properties");
+        }
 
         Iterable<EdgeVertexPair> existingConcepts = vertexiumProperty.getVertex().getEdgeVertexPairs(Direction.BOTH, LabelName.HAS_PROPERTY.toString(), getAuthorizations(workspaceId));
         for (EdgeVertexPair existingConcept : existingConcepts) {
