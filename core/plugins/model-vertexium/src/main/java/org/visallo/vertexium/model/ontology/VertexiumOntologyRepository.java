@@ -300,7 +300,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
         StreamingPropertyValue value = new StreamingPropertyValue(new ByteArrayInputStream(data), byte[].class);
         value.searchIndex(false);
         Metadata metadata = new Metadata();
-        Vertex rootConceptVertex = ((VertexiumConcept) getRootConcept(null)).getVertex();
+        Vertex rootConceptVertex = ((VertexiumConcept) getRootConcept(PUBLIC)).getVertex();
         metadata.add("index", Iterables.size(OntologyProperties.ONTOLOGY_FILE.getProperties(rootConceptVertex)), VISIBILITY.getVisibility());
         OntologyProperties.ONTOLOGY_FILE.addPropertyValue(rootConceptVertex, documentIRI.toString(), value, metadata, VISIBILITY.getVisibility(), authorizations);
         OntologyProperties.ONTOLOGY_FILE_MD5.addPropertyValue(rootConceptVertex, documentIRI.toString(), md5, metadata, VISIBILITY.getVisibility(), authorizations);
@@ -309,7 +309,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
 
     @Override
     protected boolean hasFileChanged(IRI documentIRI, byte[] inFileData) {
-        Vertex rootConceptVertex = ((VertexiumConcept) getRootConcept(null)).getVertex();
+        Vertex rootConceptVertex = ((VertexiumConcept) getRootConcept(PUBLIC)).getVertex();
         String existingMd5 = OntologyProperties.ONTOLOGY_FILE_MD5.getPropertyValue(rootConceptVertex, documentIRI.toString());
         return existingMd5 == null || !DigestUtils.md5Hex(inFileData).equals(existingMd5);
     }
@@ -317,7 +317,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     @Deprecated
     @Override
     public boolean isOntologyDefined(String iri) {
-        Vertex rootConceptVertex = ((VertexiumConcept) getRootConcept(null)).getVertex();
+        Vertex rootConceptVertex = ((VertexiumConcept) getRootConcept(PUBLIC)).getVertex();
         Property prop = OntologyProperties.ONTOLOGY_FILE.getProperty(rootConceptVertex, iri);
         return prop != null;
     }
@@ -347,7 +347,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     }
 
     private Iterable<Property> getOntologyFiles() {
-        VertexiumConcept rootConcept = (VertexiumConcept) getRootConcept(null);
+        VertexiumConcept rootConcept = (VertexiumConcept) getRootConcept(PUBLIC);
         checkNotNull(rootConcept, "Could not get root concept");
         Vertex rootConceptVertex = rootConcept.getVertex();
         checkNotNull(rootConceptVertex, "Could not get root concept vertex");
@@ -613,7 +613,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
                 findOrAddEdge(ctx, ((VertexiumConcept) concept).getVertex(), ((VertexiumConcept) parent).getVertex(), LabelName.IS_A.toString());
             }
 
-            if (workspaceId != null) {
+            if (!isPublic(workspaceId)) {
                 findOrAddEdge(ctx, workspaceId, ((VertexiumConcept) concept).getVertex().getId(), WorkspaceProperties.WORKSPACE_TO_ONTOLOGY_RELATIONSHIP_IRI);
             }
 
@@ -635,7 +635,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
 
     private VertexBuilder prepareVertex(String prefix, String iri, String workspaceId, Visibility visibility, VisibilityJson visibilityJson) {
 
-        if (workspaceId == null) {
+        if (isPublic(workspaceId)) {
             return graph.prepareVertex(prefix + iri, visibility);
         }
 
@@ -680,7 +680,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
             ctx.setPushOnQueue(false);
             VertexiumRelationship relationship = (VertexiumRelationship) getRelationshipByIRI(relationshipIri, workspaceId);
             Vertex relationshipVertex = relationship.getVertex();
-            if (workspaceId != null && relationship.getSandboxStatus() != SandboxStatus.PRIVATE) {
+            if (!isPublic(workspaceId) && relationship.getSandboxStatus() != SandboxStatus.PRIVATE) {
                 throw new UnsupportedOperationException("Sandboxed updating of domain iris is not currently supported for published relationships");
             }
 
@@ -699,7 +699,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
             ctx.setPushOnQueue(false);
             VertexiumRelationship relationship = (VertexiumRelationship) getRelationshipByIRI(relationshipIri, workspaceId);
             Vertex relationshipVertex = relationship.getVertex();
-            if (workspaceId != null && relationship.getSandboxStatus() != SandboxStatus.PRIVATE) {
+            if (!isPublic(workspaceId) && relationship.getSandboxStatus() != SandboxStatus.PRIVATE) {
                 throw new UnsupportedOperationException("Sandboxed updating of range iris is not currently supported for published relationships");
             }
             Iterable<Concept> concepts = getConceptsByIRI(conceptIris, workspaceId);
@@ -901,7 +901,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
                 }
             });
 
-            if (workspaceId != null) {
+            if (!isPublic(workspaceId)) {
                 findOrAddEdge(ctx, workspaceId, relationshipVertex.getId(), WorkspaceProperties.WORKSPACE_TO_ONTOLOGY_RELATIONSHIP_IRI);
             }
 
@@ -965,7 +965,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
                     findOrAddEdge(ctx, ((VertexiumRelationship) relationship).getVertex(), propertyVertex, LabelName.HAS_PROPERTY.toString());
                 }
 
-                if (workspaceId != null) {
+                if (!isPublic(workspaceId)) {
                     findOrAddEdge(ctx, workspaceId, propertyVertex.getId(), WorkspaceProperties.WORKSPACE_TO_ONTOLOGY_RELATIONSHIP_IRI);
                 }
             } catch (Exception e) {
@@ -1010,7 +1010,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     @Override
     public void updatePropertyDependentIris(OntologyProperty property, Collection<String> newDependentPropertyIris, User user, String workspaceId) {
         VertexiumOntologyProperty vertexiumProperty = (VertexiumOntologyProperty) property;
-        if (workspaceId != null || property.getSandboxStatus() == SandboxStatus.PRIVATE) {
+        if (!isPublic(workspaceId) || property.getSandboxStatus() == SandboxStatus.PRIVATE) {
             throw new UnsupportedOperationException("Sandboxed updating of dependent iris is not currently supported for properties");
         }
 
@@ -1022,7 +1022,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     @Override
     public void updatePropertyDomainIris(OntologyProperty property, Set<String> domainIris, User user, String workspaceId) {
         VertexiumOntologyProperty vertexiumProperty = (VertexiumOntologyProperty) property;
-        if (workspaceId != null && property.getSandboxStatus() != SandboxStatus.PRIVATE) {
+        if (!isPublic(workspaceId) && property.getSandboxStatus() != SandboxStatus.PRIVATE) {
             throw new UnsupportedOperationException("Sandboxed updating of domain iris is not currently supported for published properties");
         }
 
@@ -1063,11 +1063,11 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     }
 
     protected Authorizations getAuthorizations(String workspaceId, String... otherAuthorizations) {
-        if (workspaceId == null && (otherAuthorizations == null || otherAuthorizations.length == 0)) {
+        if (isPublic(workspaceId) && (otherAuthorizations == null || otherAuthorizations.length == 0)) {
             return publicOntologyAuthorizations;
         }
 
-        if (workspaceId == null) {
+        if (isPublic(workspaceId)) {
             return graph.createAuthorizations(publicOntologyAuthorizations, otherAuthorizations);
         } else if (otherAuthorizations == null || otherAuthorizations.length == 0) {
             return graph.createAuthorizations(publicOntologyAuthorizations, workspaceId);
@@ -1290,6 +1290,6 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     }
 
     private String cacheKey(String workspaceId) {
-        return (workspaceId == null ? "" : workspaceId);
+        return (isPublic(workspaceId) ? "" : workspaceId);
     }
 }

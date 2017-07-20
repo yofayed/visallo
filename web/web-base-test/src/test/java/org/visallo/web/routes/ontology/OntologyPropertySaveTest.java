@@ -7,10 +7,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.visallo.core.exception.VisalloAccessDeniedException;
 import org.visallo.core.exception.VisalloException;
-import org.visallo.core.model.ontology.Concept;
-import org.visallo.core.model.ontology.OntologyProperty;
-import org.visallo.core.model.ontology.OntologyRepositoryBase;
-import org.visallo.core.model.ontology.Relationship;
+import org.visallo.core.model.ontology.*;
 import org.visallo.web.clientapi.model.ClientApiOntology;
 import org.visallo.web.clientapi.model.Privilege;
 import org.visallo.web.clientapi.model.PropertyType;
@@ -71,7 +68,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
 
         // ensure it's not public
-        assertNull(ontologyRepository.getPropertyByIRI(propertyIRI, null));
+        assertNull(ontologyRepository.getPropertyByIRI(propertyIRI, OntologyRepository.PUBLIC));
 
         // Make sure we let the front end know
         Mockito.verify(workQueueRepository, Mockito.times(1)).pushOntologyChange(
@@ -182,7 +179,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
 
         String displayName = "New Property";
         String dataType = "string";
-        String[] things = new String[]{ontologyRepository.getEntityConcept(null).getIRI()};
+        String[] things = new String[]{ontologyRepository.getEntityConcept(OntologyRepository.PUBLIC).getIRI()};
         String[] relationships = new String[]{PUBLIC_RELATIONSHIP_IRI};
         ClientApiOntology.Property response = route.handle(displayName, dataType, null, things, relationships, WORKSPACE_ID, user);
 

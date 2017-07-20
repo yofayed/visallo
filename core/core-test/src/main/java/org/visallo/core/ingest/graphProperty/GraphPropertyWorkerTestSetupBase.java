@@ -21,6 +21,7 @@ import org.visallo.web.clientapi.model.VisibilityJson;
 import java.util.*;
 
 import static org.mockito.Mockito.when;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 /**
  * This base class provides a common test setup for unit tests of GraphPropertyWorker subclasses. Both Mockito and
@@ -62,11 +63,11 @@ public abstract class GraphPropertyWorkerTestSetupBase {
         configuration.put("ontology.intent.concept.phoneNumber", "http://visallo.org/test#phoneNumber");
         configuration.put("ontology.intent.relationship.artifactHasEntity", "http://visallo.org/test#artifactHasEntity");
 
-        when(ontologyRepository.getRequiredConceptIRIByIntent("location", null)).thenReturn("http://visallo.org/test#location");
-        when(ontologyRepository.getRequiredConceptIRIByIntent("organization", null)).thenReturn("http://visallo.org/test#organization");
-        when(ontologyRepository.getRequiredConceptIRIByIntent("person", null)).thenReturn("http://visallo.org/test#person");
-        when(ontologyRepository.getRequiredConceptIRIByIntent("phoneNumber", null)).thenReturn("http://visallo.org/test#phoneNumber");
-        when(ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity", null)).thenReturn("http://visallo.org/test#artifactHasEntity");
+        when(ontologyRepository.getRequiredConceptIRIByIntent("location", PUBLIC)).thenReturn("http://visallo.org/test#location");
+        when(ontologyRepository.getRequiredConceptIRIByIntent("organization", PUBLIC)).thenReturn("http://visallo.org/test#organization");
+        when(ontologyRepository.getRequiredConceptIRIByIntent("person", PUBLIC)).thenReturn("http://visallo.org/test#person");
+        when(ontologyRepository.getRequiredConceptIRIByIntent("phoneNumber", PUBLIC)).thenReturn("http://visallo.org/test#phoneNumber");
+        when(ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity", PUBLIC)).thenReturn("http://visallo.org/test#artifactHasEntity");
 
         when(user.getUserId()).thenReturn("USER123");
 

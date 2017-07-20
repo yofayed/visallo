@@ -12,6 +12,7 @@ import org.visallo.vertexium.model.ontology.InMemoryConcept;
 import java.util.Arrays;
 
 import static org.mockito.Mockito.when;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 import static org.visallo.zipcode.ZipCodeGraphPropertyWorker.ZIPCODE_CONCEPT_INTENT;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -23,7 +24,7 @@ public class ZipCodeGraphPropertyWorkerTest extends TermMentionGraphPropertyWork
     @Before
     public void setup() {
         InMemoryConcept concept = new InMemoryConcept(CONCEPT_IRI, VisalloProperties.CONCEPT_TYPE_THING, null);
-        when(ontologyRepository.getRequiredConceptByIntent(ZIPCODE_CONCEPT_INTENT, null)).thenReturn(concept);
+        when(ontologyRepository.getRequiredConceptByIntent(ZIPCODE_CONCEPT_INTENT, PUBLIC)).thenReturn(concept);
     }
 
     @Override

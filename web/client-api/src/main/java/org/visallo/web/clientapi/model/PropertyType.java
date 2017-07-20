@@ -3,6 +3,7 @@ package org.visallo.web.clientapi.model;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 
 public enum PropertyType {

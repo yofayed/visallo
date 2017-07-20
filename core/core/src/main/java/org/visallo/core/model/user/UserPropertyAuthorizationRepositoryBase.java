@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 public abstract class UserPropertyAuthorizationRepositoryBase extends AuthorizationRepositoryBase {
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(UserPropertyAuthorizationRepositoryBase.class);
@@ -56,7 +57,7 @@ public abstract class UserPropertyAuthorizationRepositoryBase extends Authorizat
 
     protected void defineAuthorizationsProperty(OntologyRepository ontologyRepository) {
         List<Concept> concepts = new ArrayList<>();
-        concepts.add(ontologyRepository.getConceptByIRI(UserRepository.USER_CONCEPT_IRI, null));
+        concepts.add(ontologyRepository.getConceptByIRI(UserRepository.USER_CONCEPT_IRI, PUBLIC));
         OntologyPropertyDefinition propertyDefinition = new OntologyPropertyDefinition(
                 concepts,
                 AUTHORIZATIONS_PROPERTY_IRI,
@@ -65,7 +66,7 @@ public abstract class UserPropertyAuthorizationRepositoryBase extends Authorizat
         );
         propertyDefinition.setUserVisible(false);
         propertyDefinition.setTextIndexHints(TextIndexHint.NONE);
-        ontologyRepository.getOrCreateProperty(propertyDefinition, new SystemUser(), null);
+        ontologyRepository.getOrCreateProperty(propertyDefinition, new SystemUser(), PUBLIC);
     }
 
     protected ImmutableSet<String> parseAuthorizations(String authorizations) {

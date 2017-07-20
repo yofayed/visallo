@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 import static org.visallo.mimeTypeOntologyMapper.MimeTypeOntologyMapperGraphPropertyWorker.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,7 +42,7 @@ public class MimeTypeOntologyMapperGraphPropertyWorkerTest extends GraphProperty
         gpw = new MimeTypeOntologyMapperGraphPropertyWorker();
 
         InMemoryConcept defaultConcept = new InMemoryConcept(DEFAULT_CONCEPT_IRI, VisalloProperties.CONCEPT_TYPE_THING, null);
-        when(ontologyRepository.getRequiredConceptByIRI(DEFAULT_CONCEPT_IRI, null)).thenReturn(defaultConcept);
+        when(ontologyRepository.getRequiredConceptByIRI(DEFAULT_CONCEPT_IRI, PUBLIC)).thenReturn(defaultConcept);
 
         String defaultConfigKey = MimeTypeOntologyMapperGraphPropertyWorker.class.getName() + ".mapping." + DEFAULT_MAPPING_KEY + "." + MAPPING_IRI_KEY;
         extraConfiguration.put(defaultConfigKey, DEFAULT_CONCEPT_IRI);
@@ -85,7 +86,7 @@ public class MimeTypeOntologyMapperGraphPropertyWorkerTest extends GraphProperty
         extraConfiguration.put(MimeTypeOntologyMapperGraphPropertyWorker.class.getName() + ".mapping.texFiles." + MAPPING_REGEX_KEY, "text/.+");
 
         InMemoryConcept textConcept = new InMemoryConcept(TEXT_CONCEPT_IRI, VisalloProperties.CONCEPT_TYPE_THING, null);
-        when(ontologyRepository.getRequiredConceptByIntent("textFile", null)).thenReturn(textConcept);
+        when(ontologyRepository.getRequiredConceptByIntent("textFile", PUBLIC)).thenReturn(textConcept);
 
         Vertex vertex = run(TEXT_MIME_TYPE);
         assertEquals("GPW should have set text concept type", TEXT_CONCEPT_IRI, VisalloProperties.CONCEPT_TYPE.getPropertyValue(vertex));
@@ -97,7 +98,7 @@ public class MimeTypeOntologyMapperGraphPropertyWorkerTest extends GraphProperty
         extraConfiguration.put(MimeTypeOntologyMapperGraphPropertyWorker.class.getName() + ".mapping.texFiles." + MAPPING_REGEX_KEY, "text/.+");
 
         InMemoryConcept textConcept = new InMemoryConcept(TEXT_CONCEPT_IRI, VisalloProperties.CONCEPT_TYPE_THING, null);
-        when(ontologyRepository.getRequiredConceptByIntent("textFile", null)).thenReturn(textConcept);
+        when(ontologyRepository.getRequiredConceptByIntent("textFile", PUBLIC)).thenReturn(textConcept);
 
         Vertex vertex = run(PNG_MIME_TYPE);
         assertEquals("GPW should have set default concept type", DEFAULT_CONCEPT_IRI, VisalloProperties.CONCEPT_TYPE.getPropertyValue(vertex));

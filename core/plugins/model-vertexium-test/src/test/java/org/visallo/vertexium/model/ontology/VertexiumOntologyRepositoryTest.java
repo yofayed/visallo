@@ -30,9 +30,9 @@ public class VertexiumOntologyRepositoryTest extends OntologyRepositoryTestBase 
                 @Override
                 public void loadOntologies(Configuration config, Authorizations authorizations) throws Exception {
                     SystemUser systemUser = new SystemUser();
-                    Concept rootConcept = getOrCreateConcept(null, ROOT_CONCEPT_IRI, "root", null, systemUser, null);
-                    getOrCreateConcept(rootConcept, ENTITY_CONCEPT_IRI, "thing", null, systemUser, null);
-                    getOrCreateConcept(null, USER_CONCEPT_IRI, "visalloUser", null, false, systemUser, null);
+                    Concept rootConcept = getOrCreateConcept(null, ROOT_CONCEPT_IRI, "root", null, systemUser, PUBLIC);
+                    getOrCreateConcept(rootConcept, ENTITY_CONCEPT_IRI, "thing", null, systemUser, PUBLIC);
+                    getOrCreateConcept(null, USER_CONCEPT_IRI, "visalloUser", null, false, systemUser, PUBLIC);
                     clearCache();
                 }
 

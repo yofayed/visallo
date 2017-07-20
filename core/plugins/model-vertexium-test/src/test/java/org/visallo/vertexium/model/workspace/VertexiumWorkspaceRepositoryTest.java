@@ -5,6 +5,7 @@ import org.vertexium.*;
 import org.visallo.core.exception.VisalloAccessDeniedException;
 import org.visallo.core.model.ontology.Concept;
 import org.visallo.core.model.ontology.OntologyPropertyDefinition;
+import org.visallo.core.model.ontology.OntologyRepository;
 import org.visallo.core.model.user.UserRepository;
 import org.visallo.core.model.workspace.*;
 import org.visallo.core.model.workspace.product.WorkProduct;
@@ -19,6 +20,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.vertexium.util.IterableUtils.count;
 import static org.vertexium.util.IterableUtils.toList;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 public class VertexiumWorkspaceRepositoryTest extends WorkspaceRepositoryTestBase {
     private User user;
@@ -74,11 +76,11 @@ public class VertexiumWorkspaceRepositoryTest extends WorkspaceRepositoryTestBas
         );
 
         User systemUser = getUserRepository().getSystemUser();
-        Concept thing = getOntologyRepository().getEntityConcept(null);
+        Concept thing = getOntologyRepository().getEntityConcept(PUBLIC);
         OntologyPropertyDefinition propertyDefinition = new OntologyPropertyDefinition(Collections.singletonList(thing), "prop1", "Prop 1", PropertyType.STRING);
         propertyDefinition.setTextIndexHints(Collections.singleton(TextIndexHint.EXACT_MATCH));
         propertyDefinition.setUserVisible(true);
-        getOntologyRepository().getOrCreateProperty(propertyDefinition, systemUser, null);
+        getOntologyRepository().getOrCreateProperty(propertyDefinition, systemUser, PUBLIC);
     }
 
     @Test

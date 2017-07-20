@@ -8,6 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.visallo.core.exception.VisalloAccessDeniedException;
 import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.ontology.Concept;
+import org.visallo.core.model.ontology.OntologyRepository;
 import org.visallo.core.model.ontology.OntologyRepositoryBase;
 import org.visallo.web.clientapi.model.ClientApiOntology;
 import org.visallo.web.clientapi.model.Privilege;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OntologyConceptSaveTest extends OntologyRouteTestBase {
@@ -37,7 +39,7 @@ public class OntologyConceptSaveTest extends OntologyRouteTestBase {
         ClientApiOntology.Concept response = route.handle(
                 displayName,
                 conceptIri,
-                ontologyRepository.getEntityConcept(null).getIRI(),
+                ontologyRepository.getEntityConcept(PUBLIC).getIRI(),
                 "glyph.png",
                 "red",
                 WORKSPACE_ID,
@@ -45,7 +47,7 @@ public class OntologyConceptSaveTest extends OntologyRouteTestBase {
         );
 
         assertEquals(conceptIri, response.getId());
-        assertEquals(ontologyRepository.getEntityConcept(null).getIRI(), response.getParentConcept());
+        assertEquals(ontologyRepository.getEntityConcept(PUBLIC).getIRI(), response.getParentConcept());
         assertEquals(displayName, response.getDisplayName());
         assertEquals("resource?id=new-concept-iri", response.getGlyphIconHref());
         assertEquals("red", response.getColor());
@@ -56,10 +58,10 @@ public class OntologyConceptSaveTest extends OntologyRouteTestBase {
         assertNotNull(concept);
         assertEquals("New Concept", concept.getDisplayName());
         assertEquals(SandboxStatus.PRIVATE, concept.getSandboxStatus());
-        assertEquals(ontologyRepository.getEntityConcept(null).getIRI(), ontologyRepository.getParentConcept(concept, WORKSPACE_ID).getIRI());
+        assertEquals(ontologyRepository.getEntityConcept(PUBLIC).getIRI(), ontologyRepository.getParentConcept(concept, WORKSPACE_ID).getIRI());
 
         // ensure it's not public
-        assertNull(ontologyRepository.getConceptByIRI(conceptIri, null));
+        assertNull(ontologyRepository.getConceptByIRI(conceptIri, PUBLIC));
 
         // Make sure we let the front end know
         Mockito.verify(workQueueRepository, Mockito.times(1)).pushOntologyConceptsChange(WORKSPACE_ID, concept.getId());
@@ -70,7 +72,7 @@ public class OntologyConceptSaveTest extends OntologyRouteTestBase {
         route.handle(
                 "New Concept",
                 "new-concept-iri",
-                ontologyRepository.getEntityConcept(null).getIRI(),
+                ontologyRepository.getEntityConcept(PUBLIC).getIRI(),
                 "glyph.png",
                 "red",
                 WORKSPACE_ID,
@@ -115,7 +117,7 @@ public class OntologyConceptSaveTest extends OntologyRouteTestBase {
     public void testSaveNewConceptWithGeneratedIri() throws Exception {
         when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
 
-        String thingIri = ontologyRepository.getEntityConcept(null).getIRI();
+        String thingIri = ontologyRepository.getEntityConcept(PUBLIC).getIRI();
 
         String displayName = "New Concept";
         String glyph = "glyph.png";

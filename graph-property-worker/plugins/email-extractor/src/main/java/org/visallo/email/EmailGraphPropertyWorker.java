@@ -6,6 +6,8 @@ import org.visallo.core.model.Description;
 import org.visallo.core.model.Name;
 import org.visallo.core.model.ontology.Concept;
 
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
+
 @Name("E-Mail extractor")
 @Description("Extracts E-Mail addresses from text")
 public class EmailGraphPropertyWorker extends RegexGraphPropertyWorker {
@@ -24,7 +26,7 @@ public class EmailGraphPropertyWorker extends RegexGraphPropertyWorker {
 
     @Override
     public void prepare(GraphPropertyWorkerPrepareData workerPrepareData) throws Exception {
-        this.concept = getOntologyRepository().getRequiredConceptByIntent(EMAIL_CONCEPT_INTENT, null);
+        this.concept = getOntologyRepository().getRequiredConceptByIntent(EMAIL_CONCEPT_INTENT, PUBLIC);
         super.prepare(workerPrepareData);
     }
 }

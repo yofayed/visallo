@@ -30,6 +30,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 public class RdfXmlImportHelper {
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(RdfXmlImportHelper.class);
@@ -60,11 +61,11 @@ public class RdfXmlImportHelper {
         this.workspaceRepository = workspaceRepository;
         this.visibilityTranslator = visibilityTranslator;
 
-        hasEntityIri = ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity", null);
+        hasEntityIri = ontologyRepository.getRequiredRelationshipIRIByIntent("artifactHasEntity", PUBLIC);
 
         // rdfConceptTypeIri is not required because the
         // concept type on the vertex could have been set somewhere else
-        rdfConceptTypeIri = ontologyRepository.getConceptIRIByIntent("rdf", null);
+        rdfConceptTypeIri = ontologyRepository.getConceptIRIByIntent("rdf", PUBLIC);
     }
 
     public void importRdfXml(

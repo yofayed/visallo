@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 public class ArtifactThumbnailRepository {
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(ArtifactThumbnailRepository.class);
@@ -41,12 +42,12 @@ public class ArtifactThumbnailRepository {
         this.simpleOrmSession = simpleOrmSession;
         this.userRepository = userRepository;
 
-        String yAxisFlippedPropertyIri = ontologyRepository.getPropertyIRIByIntent("media.yAxisFlipped", null);
+        String yAxisFlippedPropertyIri = ontologyRepository.getPropertyIRIByIntent("media.yAxisFlipped", PUBLIC);
         if (yAxisFlippedPropertyIri != null) {
             this.yAxisFlippedProperty = new BooleanVisalloProperty(yAxisFlippedPropertyIri);
         }
 
-        String clockwiseRotationPropertyIri = ontologyRepository.getPropertyIRIByIntent("media.clockwiseRotation", null);
+        String clockwiseRotationPropertyIri = ontologyRepository.getPropertyIRIByIntent("media.clockwiseRotation", PUBLIC);
         if (clockwiseRotationPropertyIri != null) {
             this.clockwiseRotationProperty = new IntegerVisalloProperty(clockwiseRotationPropertyIri);
         }

@@ -34,6 +34,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.vertexium.util.IterableUtils.toList;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 public class VertexUploadImage implements ParameterizedHandler {
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(VertexUploadImage.class);
@@ -65,10 +66,10 @@ public class VertexUploadImage implements ParameterizedHandler {
         this.visibilityTranslator = visibilityTranslator;
         this.workspaceRepository = workspaceRepository;
 
-        this.conceptIri = ontologyRepository.getRequiredConceptIRIByIntent("entityImage", null);
-        this.entityHasImageIri = ontologyRepository.getRequiredRelationshipIRIByIntent("entityHasImage", null);
-        this.yAxisFlippedIri = ontologyRepository.getRequiredPropertyIRIByIntent("media.yAxisFlipped", null);
-        this.clockwiseRotationIri = ontologyRepository.getRequiredPropertyIRIByIntent("media.clockwiseRotation", null);
+        this.conceptIri = ontologyRepository.getRequiredConceptIRIByIntent("entityImage", PUBLIC);
+        this.entityHasImageIri = ontologyRepository.getRequiredRelationshipIRIByIntent("entityHasImage", PUBLIC);
+        this.yAxisFlippedIri = ontologyRepository.getRequiredPropertyIRIByIntent("media.yAxisFlipped", PUBLIC);
+        this.clockwiseRotationIri = ontologyRepository.getRequiredPropertyIRIByIntent("media.clockwiseRotation", PUBLIC);
     }
 
     @Handle

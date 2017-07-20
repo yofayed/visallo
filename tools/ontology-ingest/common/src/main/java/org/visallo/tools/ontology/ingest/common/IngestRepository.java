@@ -18,6 +18,8 @@ import org.visallo.web.clientapi.model.VisibilityJson;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
+
 public class IngestRepository {
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(IngestRepository.class);
     private final Graph graph;
@@ -147,7 +149,7 @@ public class IngestRepository {
     public ValidationResult validateConceptBuilder(ConceptBuilder builder) {
         if (!verifiedClasses.contains(builder.getClass())) {
             LOGGER.trace("Validating Concept: %s", builder.getIri());
-            Concept concept = ontologyRepository.getConceptByIRI(builder.getIri(), null);
+            Concept concept = ontologyRepository.getConceptByIRI(builder.getIri(), PUBLIC);
             if (concept == null) {
                 return new ValidationResult("Concept class: " + builder.getClass().getName() + " IRI: " + builder.getIri() + " is invalid");
             }
@@ -161,7 +163,7 @@ public class IngestRepository {
     public ValidationResult validateRelationshipBuilder(RelationshipBuilder builder) {
         if (!verifiedClasses.contains(builder.getClass())) {
             LOGGER.trace("Validating Relationship: %s", builder.getIri());
-            Relationship relationship = ontologyRepository.getRelationshipByIRI(builder.getIri(), null);
+            Relationship relationship = ontologyRepository.getRelationshipByIRI(builder.getIri(), PUBLIC);
             if (relationship == null) {
                 return new ValidationResult("Relationship class: " + builder.getClass().getName() + " IRI: " + builder.getIri() + " is invalid");
             }
@@ -176,7 +178,7 @@ public class IngestRepository {
                     builder.getOutVertexIri(),
                     builder.getInVertexIri()
             );
-            Relationship relationship = ontologyRepository.getRelationshipByIRI(builder.getIri(), null);
+            Relationship relationship = ontologyRepository.getRelationshipByIRI(builder.getIri(), PUBLIC);
             List<String> domainConceptIRIs = relationship.getDomainConceptIRIs();
             List<String> outVertexAndParentIris = getConceptIriWithParents(builder.getOutVertexIri());
             outVertexAndParentIris.retainAll(domainConceptIRIs);
@@ -201,7 +203,7 @@ public class IngestRepository {
         List<String> conceptIriWithParents = new ArrayList<>();
         String parentConceptIRI = conceptIri;
         while (parentConceptIRI != null) {
-            Concept parentConcept = ontologyRepository.getConceptByIRI(parentConceptIRI, null);
+            Concept parentConcept = ontologyRepository.getConceptByIRI(parentConceptIRI, PUBLIC);
             parentConceptIRI = null;
             if (parentConcept != null) {
                 conceptIriWithParents.add(parentConcept.getIRI());
@@ -231,9 +233,9 @@ public class IngestRepository {
             LOGGER.trace("Validating Property on %s: %s", entityBuilder.getIri(), propertyAddition.getIri());
             HasOntologyProperties conceptOrRelationship;
             if (entityBuilder instanceof ConceptBuilder) {
-                conceptOrRelationship = ontologyRepository.getConceptByIRI(entityBuilder.getIri(), null);
+                conceptOrRelationship = ontologyRepository.getConceptByIRI(entityBuilder.getIri(), PUBLIC);
             } else if (entityBuilder instanceof RelationshipBuilder) {
-                conceptOrRelationship = ontologyRepository.getRelationshipByIRI(entityBuilder.getIri(), null);
+                conceptOrRelationship = ontologyRepository.getRelationshipByIRI(entityBuilder.getIri(), PUBLIC);
             } else {
                 return new ValidationResult("Unexpected type: " + entityBuilder.getClass().getName());
             }
@@ -242,7 +244,7 @@ public class IngestRepository {
                 return new ValidationResult("Entity: " + entityBuilder.getIri() + " does not exist in the ontology");
             }
 
-            OntologyProperty property = ontologyRepository.getPropertyByIRI(propertyAddition.getIri(), null);
+            OntologyProperty property = ontologyRepository.getPropertyByIRI(propertyAddition.getIri(), OntologyRepository.PUBLIC);
             if (property == null) {
                 return new ValidationResult("Property: " + propertyAddition.getIri() + " does not exist in the ontology");
             }
@@ -269,7 +271,7 @@ public class IngestRepository {
     private boolean isPropertyValidForEntity(HasOntologyProperties entity, OntologyProperty property) {
         if (entity.getProperties() == null || !entity.getProperties().contains(property)) {
             if (entity instanceof Concept) {
-                Concept parentConcept = ontologyRepository.getParentConcept((Concept) entity, null);
+                Concept parentConcept = ontologyRepository.getParentConcept((Concept) entity, PUBLIC);
                 if (parentConcept != null) {
                     return isPropertyValidForEntity(parentConcept, property);
                 }

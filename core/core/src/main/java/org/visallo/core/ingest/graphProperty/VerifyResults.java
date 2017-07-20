@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
+
 public class VerifyResults {
     private List<Failure> failures = new ArrayList<>();
 
     public boolean verifyRequiredPropertyIntent(OntologyRepository ontologyRepository, String intentName) {
-        String propertyIri = ontologyRepository.getPropertyIRIByIntent(intentName, null);
+        String propertyIri = ontologyRepository.getPropertyIRIByIntent(intentName, PUBLIC);
         if (propertyIri == null || propertyIri.length() == 0) {
             addFailure(new RequiredPropertyIntentFailure(intentName));
             return false;

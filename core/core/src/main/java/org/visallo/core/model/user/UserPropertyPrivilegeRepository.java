@@ -27,6 +27,8 @@ import org.visallo.web.clientapi.model.PropertyType;
 
 import java.util.*;
 
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
+
 public class UserPropertyPrivilegeRepository extends PrivilegeRepositoryBase implements PrivilegeRepositoryWithCliSupport {
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(UserPropertyPrivilegeRepository.class);
     public static final String PRIVILEGES_PROPERTY_IRI = "http://visallo.org/user#privileges";
@@ -62,7 +64,7 @@ public class UserPropertyPrivilegeRepository extends PrivilegeRepositoryBase imp
 
     private void definePrivilegesProperty(OntologyRepository ontologyRepository) {
         List<Concept> concepts = new ArrayList<>();
-        concepts.add(ontologyRepository.getConceptByIRI(UserRepository.USER_CONCEPT_IRI, null));
+        concepts.add(ontologyRepository.getConceptByIRI(UserRepository.USER_CONCEPT_IRI, PUBLIC));
         OntologyPropertyDefinition propertyDefinition = new OntologyPropertyDefinition(
                 concepts,
                 PRIVILEGES_PROPERTY_IRI,
@@ -71,7 +73,7 @@ public class UserPropertyPrivilegeRepository extends PrivilegeRepositoryBase imp
         );
         propertyDefinition.setUserVisible(false);
         propertyDefinition.setTextIndexHints(TextIndexHint.NONE);
-        ontologyRepository.getOrCreateProperty(propertyDefinition, new SystemUser(), null);
+        ontologyRepository.getOrCreateProperty(propertyDefinition, new SystemUser(), PUBLIC);
     }
 
     @Override

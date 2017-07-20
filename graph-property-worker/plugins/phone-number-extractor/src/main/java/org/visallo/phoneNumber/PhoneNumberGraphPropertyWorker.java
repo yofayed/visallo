@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.vertexium.util.IterableUtils.count;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 @Name("Phone Number Extractor")
 @Description("Extracts phone numbers from text")
@@ -46,7 +47,7 @@ public class PhoneNumberGraphPropertyWorker extends GraphPropertyWorker {
             defaultRegionCode = DEFAULT_DEFAULT_REGION_CODE;
         }
 
-        publicEntityType = getOntologyRepository().getRequiredConceptIRIByIntent(PHONE_NUMBER_CONCEPT_INTENT, null);
+        publicEntityType = getOntologyRepository().getRequiredConceptIRIByIntent(PHONE_NUMBER_CONCEPT_INTENT, PUBLIC);
     }
 
     @Override

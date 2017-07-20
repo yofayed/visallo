@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 /**
  * By default raw properties will be text extracted into "http://visallo.org#text" with a text description of "Extracted Text".
@@ -121,7 +122,7 @@ public class TikaTextExtractorGraphPropertyWorker extends GraphPropertyWorker {
             LOGGER.error("Could not load config: %s", PROPS_FILE);
         }
 
-        String pageCountPropertyIri = getOntologyRepository().getPropertyIRIByIntent("pageCount", null);
+        String pageCountPropertyIri = getOntologyRepository().getPropertyIRIByIntent("pageCount", PUBLIC);
         if (pageCountPropertyIri != null) {
             pageCountProperty = new LongVisalloProperty(pageCountPropertyIri);
         }
@@ -137,10 +138,10 @@ public class TikaTextExtractorGraphPropertyWorker extends GraphPropertyWorker {
         authorKeys = Arrays.asList(tikaProperties.getProperty(AUTHOR_PROPERTY, "author").split(","));
         numberOfPagesKeys = Arrays.asList(tikaProperties.getProperty(NUMBER_OF_PAGES_PROPERTY, "xmpTPg:NPages").split(","));
 
-        authorPropertyIri = getOntologyRepository().getPropertyIRIByIntent("documentAuthor", null);
-        titlePropertyIri = getOntologyRepository().getPropertyIRIByIntent("documentTitle", null);
+        authorPropertyIri = getOntologyRepository().getPropertyIRIByIntent("documentAuthor", PUBLIC);
+        titlePropertyIri = getOntologyRepository().getPropertyIRIByIntent("documentTitle", PUBLIC);
         if (titlePropertyIri == null) {
-            titlePropertyIri = getOntologyRepository().getPropertyIRIByIntent("artifactTitle", null);
+            titlePropertyIri = getOntologyRepository().getPropertyIRIByIntent("artifactTitle", PUBLIC);
         }
     }
 

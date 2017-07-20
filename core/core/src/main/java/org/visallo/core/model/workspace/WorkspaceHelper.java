@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.vertexium.util.IterableUtils.toList;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 @Singleton
 public class WorkspaceHelper {
@@ -63,13 +64,13 @@ public class WorkspaceHelper {
         this.workspaceRepository = workspaceRepository;
         this.privilegeRepository = privilegeRepository;
         this.authorizationRepository = authorizationRepository;
-        this.entityHasImageIri = ontologyRepository.getRelationshipIRIByIntent("entityHasImage", null);
+        this.entityHasImageIri = ontologyRepository.getRelationshipIRIByIntent("entityHasImage", PUBLIC);
 
         if (this.entityHasImageIri == null) {
             LOGGER.warn("'entityHasImage' intent has not been defined. Please update your ontology.");
         }
 
-        this.artifactContainsImageOfEntityIri = ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity", null);
+        this.artifactContainsImageOfEntityIri = ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity", PUBLIC);
         if (this.artifactContainsImageOfEntityIri == null) {
             LOGGER.warn("'artifactContainsImageOfEntity' intent has not been defined. Please update your ontology.");
         }
@@ -215,10 +216,10 @@ public class WorkspaceHelper {
 
     private void ensureOntologyIrisInitialized() {
         if (this.entityHasImageIri == null) {
-            this.entityHasImageIri = ontologyRepository.getRelationshipIRIByIntent("entityHasImage", null);
+            this.entityHasImageIri = ontologyRepository.getRelationshipIRIByIntent("entityHasImage", PUBLIC);
         }
         if (this.artifactContainsImageOfEntityIri == null) {
-            this.artifactContainsImageOfEntityIri = ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity", null);
+            this.artifactContainsImageOfEntityIri = ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity", PUBLIC);
         }
     }
 

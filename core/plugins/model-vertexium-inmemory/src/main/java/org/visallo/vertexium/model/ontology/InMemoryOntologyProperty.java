@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import org.vertexium.Authorizations;
 import org.visallo.core.model.ontology.OntologyProperties;
 import org.visallo.core.model.ontology.OntologyProperty;
+import org.visallo.core.model.ontology.OntologyRepository;
+import org.visallo.core.model.ontology.OntologyRepositoryBase;
 import org.visallo.web.clientapi.model.PropertyType;
 import org.visallo.web.clientapi.model.SandboxStatus;
 

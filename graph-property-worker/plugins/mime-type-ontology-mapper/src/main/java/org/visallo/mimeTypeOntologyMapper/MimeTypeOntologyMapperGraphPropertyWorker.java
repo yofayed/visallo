@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
+
 @Name("MIME Type Ontology Mapper")
 @Description("Maps MIME types to an ontology class")
 public class MimeTypeOntologyMapperGraphPropertyWorker extends GraphPropertyWorker {
@@ -73,12 +75,12 @@ public class MimeTypeOntologyMapperGraphPropertyWorker extends GraphPropertyWork
     private Concept getConceptFromMapping(Map<String, String> mapping) {
         String intent = mapping.get(MAPPING_INTENT_KEY);
         if (intent != null) {
-            return getOntologyRepository().getRequiredConceptByIntent(intent, null);
+            return getOntologyRepository().getRequiredConceptByIntent(intent, PUBLIC);
         }
 
         String iri = mapping.get(MAPPING_IRI_KEY);
         if (iri != null) {
-            return getOntologyRepository().getRequiredConceptByIRI(iri, null);
+            return getOntologyRepository().getRequiredConceptByIRI(iri, PUBLIC);
         }
 
         throw new VisalloException("Missing concept for mapping. Must specify " + MAPPING_INTENT_KEY + " or " + MAPPING_IRI_KEY + ".");

@@ -8,6 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.visallo.core.exception.VisalloAccessDeniedException;
 import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.ontology.Concept;
+import org.visallo.core.model.ontology.OntologyRepository;
 import org.visallo.core.model.ontology.OntologyRepositoryBase;
 import org.visallo.core.model.ontology.Relationship;
 import org.visallo.web.clientapi.model.ClientApiOntology;
@@ -39,7 +40,7 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
         ClientApiOntology.Relationship response = route.handle(
                 "New Relationship",
                 new String[]{PUBLIC_CONCEPT_IRI},
-                new String[]{ontologyRepository.getEntityConcept(null).getIRI()},
+                new String[]{ontologyRepository.getEntityConcept(OntologyRepository.PUBLIC).getIRI()},
                 PUBLIC_RELATIONSHIP_IRI,
                 relationshipIRI,
                 WORKSPACE_ID,
@@ -55,7 +56,7 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
         assertEquals(1, response.getDomainConceptIris().size());
         assertEquals(PUBLIC_CONCEPT_IRI, response.getDomainConceptIris().get(0));
         assertEquals(1, response.getRangeConceptIris().size());
-        assertEquals(ontologyRepository.getEntityConcept(null).getIRI(), response.getRangeConceptIris().get(0));
+        assertEquals(ontologyRepository.getEntityConcept(OntologyRepository.PUBLIC).getIRI(), response.getRangeConceptIris().get(0));
 
         // make sure it's sandboxed in the ontology now
         Relationship relationship = ontologyRepository.getRelationshipByIRI(relationshipIRI, WORKSPACE_ID);
@@ -65,7 +66,7 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
         assertEquals(PUBLIC_RELATIONSHIP_IRI, ontologyRepository.getParentRelationship(relationship, WORKSPACE_ID).getIRI());
 
         // ensure it's not public
-        assertNull(ontologyRepository.getRelationshipByIRI(relationshipIRI, null));
+        assertNull(ontologyRepository.getRelationshipByIRI(relationshipIRI, OntologyRepository.PUBLIC));
 
         // Make sure we let the front end know
         Mockito.verify(workQueueRepository, Mockito.times(1)).pushOntologyRelationshipsChange(WORKSPACE_ID, relationship.getId());
@@ -76,7 +77,7 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
         route.handle(
                 "New Relationship",
                 new String[]{PUBLIC_CONCEPT_IRI},
-                new String[]{ontologyRepository.getEntityConcept(null).getIRI()},
+                new String[]{ontologyRepository.getEntityConcept(OntologyRepository.PUBLIC).getIRI()},
                 PUBLIC_RELATIONSHIP_IRI,
                 "junit-relationship",
                 WORKSPACE_ID,
@@ -129,7 +130,7 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
             route.handle(
                     "New Relationship",
                     new String[]{PUBLIC_CONCEPT_IRI},
-                    new String[]{ontologyRepository.getEntityConcept(null).getIRI()},
+                    new String[]{ontologyRepository.getEntityConcept(OntologyRepository.PUBLIC).getIRI()},
                     "unknown-parent-relationship",
                     "junit-relationship",
                     WORKSPACE_ID,
@@ -159,7 +160,7 @@ public class OntologyRelationshipSaveTest extends OntologyRouteTestBase {
     public void testAddAdditionalConceptsToNewRelationship() throws Exception {
         when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
 
-        Concept thing = ontologyRepository.getEntityConcept(null);
+        Concept thing = ontologyRepository.getEntityConcept(OntologyRepository.PUBLIC);
         String displayName = "New Relationship";
         String[] sourceConcepts = {thing.getIRI()};
         String[] targetConcepts = {PUBLIC_CONCEPT_IRI};

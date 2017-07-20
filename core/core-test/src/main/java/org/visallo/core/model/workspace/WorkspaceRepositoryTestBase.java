@@ -5,10 +5,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.vertexium.*;
 import org.visallo.core.model.graph.VisibilityAndElementMutation;
-import org.visallo.core.model.ontology.Concept;
-import org.visallo.core.model.ontology.OntologyProperty;
-import org.visallo.core.model.ontology.OntologyPropertyDefinition;
-import org.visallo.core.model.ontology.Relationship;
+import org.visallo.core.model.ontology.*;
 import org.visallo.core.model.user.UserPropertyPrivilegeRepository;
 import org.visallo.core.model.workQueue.Priority;
 import org.visallo.core.model.workspace.product.Product;
@@ -24,6 +21,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 public abstract class WorkspaceRepositoryTestBase extends VisalloInMemoryTestBase {
     private static final String JUNIT_CONCEPT_TYPE = "junit-concept-iri";
@@ -43,18 +41,18 @@ public abstract class WorkspaceRepositoryTestBase extends VisalloInMemoryTestBas
 
         User systemUser = getUserRepository().getSystemUser();
         Authorizations authorizations = getAuthorizationRepository().getGraphAuthorizations(systemUser);
-        thingConcept = getOntologyRepository().getEntityConcept(null);
+        thingConcept = getOntologyRepository().getEntityConcept(PUBLIC);
 
         List<Concept> things = Collections.singletonList(thingConcept);
-        Relationship hasEntityRel = getOntologyRepository().getOrCreateRelationshipType(null, things, things, "has-entity-iri", true, systemUser, null);
+        Relationship hasEntityRel = getOntologyRepository().getOrCreateRelationshipType(null, things, things, "has-entity-iri", true, systemUser, PUBLIC);
         hasEntityRel.addIntent("entityHasImage", authorizations);
 
-        getOntologyRepository().getOrCreateConcept(thingConcept, JUNIT_CONCEPT_TYPE, "Junit Concept", null, systemUser, null);
-        getOntologyRepository().getOrCreateRelationshipType(null, things, things, JUNIT_EDGE_LABEL, true, systemUser, null);
+        getOntologyRepository().getOrCreateConcept(thingConcept, JUNIT_CONCEPT_TYPE, "Junit Concept", null, systemUser, PUBLIC);
+        getOntologyRepository().getOrCreateRelationshipType(null, things, things, JUNIT_EDGE_LABEL, true, systemUser, PUBLIC);
         OntologyPropertyDefinition propertyDefinition = new OntologyPropertyDefinition(things, JUNIT_PROPERTY_NAME, "Junit Property", PropertyType.STRING);
         propertyDefinition.setTextIndexHints(Collections.singleton(TextIndexHint.EXACT_MATCH));
         propertyDefinition.setUserVisible(true);
-        getOntologyRepository().getOrCreateProperty(propertyDefinition, systemUser, null);
+        getOntologyRepository().getOrCreateProperty(propertyDefinition, systemUser, PUBLIC);
         getOntologyRepository().clearCache();
 
         workspace = getWorkspaceRepository().add("ws1", "workspace 1", user);

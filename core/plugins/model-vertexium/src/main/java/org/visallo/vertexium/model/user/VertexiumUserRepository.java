@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.vertexium.util.IterableUtils.singleOrDefault;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 @Singleton
 public class VertexiumUserRepository extends UserRepository {
@@ -74,7 +75,7 @@ public class VertexiumUserRepository extends UserRepository {
         graphAuthorizationRepository.addAuthorizationToGraph(VISIBILITY_STRING);
         graphAuthorizationRepository.addAuthorizationToGraph(VisalloVisibility.SUPER_USER_VISIBILITY_STRING);
 
-        Concept userConcept = ontologyRepository.getOrCreateConcept(null, USER_CONCEPT_IRI, "visalloUser", null, false, getSystemUser(), null);
+        Concept userConcept = ontologyRepository.getOrCreateConcept(null, USER_CONCEPT_IRI, "visalloUser", null, false, getSystemUser(), PUBLIC);
         userConceptId = userConcept.getIRI();
 
         Set<String> authorizationsSet = new HashSet<>();

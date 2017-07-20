@@ -22,6 +22,7 @@ import org.visallo.web.clientapi.model.VisibilityJson;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WorkspaceHelperTest {
@@ -65,9 +66,9 @@ public class WorkspaceHelperTest {
         authorizationsRepository = new InMemoryGraphAuthorizationRepository();
         termMentionRepository = new TermMentionRepository(graph, authorizationsRepository);
 
-        when(ontologyRepository.getRelationshipIRIByIntent("entityHasImage", null)).thenReturn(
+        when(ontologyRepository.getRelationshipIRIByIntent("entityHasImage", PUBLIC)).thenReturn(
                 "http://visallo.org/test#entityHasImage");
-        when(ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity", null)).thenReturn(
+        when(ontologyRepository.getRelationshipIRIByIntent("artifactContainsImageOfEntity", PUBLIC)).thenReturn(
                 "http://visallo.org/test#artifactContainsImageOfEntity");
         workspaceHelper = new WorkspaceHelper(
                 termMentionRepository,

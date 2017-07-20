@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.*;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase {
     private static final String TEST_OWL = "test.owl";
@@ -78,8 +79,8 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     @Test
     public void testGettingParentConceptReturnsParentProperties() throws Exception {
         loadHierarchyOwlFile();
-        Concept concept = getOntologyRepository().getConceptByIRI(TEST_HIERARCHY_IRI + "#person", null);
-        Concept parentConcept = getOntologyRepository().getParentConcept(concept, null);
+        Concept concept = getOntologyRepository().getConceptByIRI(TEST_HIERARCHY_IRI + "#person", PUBLIC);
+        Concept parentConcept = getOntologyRepository().getParentConcept(concept, PUBLIC);
         assertEquals(1, parentConcept.getProperties().size());
     }
 
@@ -87,10 +88,10 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testRelationshipHierarchy() throws Exception {
         loadHierarchyOwlFile();
 
-        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_HIERARCHY_IRI + "#personReallyKnowsPerson", null);
+        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_HIERARCHY_IRI + "#personReallyKnowsPerson", PUBLIC);
         assertEquals(TEST_HIERARCHY_IRI + "#personKnowsPerson", relationship.getParentIRI());
 
-        relationship = getOntologyRepository().getParentRelationship(relationship, null);
+        relationship = getOntologyRepository().getParentRelationship(relationship, PUBLIC);
         assertEquals(TEST_HIERARCHY_IRI + "#personKnowsPerson", relationship.getIRI());
         assertEquals(OntologyRepositoryBase.TOP_OBJECT_PROPERTY_IRI, relationship.getParentIRI());
     }
@@ -106,8 +107,8 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         validateTestOwlConcepts(3);
         validateTestOwlProperties();
 
-        OntologyProperty aliasProperty = getOntologyRepository().getPropertyByIRI(TEST01_IRI + "#alias", null);
-        Concept person = getOntologyRepository().getConceptByIRI(TEST_IRI + "#person", null);
+        OntologyProperty aliasProperty = getOntologyRepository().getPropertyByIRI(TEST01_IRI + "#alias", PUBLIC);
+        Concept person = getOntologyRepository().getConceptByIRI(TEST_IRI + "#person", PUBLIC);
         assertTrue(person.getProperties()
                 .stream()
                 .anyMatch(p -> p.getIri().equals(aliasProperty.getIri()))
@@ -164,7 +165,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testGetConceptsByIri() throws Exception {
         createSampleOntology();
 
-        Iterable<Concept> conceptsByIRI = getOntologyRepository().getConceptsByIRI(Collections.singletonList(PUBLIC_CONCEPT_IRI), null);
+        Iterable<Concept> conceptsByIRI = getOntologyRepository().getConceptsByIRI(Collections.singletonList(PUBLIC_CONCEPT_IRI), PUBLIC);
         List<Concept> concepts = IterableUtils.toList(conceptsByIRI);
         assertEquals(1, concepts.size());
         assertEquals(PUBLIC_CONCEPT_IRI, concepts.get(0).getIRI());
@@ -174,7 +175,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(1, concepts.size());
         assertEquals(SANDBOX_CONCEPT_IRI, concepts.get(0).getIRI());
 
-        conceptsByIRI = getOntologyRepository().getConceptsByIRI(Arrays.asList(PUBLIC_CONCEPT_IRI, SANDBOX_CONCEPT_IRI), null);
+        conceptsByIRI = getOntologyRepository().getConceptsByIRI(Arrays.asList(PUBLIC_CONCEPT_IRI, SANDBOX_CONCEPT_IRI), PUBLIC);
         concepts = IterableUtils.toList(conceptsByIRI);
         assertEquals(1, concepts.size());
         assertEquals(PUBLIC_CONCEPT_IRI, concepts.get(0).getIRI());
@@ -190,7 +191,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testGetConceptsById() throws Exception {
         SampleOntologyDetails sampleOntologyDetails = createSampleOntology();
 
-        Iterable<Concept> conceptsByIRI = getOntologyRepository().getConcepts(Collections.singletonList(sampleOntologyDetails.publicConceptId), null);
+        Iterable<Concept> conceptsByIRI = getOntologyRepository().getConcepts(Collections.singletonList(sampleOntologyDetails.publicConceptId), PUBLIC);
         List<Concept> concepts = IterableUtils.toList(conceptsByIRI);
         assertEquals(1, concepts.size());
         assertEquals(PUBLIC_CONCEPT_IRI, concepts.get(0).getIRI());
@@ -200,7 +201,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(1, concepts.size());
         assertEquals(SANDBOX_CONCEPT_IRI, concepts.get(0).getIRI());
 
-        conceptsByIRI = getOntologyRepository().getConcepts(Arrays.asList(sampleOntologyDetails.publicConceptId, sampleOntologyDetails.sandboxConceptId), null);
+        conceptsByIRI = getOntologyRepository().getConcepts(Arrays.asList(sampleOntologyDetails.publicConceptId, sampleOntologyDetails.sandboxConceptId), PUBLIC);
         concepts = IterableUtils.toList(conceptsByIRI);
         assertEquals(1, concepts.size());
         assertEquals(PUBLIC_CONCEPT_IRI, concepts.get(0).getIRI());
@@ -216,7 +217,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testGetRelationshipsByIri() throws Exception {
         createSampleOntology();
 
-        Iterable<Relationship> relationshipsByIRI = getOntologyRepository().getRelationshipsByIRI(Collections.singletonList(PUBLIC_RELATIONSHIP_IRI), null);
+        Iterable<Relationship> relationshipsByIRI = getOntologyRepository().getRelationshipsByIRI(Collections.singletonList(PUBLIC_RELATIONSHIP_IRI), PUBLIC);
         List<Relationship> relationships = IterableUtils.toList(relationshipsByIRI);
         assertEquals(1, relationships.size());
         assertEquals(PUBLIC_RELATIONSHIP_IRI, relationships.get(0).getIRI());
@@ -226,7 +227,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(1, relationships.size());
         assertEquals(SANDBOX_RELATIONSHIP_IRI, relationships.get(0).getIRI());
 
-        relationshipsByIRI = getOntologyRepository().getRelationshipsByIRI(Arrays.asList(PUBLIC_RELATIONSHIP_IRI, SANDBOX_RELATIONSHIP_IRI), null);
+        relationshipsByIRI = getOntologyRepository().getRelationshipsByIRI(Arrays.asList(PUBLIC_RELATIONSHIP_IRI, SANDBOX_RELATIONSHIP_IRI), PUBLIC);
         relationships = IterableUtils.toList(relationshipsByIRI);
         assertEquals(1, relationships.size());
         assertEquals(PUBLIC_RELATIONSHIP_IRI, relationships.get(0).getIRI());
@@ -242,7 +243,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testGetRelationshipsById() throws Exception {
         SampleOntologyDetails sampleOntologyDetails = createSampleOntology();
 
-        Iterable<Relationship> relationshipsByIRI = getOntologyRepository().getRelationships(Collections.singletonList(sampleOntologyDetails.publicRelationshipId), null);
+        Iterable<Relationship> relationshipsByIRI = getOntologyRepository().getRelationships(Collections.singletonList(sampleOntologyDetails.publicRelationshipId), PUBLIC);
         List<Relationship> relationships = IterableUtils.toList(relationshipsByIRI);
         assertEquals(1, relationships.size());
         assertEquals(PUBLIC_RELATIONSHIP_IRI, relationships.get(0).getIRI());
@@ -252,7 +253,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(1, relationships.size());
         assertEquals(SANDBOX_RELATIONSHIP_IRI, relationships.get(0).getIRI());
 
-        relationshipsByIRI = getOntologyRepository().getRelationships(Arrays.asList(sampleOntologyDetails.publicRelationshipId, sampleOntologyDetails.sandboxRelationshipId), null);
+        relationshipsByIRI = getOntologyRepository().getRelationships(Arrays.asList(sampleOntologyDetails.publicRelationshipId, sampleOntologyDetails.sandboxRelationshipId), PUBLIC);
         relationships = IterableUtils.toList(relationshipsByIRI);
         assertEquals(1, relationships.size());
         assertEquals(PUBLIC_RELATIONSHIP_IRI, relationships.get(0).getIRI());
@@ -268,7 +269,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testPropertiesByIri() throws Exception {
         createSampleOntology();
 
-        Iterable<OntologyProperty> propertiesByIRI = getOntologyRepository().getPropertiesByIRI(Collections.singletonList(PUBLIC_PROPERTY_IRI), null);
+        Iterable<OntologyProperty> propertiesByIRI = getOntologyRepository().getPropertiesByIRI(Collections.singletonList(PUBLIC_PROPERTY_IRI), PUBLIC);
         List<OntologyProperty> properties = IterableUtils.toList(propertiesByIRI);
         assertEquals(1, properties.size());
         assertEquals(PUBLIC_PROPERTY_IRI, properties.get(0).getIri());
@@ -278,7 +279,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(1, properties.size());
         assertEquals(SANDBOX_PROPERTY_IRI, properties.get(0).getIri());
 
-        propertiesByIRI = getOntologyRepository().getPropertiesByIRI(Arrays.asList(PUBLIC_PROPERTY_IRI, SANDBOX_PROPERTY_IRI), null);
+        propertiesByIRI = getOntologyRepository().getPropertiesByIRI(Arrays.asList(PUBLIC_PROPERTY_IRI, SANDBOX_PROPERTY_IRI), PUBLIC);
         properties = IterableUtils.toList(propertiesByIRI);
         assertEquals(1, properties.size());
         assertEquals(PUBLIC_PROPERTY_IRI, properties.get(0).getIri());
@@ -294,7 +295,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testPropertiesById() throws Exception {
         SampleOntologyDetails sampleOntologyDetails = createSampleOntology();
 
-        Iterable<OntologyProperty> propertiesByIRI = getOntologyRepository().getProperties(Collections.singletonList(sampleOntologyDetails.publicPropertyId), null);
+        Iterable<OntologyProperty> propertiesByIRI = getOntologyRepository().getProperties(Collections.singletonList(sampleOntologyDetails.publicPropertyId), PUBLIC);
         List<OntologyProperty> properties = IterableUtils.toList(propertiesByIRI);
         assertEquals(1, properties.size());
         assertEquals(PUBLIC_PROPERTY_IRI, properties.get(0).getIri());
@@ -304,7 +305,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(1, properties.size());
         assertEquals(SANDBOX_PROPERTY_IRI, properties.get(0).getIri());
 
-        propertiesByIRI = getOntologyRepository().getProperties(Arrays.asList(sampleOntologyDetails.publicPropertyId, sampleOntologyDetails.sandboxPropertyId), null);
+        propertiesByIRI = getOntologyRepository().getProperties(Arrays.asList(sampleOntologyDetails.publicPropertyId, sampleOntologyDetails.sandboxPropertyId), PUBLIC);
         properties = IterableUtils.toList(propertiesByIRI);
         assertEquals(1, properties.size());
         assertEquals(PUBLIC_PROPERTY_IRI, properties.get(0).getIri());
@@ -345,7 +346,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testClientApiObjectWithNoWorkspace() throws Exception {
         createSampleOntology();
 
-        ClientApiOntology clientApiObject = getOntologyRepository().getClientApiObject(null);
+        ClientApiOntology clientApiObject = getOntologyRepository().getClientApiObject(PUBLIC);
 
         assertFalse(clientApiObject.getConcepts().stream().anyMatch(concept -> concept.getTitle().equals(SANDBOX_CONCEPT_IRI)));
         ClientApiOntology.Concept publicApiConcept = clientApiObject.getConcepts().stream()
@@ -421,13 +422,13 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     @Test(expected = VisalloAccessDeniedException.class)
     public void testCreatingConceptsWithNoUserOrWorkspace() {
         Concept thing = getOntologyRepository().getEntityConcept(workspaceId);
-        getOntologyRepository().getOrCreateConcept(thing, PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null, null, null);
+        getOntologyRepository().getOrCreateConcept(thing, PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null, null, PUBLIC);
     }
 
     @Test(expected = VisalloAccessDeniedException.class)
     public void testCreatingPublicConceptsWithoutPublishPrivilege() {
         Concept thing = getOntologyRepository().getEntityConcept(workspaceId);
-        getOntologyRepository().getOrCreateConcept(thing, PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null, user, null);
+        getOntologyRepository().getOrCreateConcept(thing, PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null, user, PUBLIC);
     }
 
     @Test
@@ -435,10 +436,10 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         setPrivileges(user, Sets.newHashSet(Privilege.ONTOLOGY_ADD, Privilege.ONTOLOGY_PUBLISH));
 
         Concept thing = getOntologyRepository().getEntityConcept(workspaceId);
-        getOntologyRepository().getOrCreateConcept(thing, PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null, user, null);
+        getOntologyRepository().getOrCreateConcept(thing, PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null, user, PUBLIC);
         getOntologyRepository().clearCache();
 
-        Concept noWorkspace = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, null);
+        Concept noWorkspace = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, PUBLIC);
         assertEquals(PUBLIC_DISPLAY_NAME, noWorkspace.getDisplayName());
 
         Concept withWorkspace = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, workspaceId);
@@ -448,10 +449,10 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     @Test
     public void testCreatingPublicConceptsAsSystem() {
         Concept thing = getOntologyRepository().getEntityConcept(workspaceId);
-        getOntologyRepository().getOrCreateConcept(thing, PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null, systemUser, null);
+        getOntologyRepository().getOrCreateConcept(thing, PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null, systemUser, PUBLIC);
         getOntologyRepository().clearCache();
 
-        Concept noWorkspace = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, null);
+        Concept noWorkspace = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, PUBLIC);
         assertEquals(PUBLIC_DISPLAY_NAME, noWorkspace.getDisplayName());
 
         Concept withWorkspace = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, workspaceId);
@@ -472,7 +473,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         getOntologyRepository().getOrCreateConcept(thing, SANDBOX_CONCEPT_IRI, SANDBOX_DISPLAY_NAME, null, user, workspaceId);
         getOntologyRepository().clearCache();
 
-        Concept noWorkspace = getOntologyRepository().getConceptByIRI(SANDBOX_CONCEPT_IRI, null);
+        Concept noWorkspace = getOntologyRepository().getConceptByIRI(SANDBOX_CONCEPT_IRI, PUBLIC);
         assertNull(noWorkspace);
 
         Concept withWorkspace = getOntologyRepository().getConceptByIRI(SANDBOX_CONCEPT_IRI, workspaceId);
@@ -499,20 +500,20 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         getOntologyRepository().publishConcept(sandboxedConcept, user, workspaceId);
         getOntologyRepository().clearCache();
 
-        Concept publicConcept = getOntologyRepository().getConceptByIRI(SANDBOX_CONCEPT_IRI, null);
+        Concept publicConcept = getOntologyRepository().getConceptByIRI(SANDBOX_CONCEPT_IRI, PUBLIC);
         assertEquals(SANDBOX_DISPLAY_NAME, publicConcept.getDisplayName());
     }
 
     @Test(expected = VisalloAccessDeniedException.class)
     public void testCreatingRelationshipsWithNoUserOrWorkspace() {
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
-        getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, PUBLIC_RELATIONSHIP_IRI, null, true, null, null);
+        getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, PUBLIC_RELATIONSHIP_IRI, null, true, null, PUBLIC);
     }
 
     @Test(expected = VisalloAccessDeniedException.class)
     public void testCreatingPublicRelationshipsWithoutPublishPrivilege() {
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
-        getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, PUBLIC_RELATIONSHIP_IRI, null, true, user, null);
+        getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, PUBLIC_RELATIONSHIP_IRI, null, true, user, PUBLIC);
     }
 
     @Test
@@ -520,10 +521,10 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         setPrivileges(user, Sets.newHashSet(Privilege.ONTOLOGY_ADD, Privilege.ONTOLOGY_PUBLISH));
 
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
-        getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, PUBLIC_RELATIONSHIP_IRI, null, true, user, null);
+        getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, PUBLIC_RELATIONSHIP_IRI, null, true, user, PUBLIC);
         getOntologyRepository().clearCache();
 
-        Relationship noWorkspace = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, null);
+        Relationship noWorkspace = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
         assertEquals(PUBLIC_RELATIONSHIP_IRI, noWorkspace.getIRI());
 
         Relationship withWorkspace = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, workspaceId);
@@ -533,10 +534,10 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     @Test
     public void testCreatingPublicRelationshipsAsSystem() {
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
-        getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, PUBLIC_RELATIONSHIP_IRI, null, true, systemUser, null);
+        getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, PUBLIC_RELATIONSHIP_IRI, null, true, systemUser, PUBLIC);
         getOntologyRepository().clearCache();
 
-        Relationship noWorkspace = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, null);
+        Relationship noWorkspace = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
         assertEquals(PUBLIC_RELATIONSHIP_IRI, noWorkspace.getIRI());
 
         Relationship withWorkspace = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, workspaceId);
@@ -557,7 +558,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         getOntologyRepository().getOrCreateRelationshipType(null, thing, thing, SANDBOX_RELATIONSHIP_IRI, null, true, user, workspaceId);
         getOntologyRepository().clearCache();
 
-        Relationship noWorkspace = getOntologyRepository().getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, null);
+        Relationship noWorkspace = getOntologyRepository().getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, PUBLIC);
         assertNull(noWorkspace);
 
         Relationship withWorkspace = getOntologyRepository().getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, workspaceId);
@@ -582,7 +583,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         getOntologyRepository().publishRelationship(sandboxedRelationship, user, workspaceId);
         getOntologyRepository().clearCache();
 
-        Relationship publicRelationship = getOntologyRepository().getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, null);
+        Relationship publicRelationship = getOntologyRepository().getRelationshipByIRI(SANDBOX_RELATIONSHIP_IRI, PUBLIC);
         assertEquals(SANDBOX_RELATIONSHIP_IRI, publicRelationship.getIRI());
     }
 
@@ -592,9 +593,9 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
 
-        Concept publicConcept = createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
-        Concept publicConceptB = createConcept(PUBLIC_CONCEPT_IRI + 'b', PUBLIC_DISPLAY_NAME, null);
-        createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
+        Concept publicConcept = createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, PUBLIC);
+        Concept publicConceptB = createConcept(PUBLIC_CONCEPT_IRI + 'b', PUBLIC_DISPLAY_NAME, PUBLIC);
+        createRelationship(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
 
         getOntologyRepository().clearCache();
 
@@ -616,14 +617,14 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testCreatingPropertyWithNoUserOrWorkspace() {
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(thing, PUBLIC_PROPERTY_IRI, SANDBOX_DISPLAY_NAME, PropertyType.DATE);
-        getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, null, null);
+        getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, null, PUBLIC);
     }
 
     @Test(expected = VisalloAccessDeniedException.class)
     public void testCreatingPublicPropertyWithoutPublishPrivilege() {
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(thing, PUBLIC_PROPERTY_IRI, SANDBOX_DISPLAY_NAME, PropertyType.DATE);
-        getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, user, null);
+        getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, user, PUBLIC);
     }
 
     @Test
@@ -632,10 +633,10 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(thing, PUBLIC_PROPERTY_IRI, SANDBOX_DISPLAY_NAME, PropertyType.DATE);
-        getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, user, null);
+        getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, user, PUBLIC);
         getOntologyRepository().clearCache();
 
-        OntologyProperty noWorkspace = getOntologyRepository().getPropertyByIRI(PUBLIC_PROPERTY_IRI, null);
+        OntologyProperty noWorkspace = getOntologyRepository().getPropertyByIRI(PUBLIC_PROPERTY_IRI, PUBLIC);
         assertEquals(PUBLIC_PROPERTY_IRI, noWorkspace.getIri());
 
         OntologyProperty withWorkspace = getOntologyRepository().getPropertyByIRI(PUBLIC_PROPERTY_IRI, workspaceId);
@@ -646,10 +647,10 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     public void testCreatingPublicPropertyAsSystem() {
         List<Concept> thing = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(thing, PUBLIC_PROPERTY_IRI, SANDBOX_DISPLAY_NAME, PropertyType.DATE);
-        getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, systemUser, null);
+        getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, systemUser, PUBLIC);
         getOntologyRepository().clearCache();
 
-        OntologyProperty noWorkspace = getOntologyRepository().getPropertyByIRI(PUBLIC_PROPERTY_IRI, null);
+        OntologyProperty noWorkspace = getOntologyRepository().getPropertyByIRI(PUBLIC_PROPERTY_IRI, PUBLIC);
         assertEquals(PUBLIC_PROPERTY_IRI, noWorkspace.getIri());
 
         OntologyProperty withWorkspace = getOntologyRepository().getPropertyByIRI(PUBLIC_PROPERTY_IRI, workspaceId);
@@ -668,7 +669,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         setPrivileges(user, Collections.singleton(Privilege.ONTOLOGY_ADD));
 
         List<Concept> things = Collections.singletonList(getOntologyRepository().getEntityConcept(workspaceId));
-        Relationship publicRelationship = getOntologyRepository().getOrCreateRelationshipType(null, things, things, PUBLIC_RELATIONSHIP_IRI, true, systemUser, null);
+        Relationship publicRelationship = getOntologyRepository().getOrCreateRelationshipType(null, things, things, PUBLIC_RELATIONSHIP_IRI, true, systemUser, PUBLIC);
 
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(
                 things,
@@ -677,11 +678,11 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         getOntologyRepository().getOrCreateProperty(ontologyPropertyDefinition, user, workspaceId);
         getOntologyRepository().clearCache();
 
-        OntologyProperty noWorkspace = getOntologyRepository().getPropertyByIRI(SANDBOX_PROPERTY_IRI, null);
+        OntologyProperty noWorkspace = getOntologyRepository().getPropertyByIRI(SANDBOX_PROPERTY_IRI, PUBLIC);
         assertNull(noWorkspace);
 
-        Concept thing = getOntologyRepository().getEntityConcept(null);
-        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, null);
+        Concept thing = getOntologyRepository().getEntityConcept(PUBLIC);
+        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
         assertEquals(0, thing.getProperties().size());
         assertEquals(0, publicRelationship.getProperties().size());
 
@@ -702,9 +703,9 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
 
-        createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
-        createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
-        OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, null);
+        createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, PUBLIC);
+        createRelationship(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
+        OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, PUBLIC);
 
         getOntologyRepository().clearCache();
 
@@ -722,8 +723,8 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
 
-        createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
-        createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
+        createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, PUBLIC);
+        createRelationship(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
         OntologyProperty sandboxedProperty = createProperty(SANDBOX_PROPERTY_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
 
         getOntologyRepository().clearCache();
@@ -742,10 +743,10 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(SANDBOX_PROPERTY_IRI, publicRelationship.getProperties().iterator().next().getIri());
 
         // ensure that it's not there outside the sandbox
-        publicConcept = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, null);
+        publicConcept = getOntologyRepository().getConceptByIRI(PUBLIC_CONCEPT_IRI, PUBLIC);
         assertEquals(0, publicConcept.getProperties().size());
 
-        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, null);
+        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
         assertEquals(0, publicRelationship.getProperties().size());
     }
 
@@ -757,7 +758,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         createConcept(SANDBOX_CONCEPT_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
         createRelationship(SANDBOX_RELATIONSHIP_IRI, workspaceId);
-        OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, null);
+        OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, PUBLIC);
 
         getOntologyRepository().clearCache();
 
@@ -810,7 +811,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         Concept thing = getOntologyRepository().getEntityConcept(workspaceId);
         List<Concept> things = Collections.singletonList(thing);
-        Relationship publicRelationship = getOntologyRepository().getOrCreateRelationshipType(null, things, things, PUBLIC_RELATIONSHIP_IRI, true, systemUser, null);
+        Relationship publicRelationship = getOntologyRepository().getOrCreateRelationshipType(null, things, things, PUBLIC_RELATIONSHIP_IRI, true, systemUser, PUBLIC);
         OntologyPropertyDefinition ontologyPropertyDefinition = new OntologyPropertyDefinition(
                 things,
                 Collections.singletonList(publicRelationship),
@@ -819,11 +820,11 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         getOntologyRepository().publishProperty(sandboxedProperty, user, workspaceId);
         getOntologyRepository().clearCache();
 
-        OntologyProperty publicProperty = getOntologyRepository().getPropertyByIRI(SANDBOX_PROPERTY_IRI, null);
+        OntologyProperty publicProperty = getOntologyRepository().getPropertyByIRI(SANDBOX_PROPERTY_IRI, PUBLIC);
         assertEquals(SANDBOX_PROPERTY_IRI, publicProperty.getIri());
 
-        thing = getOntologyRepository().getEntityConcept(null);
-        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, null);
+        thing = getOntologyRepository().getEntityConcept(PUBLIC);
+        publicRelationship = getOntologyRepository().getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
         assertEquals(1, thing.getProperties().size());
         assertEquals(SANDBOX_PROPERTY_IRI, thing.getProperties().iterator().next().getIri());
         assertEquals(1, publicRelationship.getProperties().size());
@@ -845,13 +846,13 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
 
         getWorkspaceRepository().add(workspaceId, "Junit Workspace", user);
 
-        Concept publicConcept = createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, null);
+        Concept publicConcept = createConcept(PUBLIC_CONCEPT_IRI, PUBLIC_DISPLAY_NAME, PUBLIC);
         Concept sandboxedConcept = createConcept(SANDBOX_CONCEPT_IRI, SANDBOX_DISPLAY_NAME, workspaceId);
 
-        Relationship publicRelationship = createRelationship(PUBLIC_RELATIONSHIP_IRI, null);
+        Relationship publicRelationship = createRelationship(PUBLIC_RELATIONSHIP_IRI, PUBLIC);
         Relationship sandboxedRelationship = createRelationship(SANDBOX_RELATIONSHIP_IRI, workspaceId);
 
-        OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, publicConcept, publicRelationship, null);
+        OntologyProperty publicProperty = createProperty(PUBLIC_PROPERTY_IRI, PUBLIC_DISPLAY_NAME, publicConcept, publicRelationship, PUBLIC);
         OntologyProperty sandboxedProperty = createProperty(SANDBOX_PROPERTY_IRI, SANDBOX_DISPLAY_NAME, Arrays.asList(publicConcept, sandboxedConcept), Arrays.asList(publicRelationship, sandboxedRelationship), workspaceId);
 
         getOntologyRepository().clearCache();
@@ -907,13 +908,13 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     }
 
     private void validateTestOwlRelationship() {
-        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", null);
+        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", PUBLIC);
         assertEquals("Knows", relationship.getDisplayName());
         assertEquals("prop('http://visallo.org/test#firstMet') || ''", relationship.getTimeFormula());
         assertTrue(relationship.getRangeConceptIRIs().contains("http://visallo.org/test#person"));
         assertTrue(relationship.getDomainConceptIRIs().contains("http://visallo.org/test#person"));
 
-        relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personIsRelatedToPerson", null);
+        relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personIsRelatedToPerson", PUBLIC);
         assertEquals("Is Related To", relationship.getDisplayName());
         String[] intents = relationship.getIntents();
         assertEquals(1, intents.length);
@@ -923,7 +924,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     }
 
     private void validateTestOwlProperties() {
-        OntologyProperty nameProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#name", null);
+        OntologyProperty nameProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#name", PUBLIC);
         assertEquals("Name", nameProperty.getDisplayName());
         assertEquals(PropertyType.STRING, nameProperty.getDataType());
         assertEquals("_.compact([\n" +
@@ -953,24 +954,24 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals("test 1", possibleValues.get("T1"));
         assertEquals("test 2", possibleValues.get("T2"));
 
-        Concept person = getOntologyRepository().getConceptByIRI(TEST_IRI + "#person", null);
+        Concept person = getOntologyRepository().getConceptByIRI(TEST_IRI + "#person", PUBLIC);
         assertTrue(person.getProperties()
                 .stream()
                 .anyMatch(p -> p.getIri().equals(nameProperty.getIri()))
         );
 
-        OntologyProperty firstMetProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#firstMet", null);
+        OntologyProperty firstMetProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#firstMet", PUBLIC);
         assertEquals("First Met", firstMetProperty.getDisplayName());
         assertEquals(PropertyType.DATE, firstMetProperty.getDataType());
 
-        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor", null);
+        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor", PUBLIC);
         assertEquals("Favorite Color", favColorProperty.getDisplayName());
         possibleValues = favColorProperty.getPossibleValues();
         assertEquals(2, possibleValues.size());
         assertEquals("red 1", possibleValues.get("Red"));
         assertEquals("blue 2", possibleValues.get("Blue"));
 
-        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", null);
+        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", PUBLIC);
         assertTrue(relationship.getProperties()
                 .stream()
                 .anyMatch(p -> p.getIri().equals(firstMetProperty.getIri()))
@@ -978,7 +979,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     }
 
     private void validateTestOwlConcepts(int expectedIriSize) throws IOException {
-        Concept contact = getOntologyRepository().getConceptByIRI(TEST_IRI + "#contact", null);
+        Concept contact = getOntologyRepository().getConceptByIRI(TEST_IRI + "#contact", PUBLIC);
         assertEquals("Contact", contact.getDisplayName());
         assertEquals("rgb(149, 138, 218)", contact.getColor());
         assertEquals("test", contact.getDisplayType());
@@ -986,7 +987,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertEquals(1, intents.size());
         assertTrue(intents.contains("face"));
 
-        Concept person = getOntologyRepository().getConceptByIRI(TEST_IRI + "#person", null);
+        Concept person = getOntologyRepository().getConceptByIRI(TEST_IRI + "#person", PUBLIC);
         assertEquals("Person", person.getDisplayName());
         intents = Arrays.asList(person.getIntents());
         assertEquals(1, intents.size());
@@ -998,7 +999,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertArrayEquals(bytes, person.getGlyphIcon());
         assertEquals("rgb(28, 137, 28)", person.getColor());
 
-        Set<Concept> conceptAndAllChildren = getOntologyRepository().getConceptAndAllChildren(contact, null);
+        Set<Concept> conceptAndAllChildren = getOntologyRepository().getConceptAndAllChildren(contact, PUBLIC);
         List<String> iris = Lists.newArrayList();
         conceptAndAllChildren.forEach(c -> iris.add(c.getIRI()));
         assertEquals(expectedIriSize, iris.size());
@@ -1007,7 +1008,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     }
 
     private void validateChangedOwlRelationships() throws IOException {
-        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", null);
+        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", PUBLIC);
         assertEquals("Person Knows Person", relationship.getDisplayName());
         assertNull(relationship.getTimeFormula());
         assertFalse(relationship.getRangeConceptIRIs().contains("http://visallo.org/test#person2"));
@@ -1021,8 +1022,8 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     }
 
     private void validateChangedOwlConcepts() throws IOException {
-        Concept contact = getOntologyRepository().getConceptByIRI(TEST_IRI + "#contact", null);
-        Concept person = getOntologyRepository().getConceptByIRI(TEST_IRI + "#person", null);
+        Concept contact = getOntologyRepository().getConceptByIRI(TEST_IRI + "#contact", PUBLIC);
+        Concept person = getOntologyRepository().getConceptByIRI(TEST_IRI + "#person", PUBLIC);
         assertEquals("Person", person.getDisplayName());
         List<String> intents = Arrays.asList(person.getIntents());
         assertEquals(1, intents.size());
@@ -1035,7 +1036,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         assertNull(person.getGlyphIcon());
         assertEquals("rgb(28, 137, 28)", person.getColor());
 
-        Set<Concept> conceptAndAllChildren = getOntologyRepository().getConceptAndAllChildren(contact, null);
+        Set<Concept> conceptAndAllChildren = getOntologyRepository().getConceptAndAllChildren(contact, PUBLIC);
         List<String> iris = Lists.newArrayList();
         conceptAndAllChildren.forEach(c -> iris.add(c.getIRI()));
         assertEquals(2, iris.size());
@@ -1044,7 +1045,7 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     }
 
     private void validateChangedOwlProperties() throws IOException {
-        OntologyProperty nameProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#name", null);
+        OntologyProperty nameProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#name", PUBLIC);
         assertEquals("http://visallo.org/test#name", nameProperty.getDisplayName());
         assertEquals(PropertyType.STRING, nameProperty.getDataType());
         assertEquals("_.compact([\n" +
@@ -1071,18 +1072,18 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
         Map<String, String> possibleValues = nameProperty.getPossibleValues();
         assertNull(possibleValues);
 
-        OntologyProperty firstMetProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#firstMet", null);
+        OntologyProperty firstMetProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#firstMet", PUBLIC);
         assertEquals("First Met", firstMetProperty.getDisplayName());
         assertEquals(PropertyType.DATE, firstMetProperty.getDataType());
 
-        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor", null);
+        OntologyProperty favColorProperty = getOntologyRepository().getPropertyByIRI(TEST_IRI + "#favoriteColor", PUBLIC);
         assertEquals("Favorite Color", favColorProperty.getDisplayName());
         possibleValues = favColorProperty.getPossibleValues();
         assertEquals(2, possibleValues.size());
         assertEquals("red 1", possibleValues.get("Red"));
         assertEquals("blue 2", possibleValues.get("Blue"));
 
-        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", null);
+        Relationship relationship = getOntologyRepository().getRelationshipByIRI(TEST_IRI + "#personKnowsPerson", PUBLIC);
         assertTrue(relationship.getProperties()
                 .stream()
                 .anyMatch(p -> p.getIri().equals(firstMetProperty.getIri()))

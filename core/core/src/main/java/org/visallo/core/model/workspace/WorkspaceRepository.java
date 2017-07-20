@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.vertexium.util.IterableUtils.toList;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 import static org.visallo.core.util.StreamUtil.stream;
 
 public abstract class WorkspaceRepository {
@@ -83,7 +84,7 @@ public abstract class WorkspaceRepository {
         this.ontologyRepository = ontologyRepository;
         this.workQueueRepository = workQueueRepository;
 
-        this.entityHasImageIri = ontologyRepository.getRelationshipIRIByIntent("entityHasImage", null);
+        this.entityHasImageIri = ontologyRepository.getRelationshipIRIByIntent("entityHasImage", PUBLIC);
         this.authorizationRepository = authorizationRepository;
         if (this.entityHasImageIri == null) {
             LOGGER.warn("'entityHasImage' intent has not been defined. Please update your ontology.");

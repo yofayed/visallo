@@ -7,6 +7,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.ontology.Concept;
 import org.visallo.core.model.ontology.OntologyPropertyDefinition;
+import org.visallo.core.model.ontology.OntologyRepository;
 import org.visallo.web.clientapi.model.ClientApiOntology;
 import org.visallo.web.clientapi.model.Privilege;
 import org.visallo.web.clientapi.model.PropertyType;
@@ -42,7 +43,7 @@ public class OntologyGetTest extends OntologyRouteTestBase {
         String sandboxRelationshipIri = "sandboxed-relationship";
         String sandboxedPropertyIri = "sandboxed-property";
 
-        Concept thingConcept = ontologyRepository.getEntityConcept(null);
+        Concept thingConcept = ontologyRepository.getEntityConcept(OntologyRepository.PUBLIC);
         List<Concept> things = Collections.singletonList(thingConcept);
         ontologyRepository.getOrCreateConcept(thingConcept, sandboxConceptIri, "Sandboxed Concept", null, user, WORKSPACE_ID);
         ontologyRepository.getOrCreateRelationshipType(null, things, things, sandboxRelationshipIri, true, user, WORKSPACE_ID);

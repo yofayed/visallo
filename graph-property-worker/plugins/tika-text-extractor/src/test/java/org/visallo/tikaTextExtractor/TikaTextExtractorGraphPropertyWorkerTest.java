@@ -23,6 +23,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TikaTextExtractorGraphPropertyWorkerTest extends GraphPropertyWorkerTestBase {
@@ -32,7 +33,7 @@ public class TikaTextExtractorGraphPropertyWorkerTest extends GraphPropertyWorke
 
     @Before
     public void before() throws Exception {
-        when(ontologyRepository.getPropertyIRIByIntent("documentTitle", null)).thenReturn(DOCUMENT_TITLE_PROPERTY_IRI);
+        when(ontologyRepository.getPropertyIRIByIntent("documentTitle", PUBLIC)).thenReturn(DOCUMENT_TITLE_PROPERTY_IRI);
 
         Configuration config = new HashMapConfigurationLoader(getConfigurationMap()).createConfiguration();
         TikaTextExtractorGraphPropertyWorkerConfiguration tikaConfig = new TikaTextExtractorGraphPropertyWorkerConfiguration(config);

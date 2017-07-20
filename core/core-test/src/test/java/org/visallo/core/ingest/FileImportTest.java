@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.when;
 import static org.vertexium.util.IterableUtils.toList;
+import static org.visallo.core.model.ontology.OntologyRepository.PUBLIC;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileImportTest {
@@ -75,9 +76,13 @@ public class FileImportTest {
     public void setup() {
         graph = InMemoryGraph.create();
         visibilityTranslator = new DirectVisibilityTranslator();
-        authorizations = graph.createAuthorizations();
 
-        when(ontologyRepository.getRequiredPropertyByIntent(PROP1_NAME, null)).thenReturn(ontologyProperty);
+        String workspaceId = "junit-workspace";
+        authorizations = graph.createAuthorizations(workspaceId);
+
+        when(workspace.getWorkspaceId()).thenReturn(workspaceId);
+
+        when(ontologyRepository.getRequiredPropertyByIntent(PROP1_NAME, workspaceId)).thenReturn(ontologyProperty);
         when(ontologyProperty.getVisalloProperty()).thenReturn(new IntegerVisalloProperty(PROP1_NAME));
 
         fileImport = new FileImport(
