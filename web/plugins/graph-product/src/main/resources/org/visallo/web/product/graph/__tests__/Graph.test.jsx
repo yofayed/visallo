@@ -1,7 +1,6 @@
 import React from 'react'
 import Graph from '../Graph'
-import renderer from 'react-test-renderer'
-import ReactTestUtils from 'react-dom/lib/ReactTestUtils'
+import ReactShallowRenderer from 'react-test-renderer/shallow'
 import bluebird from 'bluebird'
 import updeep from 'updeep'
 
@@ -46,7 +45,7 @@ it('Should only call extension functions on vertex changes', () => {
             })
         })
     }
-    const renderer = ReactTestUtils.createRenderer()
+    const renderer = new ReactShallowRenderer()
     let props = {
         workspace: { editable: true },
         uiPreferences: { },
@@ -62,7 +61,7 @@ it('Should only call extension functions on vertex changes', () => {
                 e3: { edgeId:'e3', label: 'e2Label', inVertexId: 'v2', outVertexId: 'v1'  }
             }
         },
-        ontology: { relationships: { } },
+        relationships: {},
         elements: {
             vertices: {
                 'v1': { id: 'v1', properties: [] },

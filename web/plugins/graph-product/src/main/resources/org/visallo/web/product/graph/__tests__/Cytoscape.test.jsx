@@ -2,7 +2,7 @@ jest.mock('cytoscape')
 
 import React from 'react'
 import Cytoscape from '../Cytoscape'
-import renderer from 'react-test-renderer'
+import ReactTestRenderer from 'react-test-renderer'
 import cytoscape from 'cytoscape'
 
 const DEFAULT_NODE = {
@@ -102,7 +102,7 @@ function render(props = {}) {
             return null;
         }
     };
-    const component = renderer.create(comp(props), options)
+    const component = ReactTestRenderer.create(comp(props), options)
     return component
 }
 
