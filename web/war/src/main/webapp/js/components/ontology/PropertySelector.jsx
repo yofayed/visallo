@@ -100,7 +100,6 @@ define([
                             // otherwise any value is valid
                             if (filter[fp] !== undefined && filter[fp] !== null) {
                                 test = test && p[fp] === filter[fp];
-                                console.log(test, fp, filter[fp], p[fp], p)
                             }
                         }
                     })

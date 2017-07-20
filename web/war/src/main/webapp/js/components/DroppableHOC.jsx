@@ -82,8 +82,7 @@ define(['create-react-class', 'prop-types', 'util/dnd'], function(createReactCla
                 y: pageY - box.top
             });
 
-            console.log(position, pageX, pageY, positionTransform, box)
-            //this.props.onDrop(event, position);
+            this.props.onDrop(event, position);
         },
         toggleClass(toggle) {
             const cls = toggle ? 'accepts-draggable' : '';
