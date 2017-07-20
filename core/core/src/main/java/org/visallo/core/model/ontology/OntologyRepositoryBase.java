@@ -70,6 +70,7 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
     public static final String COMMENT_OWL_IRI = "http://visallo.org/comment";
     public static final String RESOURCE_ENTITY_PNG = "entity.png";
     public static final String TOP_OBJECT_PROPERTY_IRI = "http://www.w3.org/2002/07/owl#topObjectProperty";
+    public static final int MAX_DISPLAY_NAME = 50;
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(OntologyRepositoryBase.class);
     private final Configuration configuration;
     private final LockRepository lockRepository;
@@ -1313,6 +1314,8 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
 
     @Override
     public String generateDynamicIri(Class type, String displayName, String workspaceId, String... extended) {
+        displayName = displayName.trim().replaceAll("\\s+", "_").toLowerCase();
+        displayName = displayName.substring(0, Math.min(displayName.length(), MAX_DISPLAY_NAME));
         String typeIri = type.toString() + workspaceId + displayName;
         if (extended != null && extended.length > 0) {
             typeIri += Joiner.on("").join(extended);
@@ -1320,7 +1323,7 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
 
         return OntologyRepositoryBase.BASE_OWL_IRI +
                 "/" +
-                displayName.replaceAll("\\s+", "_").toLowerCase() +
+                displayName.replaceAll("[^a-zA-Z0-9_]", "") +
                 "#" +
                 Hashing.sha1().hashString(typeIri, Charsets.UTF_8).toString();
     }

@@ -116,6 +116,25 @@ public abstract class OntologyRepositoryTestBase extends VisalloInMemoryTestBase
     }
 
     @Test
+    public void testGenerateIri() throws Exception {
+        assertEquals("Should lowercase","http://visallo.org/xxx#545f80459971026861f7d0a767a058474788f5d8", getOntologyRepository().generateDynamicIri(Concept.class, "XxX", "w0"));
+        assertEquals("Extended data should change hash","http://visallo.org/xxx#a3ee0f2fcbb97cd46570913b304940dfd563d0dd", getOntologyRepository().generateDynamicIri(Concept.class, "XxX", "w0", "1"));
+        assertEquals("replace spaces","http://visallo.org/s_1_2_3#b326c1112fdf23093cc7b2b964294a9afd2530ec", getOntologyRepository().generateDynamicIri(Concept.class, " S 1 2 3 ", "w0"));
+        assertEquals("replace non-alpha-num","http://visallo.org/a_a1#4db31fddc58acba07547c744ee9f1edae49ad22d", getOntologyRepository().generateDynamicIri(Concept.class, "a !@#A$%1^&*()<>?\":{}=+),[]\\|`~", "w0"));
+
+
+        StringBuilder valid = new StringBuilder();
+        StringBuilder invalid = new StringBuilder();
+        for (int i = 0; i < OntologyRepositoryBase.MAX_DISPLAY_NAME + 2; i++) {
+            if (i < OntologyRepositoryBase.MAX_DISPLAY_NAME) valid.append("a");
+            invalid.append("a");
+        }
+        assertEquals("length check valid","http://visallo.org/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#2f36190a6f38c1c1d1bc7d8a5e1f00cd71e5dc74", getOntologyRepository().generateDynamicIri(Concept.class, valid.toString(), "w0"));
+        assertEquals("length/hash check invalid","http://visallo.org/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#2f36190a6f38c1c1d1bc7d8a5e1f00cd71e5dc74", getOntologyRepository().generateDynamicIri(Concept.class, invalid.toString(), "w0"));
+
+    }
+
+    @Test
     public void testGetConceptsWithProperties() throws Exception {
         loadHierarchyOwlFile();
         getOntologyRepository().clearCache();
