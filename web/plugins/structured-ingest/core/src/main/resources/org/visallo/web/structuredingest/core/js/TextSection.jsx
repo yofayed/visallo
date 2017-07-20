@@ -2,7 +2,7 @@ define([
     'create-react-class',
     './util',
     'util/formatters'
-], function(React, util, F) {
+], function(createReactClass, util, F) {
     'use strict';
 
     const StructuredIngestTextSection = createReactClass({
