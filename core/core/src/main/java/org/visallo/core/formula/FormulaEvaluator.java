@@ -168,17 +168,19 @@ public class FormulaEvaluator {
     }
 
     private void evaluateFile(ScriptableObject scope, String filename) {
-        LOGGER.debug("evaluating file: %s", filename);
-        try (InputStream is = FormulaEvaluator.class.getResourceAsStream("jsc/" + filename)) {
+        String transformed = RequireJsSupport.transformFilePath(filename);
+
+        LOGGER.debug("evaluating file: %s", transformed);
+        try (InputStream is = FormulaEvaluator.class.getResourceAsStream(transformed)) {
             if (is == null) {
-                throw new VisalloException("File not found " + filename);
+                throw new VisalloException("File not found " + transformed);
             }
 
-            Context.getCurrentContext().evaluateString(scope, IOUtils.toString(is), filename, 0, null);
+            Context.getCurrentContext().evaluateString(scope, IOUtils.toString(is), transformed, 0, null);
         } catch (JavaScriptException ex) {
-            throw new VisalloException("JavaScript error in " + filename, ex);
+            throw new VisalloException("JavaScript error in " + transformed, ex);
         } catch (IOException ex) {
-            throw new VisalloException("Could not read file: " + filename, ex);
+            throw new VisalloException("Could not read file: " + transformed, ex);
         }
     }
 

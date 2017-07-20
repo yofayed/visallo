@@ -56,20 +56,25 @@ public class RequireJsSupport extends ScriptableObject {
         return null;
     }
 
+    public static String transformFilePath(String filename) {
+        return filename.startsWith("../") ? (filename.replace("../", "")) : ("jsc/" + filename);
+    }
+
     private void processSource(Context cx, String filename) throws IOException {
         String fileContents = getFileContents(filename);
         cx.evaluateString(this, fileContents, filename, 1, null);
     }
 
     private String getFileContents(String file) {
-        LOGGER.debug("reading file: %s", file);
-        try (InputStream is = RequireJsSupport.class.getResourceAsStream("jsc/" + file)) {
+        String transformed = transformFilePath(file);
+        LOGGER.debug("reading file: %s", transformed);
+        try (InputStream is = RequireJsSupport.class.getResourceAsStream(transformed)) {
             if (is == null) {
-                throw new VisalloException("File not found: " + file);
+                throw new VisalloException("File not found: " + transformed);
             }
             return IOUtils.toString(is, Charset.forName("UTF-8"));
         } catch (IOException ex) {
-            throw new VisalloException("Could not read file contents: " + file, ex);
+            throw new VisalloException("Could not read file contents: " + transformed, ex);
         }
     }
 }
