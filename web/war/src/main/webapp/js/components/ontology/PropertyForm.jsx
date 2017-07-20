@@ -13,6 +13,13 @@ define([
 
     const PropertyForm = createReactClass({
         propTypes: {
+            transformForSubmit: PropTypes.func.isRequired,
+            transformForInput: PropTypes.func.isRequired,
+            onCreate: PropTypes.func.isRequired,
+            onCancel: PropTypes.func.isRequired,
+            displayName: PropTypes.string,
+            domain: PropTypes.string,
+            type: PropTypes.string
         },
         getInitialState() {
             return {};
@@ -23,7 +30,8 @@ define([
             return _.isString(displayName) ? displayName : defaultValue;
         },
         componentDidMount() {
-            this.setState({ domain: this.props.domain, type: this.props.type })
+            const { domain, type } = this.props;
+            this.setState({ domain, type })
         },
         componentWillReceiveProps(nextProps) {
             if (nextProps.domain !== this.state.domain) {
@@ -35,15 +43,17 @@ define([
         },
         render() {
             const { domain, type } = this.state;
-            const { conceptId, relationshipId, error } = this.props;
+            const { conceptId, relationshipId, error, transformForSubmit, transformForInput } = this.props;
             const value = this.getValue();
-            const disabled = _.isEmpty(value) || !type || !domain;
+            const valueForSubmit = transformForSubmit(value);
+            const valueForInput = transformForInput(value);
+            const disabled = _.isEmpty(valueForSubmit) || !type || !domain;
             return (
                 <div>
                     { error ? (<Alert error={error} />) : null }
                     <input type="text"
                         onChange={this.onDisplayNameChange}
-                        value={value} />
+                        value={valueForInput} />
 
                     { conceptId ?
                         (<ConceptsSelector
@@ -82,7 +92,7 @@ define([
                         </optgroup>
                     </select>
 
-                    <div className="base-select-form-buttons" style={{textAlign: 'right'}}>
+                    <div className="base-select-form-buttons">
                     <button
                         onClick={this.props.onCancel}
                         className="btn btn-link btn-small"
@@ -92,7 +102,7 @@ define([
                         onClick={this.onCreate}
                         className="btn btn-small btn-primary"
                         style={{ width: 'auto', marginBottom: '1em'}}>{
-                            disabled ? 'Create' : `Create "${value}"`
+                            disabled ? 'Create' : `Create "${valueForSubmit}"`
                         }</button>
                     </div>
                 </div>

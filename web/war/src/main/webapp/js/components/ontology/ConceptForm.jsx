@@ -14,6 +14,11 @@ define([
 
     const ConceptForm = createReactClass({
         propTypes: {
+            transformForSubmit: PropTypes.func.isRequired,
+            transformForInput: PropTypes.func.isRequired,
+            onCreate: PropTypes.func.isRequired,
+            onCancel: PropTypes.func.isRequired,
+            displayName: PropTypes.string
         },
         getInitialState() {
             return {}
@@ -24,8 +29,11 @@ define([
             return _.isString(displayName) ? displayName : defaultValue;
         },
         render() {
+            const { transformForSubmit, transformForInput } = this.props;
             const { color } = this.state;
             const value = this.getValue();
+            const valueForInput = transformForInput(value);
+            const valueForSubmit = transformForSubmit(value);
             const disabled = _.isEmpty(value);
             return (
                 <div>
@@ -33,7 +41,7 @@ define([
                     <input type="text"
                         placeholder="Display Name"
                         onChange={this.onDisplayNameChange}
-                        value={value} />
+                        value={valueForInput} />
 
                     <ConceptsSelector
                         value={this.state.parentConcept}
@@ -44,7 +52,7 @@ define([
                     <ColorSelector value={color} onSelected={this.onColorSelected} />
                     <GlyphSelector search={value} onSelected={this.onIconSelected} />
 
-                    <div style={{textAlign: 'right'}}>
+                    <div className="base-select-form-buttons">
                     <button
                         onClick={this.props.onCancel}
                         className="btn btn-link btn-small"
@@ -54,7 +62,7 @@ define([
                         onClick={this.onCreate}
                         className="btn btn-small btn-primary"
                         style={{ width: 'auto', marginBottom: '1em'}}>{
-                            disabled ? 'Create' : `Create "${value}"`
+                            disabled ? 'Create' : `Create "${valueForSubmit}"`
                         }</button>
                     </div>
                 </div>

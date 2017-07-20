@@ -7,6 +7,11 @@ define([
 
     const RelationshipForm = createReactClass({
         propTypes: {
+            transformForSubmit: PropTypes.func.isRequired,
+            transformForInput: PropTypes.func.isRequired,
+            onCreate: PropTypes.func.isRequired,
+            onCancel: PropTypes.func.isRequired,
+            displayName: PropTypes.string
         },
         getInitialState() {
             return {}
@@ -17,11 +22,15 @@ define([
             return _.isString(displayName) ? displayName : defaultValue;
         },
         render() {
+            const { error, transformForSubmit, transformForInput } = this.props;
+
             const value = this.getValue();
-            const disabled = _.isEmpty(value);
+            const valueForSubmit = transformForSubmit(value);
+            const valueForInput = transformForInput(value);
+            const disabled = _.isEmpty(valueForSubmit);
             return (
                 <div>
-                    { this.props.error ? (<Alert error={this.props.error} />) : null }
+                    { error ? (<Alert error={error} />) : null }
                     <ConceptsSelector
                         value={_.isString(this.state.sourceId) ? this.state.sourceId : this.props.sourceId}
                         placeholder="From Concept"
@@ -33,7 +42,7 @@ define([
                     <input type="text"
                         placeholder="Display Name"
                         onChange={this.onDisplayNameChange}
-                        value={value} />
+                        value={valueForInput} />
 
                     <ConceptsSelector
                         value={_.isString(this.state.targetId) ? this.state.targetId : this.props.targetId}
@@ -43,7 +52,7 @@ define([
                         creatable={false}
                         onSelected={this.onTargetConceptSelected} />
 
-                    <div style={{textAlign: 'right'}}>
+                    <div className="base-select-form-buttons">
                     <button
                         onClick={this.props.onCancel}
                         className="btn btn-link btn-small"
@@ -53,7 +62,7 @@ define([
                         onClick={this.onCreate}
                         className="btn btn-small btn-primary"
                         style={{ width: 'auto', marginBottom: '1em'}}>{
-                            disabled ? 'Create' : `Create "${value}"`
+                            disabled ? 'Create' : `Create "${valueForSubmit}"`
                         }</button>
                     </div>
                 </div>

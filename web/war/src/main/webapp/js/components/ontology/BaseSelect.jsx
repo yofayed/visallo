@@ -10,6 +10,10 @@ define([
     var _counter = 1;
     const keyCounter = () => _counter++;
 
+    const MaxValueLength = 50;
+    const transformForInput = value => (value || '').substring(0, MaxValueLength);
+    const transformForSubmit = value => transformForInput(value).trim();
+
     const createFixedCreatable = Creatable => {
         class CreatablePutLast extends Creatable {
             constructor(props) {
@@ -92,7 +96,7 @@ define([
             const { creating, showForm, value, CreateForm, selectComponent, key, error, type } = this.state;
             const { formProps, value: defaultValue, creatable, createForm, disabled, placeholder, ...rest } = this.props;
             const hasKey = Boolean(key);
-            const extendedFormProps = { ...(formProps || {}), type };
+            const extendedFormProps = { ...(formProps || {}), type, transformForSubmit, transformForInput };
             return (
                 <div>
                 {
@@ -156,6 +160,8 @@ define([
             this.setState({ showForm: false })
         },
         onCreate(option) {
+            option.displayName = transformForSubmit(option.displayName);
+
             const key = keyCounter();
             this.props.onCreate(option, { key });
             const { type, displayName } = option;
