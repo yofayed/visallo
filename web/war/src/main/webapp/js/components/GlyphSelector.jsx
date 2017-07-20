@@ -44,7 +44,7 @@ define([
         },
         render() {
             const { value = null, options = [], isLoading, similar } = this.state;
-            const { search } = this.props;
+            const { search, ...rest } = this.props;
 
             return (
                 <VirtualizedSelect
@@ -57,8 +57,9 @@ define([
                     optionRenderer={GlyphOptionRenderer}
                     optionHeight={28}
                     isLoading={isLoading}
-                    placeholder="Icon (optional)"
+                    placeholder="Select Icon"
                     valueRenderer={GlyphValueRenderer}
+                    {...rest}
                 />
             )
         },

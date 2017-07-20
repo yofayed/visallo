@@ -50,7 +50,7 @@ define([
                         onSelected={this.onConceptSelected} />
 
                     <ColorSelector value={color} onSelected={this.onColorSelected} />
-                    <GlyphSelector search={value} onSelected={this.onIconSelected} />
+                    <GlyphSelector placeholder="Icon (optional)" search={value} onSelected={this.onIconSelected} />
 
                     <div className="base-select-form-buttons">
                     <button
