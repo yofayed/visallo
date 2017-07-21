@@ -58,7 +58,9 @@ define([
 
             return (
                 <div className="alert alert-error">
-                    <button type="button" className="close" onClick={this.handleDismissClick}>&times;</button>
+                    {this.props.onDismiss ? (
+                        <button type="button" className="close" onClick={this.handleDismissClick}>&times;</button>
+                    ) : null}
                     {this.renderType()}
                     {this.renderMessage()}
                 </div>
