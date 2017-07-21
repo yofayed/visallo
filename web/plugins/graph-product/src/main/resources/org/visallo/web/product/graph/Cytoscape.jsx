@@ -86,6 +86,7 @@ define([
             hasPreview: PropTypes.bool,
             editable: PropTypes.bool,
             onCollapseSelectedNodes: PropTypes.func.isRequired,
+            reapplyGraphStylesheet: PropTypes.func.isRequired,
             ...eventPropTypes
         },
 
@@ -860,7 +861,10 @@ define([
             if (cy) {
                 return this.props.tools.map(tool => ({
                     ...tool,
-                    props: { cy }
+                    props: {
+                        cy,
+                        reapplyGraphStylesheet: this.props.reapplyGraphStylesheet
+                    }
                 }))
             }
             return [];
