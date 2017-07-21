@@ -166,6 +166,7 @@ define([
                     selected = el.id in elementsSelectedById,
                     iconUrl = 'map/marker/image?' + $.param({
                         type: conceptType,
+                        workspaceId: this.props.workspaceId,
                         scale: this.props.pixelRatio > 1 ? '2' : '1',
                     }),
                     iconUrlSelected = `${iconUrl}&selected=true`;

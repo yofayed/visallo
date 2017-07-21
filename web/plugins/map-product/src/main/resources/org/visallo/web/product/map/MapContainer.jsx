@@ -4,11 +4,22 @@ define([
     'data/web-worker/store/selection/actions',
     'data/web-worker/store/product/actions',
     'data/web-worker/store/product/selectors',
+    'data/web-worker/store/ontology/selectors',
     'util/dnd',
     './worker/actions',
     'components/DroppableHOC',
     './Map'
-], function(redux, ReactDom, selectionActions, productActions, productSelectors, dnd, mapActions, DroppableHOC, Map) {
+], function(
+    redux,
+    ReactDom,
+    selectionActions,
+    productActions,
+    productSelectors,
+    ontologySelectors,
+    dnd,
+    mapActions,
+    DroppableHOC,
+    Map) {
     'use strict';
 
     const mimeTypes = [VISALLO_MIMETYPES.ELEMENTS];
@@ -16,20 +27,17 @@ define([
     return redux.connect(
 
         (state, props) => {
-            var ontologyProperties = state.ontology.properties,
-                configProperties = state.configuration.properties,
-                pixelRatio = state.screen.pixelRatio;
-
             return {
                 ...props,
-                configProperties,
-                ontologyProperties,
+                workspaceId: state.workspace.currentId,
+                configProperties: state.configuration.properties,
+                ontologyProperties: ontologySelectors.getProperties(state),
                 panelPadding: state.panel.padding,
                 selection: productSelectors.getSelectedElementsInProduct(state),
                 viewport: productSelectors.getViewport(state),
                 productElementIds: productSelectors.getElementIdsInProduct(state),
                 elements: productSelectors.getElementsInProduct(state),
-                pixelRatio,
+                pixelRatio: state.screen.pixelRatio,
                 mimeTypes,
                 style: { height: '100%' }
             }
