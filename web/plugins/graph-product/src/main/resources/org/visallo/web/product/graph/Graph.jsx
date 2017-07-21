@@ -305,6 +305,7 @@ define([
                         onGhostFinished={this.props.onGhostFinished}
                         onUpdatePreview={this.onUpdatePreview}
                         editable={editable}
+                        reapplyGraphStylesheet={this.reapplyGraphStylesheet}
                     ></Cytoscape>
 
                     {cyElements.nodes.length === 0 ? (
@@ -348,6 +349,7 @@ define([
         },
 
         reapplyGraphStylesheet() {
+            memoizeClear();
             this.forceUpdate();
         },
 
