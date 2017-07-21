@@ -12,6 +12,7 @@ import org.vertexium.util.IterableUtils;
 import org.vertexium.util.StreamUtils;
 import org.visallo.core.bootstrap.InjectHelper;
 import org.visallo.core.config.Configuration;
+import org.visallo.core.config.VisalloResourceBundleManager;
 import org.visallo.core.exception.VisalloAccessDeniedException;
 import org.visallo.core.exception.VisalloException;
 import org.visallo.core.formula.FormulaEvaluator;
@@ -56,7 +57,6 @@ public abstract class WorkspaceRepository {
     public static final String WORKSPACE_TO_USER_RELATIONSHIP_IRI = WorkspaceProperties.WORKSPACE_TO_USER_RELATIONSHIP_IRI;
     public static final String WORKSPACE_ID_PREFIX = "WORKSPACE_";
     public static final String OWL_IRI = "http://visallo.org/workspace";
-    private static final String DEFAULT_WORKSPACE_TITLE = "Default";
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(WorkspaceRepository.class);
     private final Graph graph;
     private final Configuration configuration;
@@ -65,6 +65,8 @@ public abstract class WorkspaceRepository {
     private final OntologyRepository ontologyRepository;
     private final WorkQueueRepository workQueueRepository;
     private String entityHasImageIri;
+    private VisalloResourceBundleManager visalloResourceBundleManager;
+    private ResourceBundle visalloResourceBundle;
     private final AuthorizationRepository authorizationRepository;
     private Collection<WorkspaceListener> workspaceListeners;
 
@@ -84,6 +86,8 @@ public abstract class WorkspaceRepository {
         this.ontologyRepository = ontologyRepository;
         this.workQueueRepository = workQueueRepository;
 
+        visalloResourceBundleManager = new VisalloResourceBundleManager();
+        visalloResourceBundle = visalloResourceBundleManager.getBundle();
         this.entityHasImageIri = ontologyRepository.getRelationshipIRIByIntent("entityHasImage", PUBLIC);
         this.authorizationRepository = authorizationRepository;
         if (this.entityHasImageIri == null) {
@@ -128,7 +132,7 @@ public abstract class WorkspaceRepository {
 
     public Workspace add(String title, User user) {
         if (title == null) {
-            title = DEFAULT_WORKSPACE_TITLE + " - " + user.getDisplayName();
+            title = visalloResourceBundle.getString("workspace.default.title").replace("{0}", user.getDisplayName());
         }
         return add(null, title, user);
     }
