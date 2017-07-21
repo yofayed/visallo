@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -e
+set -e
 
 if [ "$BUILD_DOCS" ]; then
 
@@ -18,30 +18,5 @@ if [ "$BUILD_DOCS" ]; then
   fi
 
 else
-
-  #~/.m2/repository/node/v6.11.1/node/yarn/dist/bin/yarn remove node-gyp
-  #~/.m2/repository/node/v6.11.1/node/yarn/dist/bin/yarn add node-gyp
-  #~/.m2/repository/node/v6.11.1/node/yarn/dist/bin/yarn cache clean
-  echo "NODE_DIR"
-  ls -l $HOME/.m2
-  mvn -B -fae compile -Ptest-exclude-native -DlogQuiet
-  ~/.m2/repository/node/v6.11.1/node/yarn/dist/bin/yarn global add node-gyp
-  ~/.m2/repository/node/v6.11.1/node/yarn/dist/bin/yarn cache clean
-  mvn -B -fae compile -Ptest-exclude-native -DlogQuiet
-  cat ~/.config/yarn/global/yarn-error.log
-  echo "NODE_DIR2"
-  ls -l $HOME/.m2
-  
-  
-  #echo ">>>>>"
-  #cat $HOME/.config/yarn/global/yarn-error.log
-  #echo "<<<<<"
-  #mvn -f web -B -fae test -Ptest-exclude-native -DlogQuiet
-  #EXIT=$?
-  #echo "Exited with $EXIT"
-  #echo ">>>>>"
-  #cat ~/.config/yarn/global/yarn-error.log
-  #echo "<<<<<"  
-  #exit $EXIT
-  exit 1
+  mvn -B -fae test -Ptest-exclude-native -DlogQuiet
 fi
