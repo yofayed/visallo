@@ -95,6 +95,7 @@ define([
                 properties: _.reject(this.filteredProperties || ontology.properties.list, function(p) {
                     return p.searchable === false || p.sortable === false;
                 }),
+                creatable: false,
                 onlySearchable: true,
                 onlySortable: true,
                 placeholder: i18n('search.sort.placeholder')

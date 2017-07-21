@@ -4,6 +4,7 @@
  * @module components/RelationshipSelect
  * @flight Dropdown selection component for selecting relationships from the ontology
  * @attr {string} [defaultText=Choose a Relationship...] the placeholder text to display
+ * @attr {boolean} [creatable=true] Allow creation of new relationships if the user has ONTOLOGY_ADD privilege
  * @attr {string} [limitParentConceptId=''] Limit edges that contain this concept IRI on one side of the edge
  * @attr {string} [sourceConcept=''] Limit relationships to those that have this concept IRI as the source
  * @attr {string} [targetConcept=''] Limit relationships to those that have this concept IRI as the target
@@ -67,7 +68,7 @@ define([
              * $node.trigger('selectRelationshipId')
              */
             this.on('selectRelationshipId', function(event, data) {
-                const relationshipId = data && data.relationshipId || '';
+                const relationshipId = data && data.relationshipId || null;
                 self.attacher.params({ ...self.attacher._params, value: relationshipId }).attach()
             })
 
@@ -75,6 +76,7 @@ define([
                 .node(this.node)
                 .params({
                     placeholder: this.attr.defaultText,
+                    creatable: this.attr.creatable !== false,
                     autofocus: this.attr.focus === true,
                     filter: {
                         conceptId: this.attr.limitParentConceptId,

@@ -6,6 +6,7 @@
  * @attr {string} [defaultText=Choose a Concept...] the placeholder text to display
  * @attr {boolean} [showAdminConcepts=false] Whether concepts that aren't user visible should be displayed
  * @attr {boolean} [onlySearchable=false] Only show concepts that have searchable attribute equal to true in ontology
+ * @attr {boolean} [creatable=true] Allow creation of new concepts if the user has ONTOLOGY_ADD privilege
  * @attr {string} [restrictConcept=''] Only allow selection of this concept or its descendants
  * @attr {string} [limitRelatedToConceptId=''] Only allow selection of concepts where there is a valid edge containing the passed in concept IRI
  * @attr {string} [selectedConceptId=''] Default the selection to this concept IRI
@@ -47,7 +48,7 @@ define([
              * $node.trigger('clearSelectedConcept')
              */
             this.on('clearSelectedConcept', function(event) {
-                this.attacher.params({ ...this.attacher._params, value: '' }).attach();
+                this.attacher.params({ ...this.attacher._params, value: null }).attach();
             })
 
             /**
@@ -116,6 +117,7 @@ define([
                 .node(this.node)
                 .params({
                     filter,
+                    creatable: this.attr.creatable !== false,
                     value: this.attr.selectedConceptId,
                     placeholder: this.attr.defaultText,
                     autofocus: this.attr.focus === true

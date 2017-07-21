@@ -376,6 +376,7 @@ define([
             FieldSelection.attachTo(this.select('propertySelectionSelector'), {
                 properties: this.attr.properties,
                 onlySearchable: true,
+                creatable: false,
                 placeholder: i18n('search.filters.add_filter.placeholder')
             });
         };

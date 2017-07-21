@@ -5,6 +5,7 @@
  * @flight Dropdown selection component for selecting properties from the ontology
  * @attr {Array.<object>=} properties The ontology properties to populate the list with, if not provided will use visible properties
  * @attr {string} [placeholder=Select Property] the placeholder text to display
+ * @attr {boolean} [creatable=true] Allow creation of new properties if the user has ONTOLOGY_ADD privilege
  * @attr {boolean} [limitParentConceptId=''] Only show properties that are attached to this concept or it's descendents
  * @attr {boolean} [onlySearchable=false] Only show properties that have searchable attribute equal to true in ontology
  * @attr {boolean} [onlySortable=false] Only show properties that have sortable attribute equal to true in ontology
@@ -13,6 +14,7 @@
  * @attr {string} [selectedProperty=''] Default the selection to this property IRI
  * @fires module:components/PropertySelect#propertyselected
  * @listens module:components/PropertySelect#filterProperties
+ * @listens module:components/PropertySelect#selectProperty
  * @example
  * dataRequest('ontology', 'properties').then(function(properties) {
  *     PropertySelect.attachTo(node, {
@@ -61,6 +63,26 @@ define([
                 }
             });
 
+            /**
+             * Trigger to change the the selected property (or clear it.)
+             *
+             * @event module:components/PropertySelect#selectProperty
+             * @property {object} data
+             * @property {string} data.property The property iri to select
+             * @example
+             * PropertySelect.attachTo($node)
+             * //...
+             * $node.trigger('selectProperty', { property: 'http://visallo.org#title' })
+             * $node.trigger('selectProperty') // Clear
+             */
+            this.on('selectProperty', function(event, data) {
+                const params = this.attacher._params;
+                this.attacher.params({
+                    ...params,
+                    value: data && data.property || null
+                }).attach();
+            });
+
             const {
                 filter = {},
                 rollupCompound = true,
@@ -95,6 +117,7 @@ define([
                     filter: { ...filter, rollupCompound },
                     value: this.attr.selectedProperty,
                     autofocus: focus === true,
+                    creatable: this.attr.creatable !== false,
                     placeholder
                 })
                 .behavior({

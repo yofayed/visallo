@@ -802,6 +802,7 @@ define([
 
         this.loadEdgeTypes = function() {
             RelationshipSelector.attachTo(this.select('edgeLabelDropdownSelector'), {
+                creatable: false,
                 defaultText: i18n('search.filters.all_edgetypes')
             });
         };
@@ -809,6 +810,7 @@ define([
         this.loadConcepts = function() {
             ConceptSelector.attachTo(this.select('conceptDropdownSelector'), {
                 onlySearchable: true,
+                creatable: false,
                 defaultText: i18n('search.filters.all_concepts')
             })
         };

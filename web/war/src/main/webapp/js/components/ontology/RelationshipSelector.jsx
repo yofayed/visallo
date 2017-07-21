@@ -78,7 +78,7 @@ define([
                     createForm={'components/ontology/RelationshipForm'}
                     formProps={formProps}
                     options={options}
-                    creatable={Boolean(privileges.ONTOLOGY_ADD)}
+                    creatable={creatable && Boolean(privileges.ONTOLOGY_ADD)}
                     {...rest} />
             );
         }
