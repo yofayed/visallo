@@ -194,13 +194,19 @@ define([
             const oldExtendedData = this.props.product.extendedData;
             if (newExtendedData) {
                 let shouldClear = false;
+                let shouldDefocusPaths = false;
                 const ignoredExtendedDataKeys = ['vertices', 'edges', 'unauthorizedEdgeIds', 'compoundNodes'];
+
                 Object.keys(newExtendedData).forEach(key => {
-                    if (shouldClear || ignoredExtendedDataKeys.includes(key)) return;
                     if (!oldExtendedData || newExtendedData[key] !== oldExtendedData[key]) {
-                        shouldClear = true;
+                        if (ignoredExtendedDataKeys.includes(key)) {
+                            shouldDefocusPaths = true;
+                        } else {
+                            shouldClear = true;
+                        }
                     }
                 })
+
                 if (shouldClear) {
                     memoizeClear(
                         'vertexToCyNode',
@@ -208,6 +214,10 @@ define([
                         'org.visallo.graph.edge.transformer',
                         'org.visallo.graph.node.class'
                     );
+                }
+
+                if (shouldDefocusPaths) {
+                    $(document).trigger('defocusPaths');
                 }
             }
             if (nextProps.product.id === this.props.product.id) {
@@ -291,7 +301,7 @@ define([
                         panelPadding={panelPadding}
                         elements={cyElements}
                         drawEdgeToMouseFrom={draw ? _.pick(draw, 'vertexId', 'toVertexId') : null }
-                        drawPaths={paths ? _.pick(paths, 'paths', 'sourceId', 'targetId') : null }
+                        drawPaths={paths}
                         onGhostFinished={this.props.onGhostFinished}
                         onUpdatePreview={this.onUpdatePreview}
                         editable={editable}
@@ -309,10 +319,23 @@ define([
         },
 
         onFocusPaths(event, data) {
+            const cy = this.cytoscape.state.cy;
+            const collapsedNodes = cy.nodes().filter('node.c');
+            const mappedIds = {};
+
             if (data.paths.length > MaxPathsToFocus) {
                 data.paths = data.paths.slice(0, MaxPathsToFocus);
                 $(document).trigger('displayInformation', { message: 'Too many paths to show, will display the first ' + MaxPathsToFocus })
             }
+
+            data.renderedPaths = data.paths.map(path => _.uniq(path.map(id => {
+                mappedIds[id] = mappedIds[id] || (
+                    cy.getElementById(id).length
+                        ? id : (collapsedNodes.filter(node => node.data('vertexIds').includes(id)).id() || id)
+                );
+                return mappedIds[id];
+            })));
+
             this.setState({
                 paths: data
             })
