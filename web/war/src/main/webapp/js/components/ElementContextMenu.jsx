@@ -242,23 +242,36 @@ define([
                     const firstElement = _.isArray(elements)
                         ? elements[0]
                         : elements;
+                    const currentSelection = isVertex
+                        ? visalloData.selectedObjects.vertexIds
+                        : visalloData.selectedObjects.edgeIds;
 
-                    registry.extensionsForPoint(`org.visallo.${isCollapsedItem ? 'collapsedItem' : isVertex ? 'vertex' : 'edge'}.menu`).forEach((item) => {
-                        const currentSelection = isVertex
-                            ? visalloData.selectedObjects.vertexIds
-                            : visalloData.selectedObjects.edgeIds;
-                        const canHandle = _.isFunction(item.canHandle) ? item.canHandle(currentSelection, elements) : true;
+                    registry.extensionsForPoint(`org.visallo.${isCollapsedItem ? 'collapsedItem' : isVertex ? 'vertex' : 'edge'}.menu`)
+                        .filter(item => {
+                            if (item.selection) {
+                                const amount = firstElement.id in currentSelection
+                                    ? Object.keys(currentSelection).length
+                                    : _.isArray(elements)
+                                        ? elements.length
+                                        : 1;
+                                return item.selection === amount;
+                            } else {
+                                return true
+                            }
+                        })
+                        .forEach(item => {
+                            const canHandle = _.isFunction(item.canHandle) ? item.canHandle(currentSelection, elements) : true;
 
-                        if (!canHandle) {
-                            return;
-                        }
+                            if (!canHandle) {
+                                return;
+                            }
 
-                        if (item.options && _.isFunction(item.options.insertIntoMenuItems)) {
-                            item.options.insertIntoMenuItems(item, items);
-                        } else {
-                            items.push(item);
-                        }
-                    });
+                            if (item.options && _.isFunction(item.options.insertIntoMenuItems)) {
+                                item.options.insertIntoMenuItems(item, items);
+                            } else {
+                                items.push(item);
+                            }
+                        });
 
                     const title = isCollapsedItem
                         ? i18n('vertex.contextmenu.collapsed')
@@ -397,15 +410,19 @@ define([
                             label: i18n('vertex.contextmenu.select.connected'),
                             subtitle: i18n('vertex.contextmenu.select.connected.subtitle'),
                             shortcut: 'meta-e',
-                            event: 'selectConnected',
-                            selection: 1
+                            event: 'selectConnected'
                         }
                     ]
                 },
                 {
                     label: i18n('vertex.contextmenu.search'),
                     submenu: [
-                        {label: '{ title }', shortcut: 'alt+t', event: 'searchTitle', selection: 1},
+                        {
+                            label: '{ title }',
+                            shortcut: 'alt+t',
+                            event: 'searchTitle',
+                            selection: 1
+                        },
                         {
                             label: i18n('graph.contextmenu.search.related'),
                             subtitle: i18n('graph.contextmenu.search.related.subtitle'),
@@ -421,7 +438,6 @@ define([
                     shortcut: 'delete',
                     subtitle: i18n('vertex.contextmenu.remove.subtitle'),
                     event: 'deleteSelected',
-                    selection: 2,
                     shouldDisable: function(selection, vertexId, target) {
                         return !visalloData.currentWorkspaceEditable || false;
                         // TODO:  !inWorkspace(vertexId);
