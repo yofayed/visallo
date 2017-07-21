@@ -27,6 +27,7 @@ public final class Privilege {
                 COMMENT_DELETE_ANY,
                 HISTORY_READ,
                 ONTOLOGY_ADD,
+                ONTOLOGY_PUBLISH,
                 SEARCH_SAVE_GLOBAL,
                 EDIT,
                 PUBLISH,
