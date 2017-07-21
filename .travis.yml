@@ -12,9 +12,11 @@ cache:
     - $HOME/.npm
     - $HOME/.yarn-cache
     - $HOME/awscli-bundle
+    - travis_phantomjs
 env:
   - CC=clang CXX=clang++
   - BUILD_DOCS=1 VERSION_LIST="release-3.1 master" VERSION_ROOT="release-3.1" 
+before_install: ./travis/before-install.sh
 install: ./travis/install.sh
 script: ./travis/script.sh
 after_success: ./travis/after-success.sh
