@@ -34,9 +34,6 @@ require.config({
         'jquery': 'mocks/jquery',
         'jstz': 'mocks/jstz',
         'util/withDataRequest': 'mocks/withDataRequest',
-//        'util/ajax': 'mocks/ajax',
-//        'util/memoize': 'mocks/memoize',
-//        'configuration/plugins/registry': 'mocks/registry',
         'store': 'mocks/store',
         'reselect': 'mocks/reselect',
 
@@ -47,13 +44,11 @@ require.config({
         'util/parsers': 'util_parsers',
         'util/requirejs/promise': 'util_requirejs_promise',
         'util/service/messagesPromise': 'util_service_messagesPromise',
-//        'util/service/ontologyPromise': 'util_service_ontologyPromise',
         'util/service/propertiesPromise': 'util_service_propertiesPromise',
         'util/vertex/formatters': 'util_vertex_formatters',
         'util/vertex/formula': 'util_vertex_formula',
         'util/vertex/urlFormatters': 'util_vertex_urlFormatters',
         'service/config': 'service/config',
-//        'service/ontology': 'service/ontology',
         'data/web-worker/store/ontology/selectors': 'store_ontology_selectors'
     },
     shims: {
