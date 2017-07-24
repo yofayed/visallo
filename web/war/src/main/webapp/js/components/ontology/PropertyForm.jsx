@@ -55,18 +55,18 @@ define([
                         onChange={this.onDisplayNameChange}
                         value={valueForInput} />
 
-                    { conceptId ?
-                        (<ConceptsSelector
-                            value={domain}
-                            creatable={false}
-                            clearable={false}
-                            filter={{ conceptId, showAncestors: true }}
-                            onSelected={this.onDomainSelected} />) :
+                    { relationshipId ?
                         (<RelationshipSelector
                             value={domain}
                             creatable={false}
                             clearable={false}
                             filter={{ relationshipId, showAncestors: true }}
+                            onSelected={this.onDomainSelected} />) :
+                        (<ConceptsSelector
+                            value={domain}
+                            creatable={false}
+                            clearable={false}
+                            filter={{ conceptId, showAncestors: true }}
                             onSelected={this.onDomainSelected} />)
                     }
 

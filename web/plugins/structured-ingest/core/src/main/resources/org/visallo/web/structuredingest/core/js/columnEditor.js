@@ -255,7 +255,8 @@ define([
                             placeholder: i18n('csv.file_import.mapping.properties.placeholder'),
                             properties: filtered,
                             rollupCompound: false,
-                            selectedProperty: ontologyProperty
+                            selectedProperty: ontologyProperty,
+                            limitParentConceptId: conceptProperty.value
                         });
                         if (ontologyProperty) {
                             return self.setOntologyProperty(ontologyProperty, property);
