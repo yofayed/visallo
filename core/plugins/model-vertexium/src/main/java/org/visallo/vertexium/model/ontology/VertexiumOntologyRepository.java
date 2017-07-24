@@ -832,8 +832,9 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
         Vertex inverseVertex = inverseOfRelationshipSg.getVertex();
         checkNotNull(inverseVertex, "inverseVertex is required");
 
-        findOrAddEdge(fromVertex, inverseVertex, LabelName.INVERSE_OF.toString(), null, null);
-        findOrAddEdge(inverseVertex, fromVertex, LabelName.INVERSE_OF.toString(), null, null);
+        User user = getSystemUser();
+        findOrAddEdge(fromVertex, inverseVertex, LabelName.INVERSE_OF.toString(), user, null);
+        findOrAddEdge(inverseVertex, fromVertex, LabelName.INVERSE_OF.toString(), user, null);
     }
 
     @Override
