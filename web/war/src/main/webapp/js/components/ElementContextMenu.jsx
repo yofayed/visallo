@@ -9,12 +9,12 @@ define([
 
     const DIVIDER = 'DIVIDER';
 
-    const MENU_ITEM_SHAPE = PropTypes.shape({
-        // function(currentSelection, vertexId, DOMElement, vertex): return true if this item should be disabled
-        shouldDisable: PropTypes.func,
+    const MENU_ITEM_SHAPE = React.PropTypes.shape({
+        // function(currentSelection, elementId, DOMElement, element): return true if this item should be disabled
+        shouldDisable: React.PropTypes.func,
 
-        // function(currentSelection, vertex): return true if this item can handle the given vertex
-        canHandle: PropTypes.func,
+        // function(currentSelection, element): return true if this item can handle the given vertex
+        canHandle: React.PropTypes.func,
 
         // The primary label to display
         label: PropTypes.string.isRequired,
@@ -64,6 +64,8 @@ define([
         },
 
         render() {
+            const { items, element, elementTitle, domElement, onMenuItemClick } = this.props;
+
             return (
                 <ul className="dropdown-menu" role="menu">
                     {this.props.items.map((item, itemIndex) => {
@@ -71,11 +73,15 @@ define([
                             return (<li key={itemIndex} className="divider"/>);
                         } else {
                             return (
-                                <ElementContextMenuItem key={itemIndex} elementTitle={this.props.elementTitle}
-                                                        item={item} domElement={this.props.domElement}
-                                                        element={this.props.element}
-                                                        onClick={this.handleMenuItemClick.bind(this, item)}
-                                                        onMenuItemClick={this.props.onMenuItemClick}/>
+                                <ElementContextMenuItem
+                                    key={itemIndex}
+                                    elementTitle={elementTitle}
+                                    item={item}
+                                    domElement={domElement}
+                                    element={element}
+                                    onClick={this.handleMenuItemClick.bind(this, item)}
+                                    onMenuItemClick={onMenuItemClick}
+                                />
                             );
                         }
                     })}
@@ -112,10 +118,12 @@ define([
         },
 
         componentWillMount() {
+            const { element, domElement, item } = this.props;
             const currentSelection = visalloData.selectedObjects.vertexIds;
-            const disabled = _.isFunction(this.props.item.shouldDisable)
-                ? this.props.item.shouldDisable(currentSelection, this.props.element.id, this.props.domElement, this.props.element)
+            const disabled = _.isFunction(item.shouldDisable)
+                ? this.props.item.shouldDisable(currentSelection, element.id, domElement, element)
                 : false;
+
             this.setState({
                 disabled: disabled
             });
@@ -243,23 +251,36 @@ define([
                     const firstElement = _.isArray(elements)
                         ? elements[0]
                         : elements;
+                    const currentSelection = isVertex
+                        ? visalloData.selectedObjects.vertexIds
+                        : visalloData.selectedObjects.edgeIds;
 
-                    registry.extensionsForPoint(`org.visallo.${isCollapsedItem ? 'collapsedItem' : isVertex ? 'vertex' : 'edge'}.menu`).forEach((item) => {
-                        const currentSelection = isVertex
-                            ? visalloData.selectedObjects.vertexIds
-                            : visalloData.selectedObjects.edgeIds;
-                        const canHandle = _.isFunction(item.canHandle) ? item.canHandle(currentSelection, elements) : true;
+                    registry.extensionsForPoint(`org.visallo.${isCollapsedItem ? 'collapsedItem' : isVertex ? 'vertex' : 'edge'}.menu`)
+                        .filter(item => {
+                            if (item.selection) {
+                                const amount = firstElement.id in currentSelection
+                                    ? Object.keys(currentSelection).length
+                                    : _.isArray(elements)
+                                        ? elements.length
+                                        : 1;
+                                return item.selection === amount;
+                            } else {
+                                return true
+                            }
+                        })
+                        .forEach(item => {
+                            const canHandle = _.isFunction(item.canHandle) ? item.canHandle(currentSelection, elements) : true;
 
-                        if (!canHandle) {
-                            return;
-                        }
+                            if (!canHandle) {
+                                return;
+                            }
 
-                        if (item.options && _.isFunction(item.options.insertIntoMenuItems)) {
-                            item.options.insertIntoMenuItems(item, items);
-                        } else {
-                            items.push(item);
-                        }
-                    });
+                            if (item.options && _.isFunction(item.options.insertIntoMenuItems)) {
+                                item.options.insertIntoMenuItems(item, items);
+                            } else {
+                                items.push(item);
+                            }
+                        });
 
                     const title = isCollapsedItem
                         ? i18n('vertex.contextmenu.collapsed')
@@ -347,9 +368,12 @@ define([
             return (<div className="vertex-menu" ref="menuDiv">
                 { items.length &&
                     <ElementContextMenuList
-                        items={this.state.items} elementTitle={this.state.title}
-                        domElement={this.props.domElement} element={this.state.element}
-                        onMenuItemClick={this.handleMenuItemClick}/>
+                        items={items}
+                        elementTitle={title}
+                        domElement={this.props.domElement}
+                        element={element}
+                        onMenuItemClick={this.handleMenuItemClick}
+                    />
                 }
             </div>);
         },
@@ -398,15 +422,19 @@ define([
                             label: i18n('vertex.contextmenu.select.connected'),
                             subtitle: i18n('vertex.contextmenu.select.connected.subtitle'),
                             shortcut: 'meta-e',
-                            event: 'selectConnected',
-                            selection: 1
+                            event: 'selectConnected'
                         }
                     ]
                 },
                 {
                     label: i18n('vertex.contextmenu.search'),
                     submenu: [
-                        {label: '{ title }', shortcut: 'alt+t', event: 'searchTitle', selection: 1},
+                        {
+                            label: '{ title }',
+                            shortcut: 'alt+t',
+                            event: 'searchTitle',
+                            selection: 1
+                        },
                         {
                             label: i18n('graph.contextmenu.search.related'),
                             subtitle: i18n('graph.contextmenu.search.related.subtitle'),
@@ -422,7 +450,6 @@ define([
                     shortcut: 'delete',
                     subtitle: i18n('vertex.contextmenu.remove.subtitle'),
                     event: 'deleteSelected',
-                    selection: 2,
                     shouldDisable: function(selection, vertexId, target) {
                         return !visalloData.currentWorkspaceEditable || false;
                         // TODO:  !inWorkspace(vertexId);

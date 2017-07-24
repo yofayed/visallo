@@ -22,7 +22,7 @@ define([], function() {
         }
 
         if ('edgeId' in anchorTo) {
-            return cy.edges().filter(function(edgeIndex, edge) {
+            return cy.edges().filter(function(edge, edgeIndex) {
                 return _.any(edge.data('edgeInfos'), function(edgeInfo) {
                     return edgeInfo.edgeId === anchorTo.edgeId;
                 });

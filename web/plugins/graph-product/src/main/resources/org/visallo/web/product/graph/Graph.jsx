@@ -141,7 +141,17 @@ define([
                 selectConnected: (event, data) => {
                     event.stopPropagation();
                     const cy = this.cytoscape.state.cy;
-                    const selected = cy.elements().filter(':selected');
+                    let selected = cy.elements().filter(':selected');
+
+                    if (selected.length === 0) {
+                        const id = data.collapsedNodeId || data.vertexId || date.edgeIds[0];
+                        selected = cy.getElementById(id);
+
+                        if (selected.length === 0) {
+                            cy.edges().filter(edge => edge.data('edgeInfos').some(edgeInfo => edgeInfo.edgeId === id))
+                        }
+                    }
+
                     selected.neighborhood('node').select();
                     selected.connectedNodes().select();
 
@@ -300,6 +310,7 @@ define([
                         onGhostFinished={this.props.onGhostFinished}
                         onUpdatePreview={this.onUpdatePreview}
                         editable={editable}
+                        reapplyGraphStylesheet={this.reapplyGraphStylesheet}
                     ></Cytoscape>
 
                     {cyElements.nodes.length === 0 ? (
@@ -343,6 +354,7 @@ define([
         },
 
         reapplyGraphStylesheet() {
+            memoizeClear();
             this.forceUpdate();
         },
 

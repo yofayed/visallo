@@ -7,16 +7,11 @@ define([
     return defineComponent(Menu);
 
     function Menu() {
-        this.after('teardown', function() {
-            $(document).off('.vertexMenu');
-        });
 
         this.after('initialize', function() {
             var self = this;
 
-            this.on(document, 'closeVertexMenu', function() {
-                self.onClose();
-            });
+            this.on(document, 'closeVertexMenu', this.teardown);
 
             this.$node.append('<div class="vertex-menu-wrapper"></div>');
             this.$menu = this.$node.find('.vertex-menu-wrapper');
@@ -37,15 +32,19 @@ define([
                 $(document).off('.vertexMenu').on('click.vertexMenu', function() {
                     $(document).off('.vertexMenu');
                     _.defer(function() {
-                        self.onClose();
+                        self.teardown();
                     })
                 });
             });
         });
 
-        this.onClose = function() {
+        this.before('teardown', function() {
             attacher().node(this.$menu).teardown();
-            this.teardown();
-        };
+        });
+
+        this.after('teardown', function() {
+            $(document).off('.vertexMenu');
+        });
+
     }
 });

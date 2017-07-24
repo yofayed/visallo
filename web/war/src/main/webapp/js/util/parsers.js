@@ -36,7 +36,7 @@ define([
             },
 
             bool: {
-                parse: function(s) {
+                parse: function(s, defaultValue) {
                     if (typeof s === 'boolean') {
                         return s;
                     } else if (typeof s === 'string') {
@@ -45,6 +45,8 @@ define([
                         } else if (s.toLocaleLowerCase() === 'false') {
                             return false;
                         }
+                    } else if ((_.isUndefined(s) || _.isNull(s)) && typeof defaultValue === 'boolean') {
+                        return defaultValue;
                     }
                     throw new Error('Could not parse boolean "' + s + '"');
                 }

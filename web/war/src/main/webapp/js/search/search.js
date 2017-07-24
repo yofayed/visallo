@@ -70,7 +70,7 @@ define([
      *
      * Each of the search interfaces has its own saved searches.
      *
-     * @param {string} componentPath Path to Flight {@link org.visallo.search.advanced~Component}
+     * @param {string} componentPath Path to {@link org.visallo.search.advanced~Component}
      * @param {string} displayName The text to display in search dropdown (to
      * select the type of search interface)
      * @param {string} savedSearchUrl The endpoint to execute when search is changed
@@ -185,6 +185,7 @@ define([
                     ...params,
                     initialParameters: data.query.parameters
                 }).attach();
+                this.currentSearchNode.trigger('savedQuerySelected', data);
             } else {
                 this.trigger(
                     'searchByParameters',
@@ -215,18 +216,14 @@ define([
                 { ...advancedSearch, advancedSearch: advancedSearch.componentPath } :
                 'Visallo'
             ).then(function() {
-                if (advancedSearch) {
-                    self.currentSearchNode.trigger('savedQuerySelected', { query: data });
-                } else {
-                    var node = self.getSearchTypeNode().find('.search-filters > .content');
-                    if ('q' in data.parameters) {
-                        self.select('querySelector').filter(':visible')
-                            .val(data.parameters.q)
-                            .select()
-                        self.updateClearSearch();
-                    }
-                    node.trigger(event.type, data);
+                var node = self.getSearchTypeNode().find('.search-filters > .content');
+                if ('q' in data.parameters) {
+                    self.select('querySelector').filter(':visible')
+                        .val(data.parameters.q)
+                        .select()
+                    self.updateClearSearch();
                 }
+                node.trigger(event.type, data);
             });
         };
 
@@ -473,7 +470,7 @@ define([
                 )
             }
 
-            this.savedQueries[searchType].status = status || {};
+            this.savedQueries[searchType].status = status || { success: true };
             this.updateTypeCss();
         };
 

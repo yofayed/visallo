@@ -1,71 +1,25 @@
 Element Menu Plugin
 ===================
-Plugin to add new items to vertex context menu.
+* [Vertex Menu Javascript API `org.visallo.vertex.menu`](../../../javascript/org.visallo.vertex.menu.html)
+* [Edge Menu Javascript API `org.visallo.edge.menu`](../../../javascript/org.visallo.edge.menu.html)
 
-Plugin to add new items to vertex or edge context menu.
+Plugin to add new items to vertex or edge context menu. Providing a `shouldDisable` handler will still show the
+item in the context menu, provide a `canHandle` function if you want to remove items completely based
+on the current selection and target element.
 
-## Required parameters:
+To add a divider:
 
-* label: The text to display.
-* event: The event to trigger.
-
-## Optional parameters:
-
-* shortcut: string of shortcut to show in menu. Doesn't actually listen for shortcut, just places the text in the label.
-* args: other values to pass to event handler.
-* shouldDisable: function to disable / enable the field which will receive the following arguments:
-    * `currentSelection`: object with currently selected element ids as keys and their element objects as values
-    * `vertexId`: the vertex id of the click target's corresponding vertex
-    * `edgeIds`: the edge ids of the click target's corresponding edges
-    * `element`: the DOM element target
-    * `vertex`: the corresponding vertex object of the click target
-* selection: number of how many selected items this supports.
-* options: (object)
-    * insertIntoMenuItems: function to place the item in existing items.
-
+```js
+registry.registerExtension('org.visallo.vertex.menu', 'DIVIDER');  // vertex menu
+registry.registerExtension('org.visallo.edge.menu', 'DIVIDER');  //edge menu
+```
 
 ## Example
 
 To register an item:
 
-```js
-require([
-    'configuration/plugins/registry',
-    'util/messages'
-], function(registry, i18n) {
+{% github_embed "https://github.com/visallo/doc-examples/blob/bab1856a/extension-element-context-menu/src/main/resources/org/visallo/examples/context_menu/plugin.js#L1-L48", hideLines=['23-47'] %}{% endgithub_embed %}
 
-    registry.registerExtension('org.visallo.vertex.menu', {
-        label: i18n('com.myplugin.menu.label'),
-        shortcut: 'alt+i',
-        event: 'searchSimilar',
-        selection: 2,
-        options: {
-            insertIntoMenuItems: function(item, items) {
-                // Add item as fourth in list
-                items.splice(3, 0, item);
-            }
-        }
-    });
-});
-```
+Then add an event listener to handle when your menu item is clicked:
 
-To create a `shouldDisable` handler:
-
-```js
-shouldDisable: function(currentSelection, vertexId, element, vertex) {
-    // Disable this menu option if multiple vertices are selected
-    return Object.keys(currentSelection).length > 1;
-}
-```
-
-To add a divider:
-
-```js
-registry.registerExtension('org.visallo.vertex.menu', 'DIVIDER');
-```
-
-To add an edge context menu item:
-
-```js
-registry.registerExtension('org.visallo.edge.menu', ...);
-```
+{% github_embed "https://github.com/visallo/doc-examples/blob/bab1856a/extension-element-context-menu/src/main/resources/org/visallo/examples/context_menu/plugin.js#L3-L47", hideLines=['4-35', '43-46'] %}{% endgithub_embed %}

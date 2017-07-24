@@ -134,8 +134,7 @@ define([
              * @param {array.<object>} [submenu] The submenu to open on hover
              * @param {function} [canHandle] Should the item be place given
              * `currentSelection` and `vertex` parameters.
-             * @param {number} [selection] Automatically enable based on the
-             * selection count `0`, `1`, `2`.
+             * @param {number} [selection] Automatically enable or disable based on the targeted number of vertices
              * @param {object} [options]
              * @param {function} [options.insertIntoMenuItems] function to place the item in a specific location/order, given `item` and `items`.
              *
@@ -150,6 +149,30 @@ define([
                 },
                 'http://docs.visallo.org/extension-points/front-end/elementMenu'
             );
+            /**
+             * Add menu items to the context menu of edges.
+             *
+             * Pass the string `DIVIDER` to place a divider in the menu
+             *
+             * @param {string} label The menu text to display
+             * @param {string} event The event to trigger on click, not
+             * required if `submenu` is provided
+             * @param {string} [shortcut] string of shortcut to show in menu.
+             * Doesn't actually listen for shortcut, just places the text in
+             * the label. For example, `alt+p`
+             * @param {object} [args] Additional arguments passed to handler
+             * @param {string} [cls] CSS classname added to item
+             * @param {function} [shouldDisable] Given the `selection`,
+             * `edgeId`, `DomElement`, and `edge` as parameters
+             * @param {array.<object>} [submenu] The submenu to open on hover
+             * @param {function} [canHandle] Should the item be place given
+             * `currentSelection` and `edge` parameters.
+             * @param {number} [selection] Automatically enable or disable based on the targeted number of edges
+             * @param {object} [options]
+             * @param {function} [options.insertIntoMenuItems] function to place the item in a specific location/order, given `item` and `items`.
+             *
+             * Syntax similar to {@link org.visallo.detail.toolbar~insertIntoMenuItems}
+             */
             registry.documentExtensionPoint('org.visallo.edge.menu',
                 'Add edge context menu items',
                 function(e) {
