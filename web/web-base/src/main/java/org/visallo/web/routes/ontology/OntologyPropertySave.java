@@ -47,7 +47,10 @@ public class OntologyPropertySave extends OntologyBase {
         List<Concept> concepts = ontologyIrisToConcepts(conceptIris, workspaceId);
         List<Relationship> relationships = ontologyIrisToRelationships(relationshipIris, workspaceId);
 
-        PropertyType type = convertDataTypeStringToPropertyType(dataType);
+        PropertyType type = PropertyType.convert(dataType, null);
+        if (type == null) {
+            throw new VisalloException("Unknown property type: " + dataType);
+        }
 
         if (propertyIri == null) {
             propertyIri = ontologyRepository.generateDynamicIri(OntologyProperty.class, displayName, workspaceId, dataType);
@@ -86,15 +89,5 @@ public class OntologyPropertySave extends OntologyBase {
         workQueueRepository.pushOntologyChange(workspaceId, conceptIds, relationshipIds, Collections.singletonList(property.getId()));
 
         return property.toClientApi();
-    }
-
-    private PropertyType convertDataTypeStringToPropertyType(String dataType) {
-        boolean isValid = Arrays.stream(PropertyType.values())
-                .anyMatch(pt -> pt.toString().toLowerCase().equals(dataType.toLowerCase()));
-        if (!isValid) {
-            throw new VisalloException("Unknown property type: " + dataType);
-        }
-
-        return PropertyType.valueOf(dataType.toUpperCase());
     }
 }

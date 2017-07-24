@@ -39,12 +39,16 @@ public enum PropertyType {
     }
 
     public static PropertyType convert(String property) {
+        return convert(property, STRING);
+    }
+
+    public static PropertyType convert(String property, PropertyType defaultValue) {
         for (PropertyType pt : PropertyType.values()) {
             if (pt.toString().equalsIgnoreCase(property)) {
                 return pt;
             }
         }
-        return STRING;
+        return defaultValue;
     }
 
     public static Class getTypeClass(PropertyType propertyType) {
