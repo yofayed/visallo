@@ -9,10 +9,10 @@ define([
     const DIVIDER = 'DIVIDER';
 
     const MENU_ITEM_SHAPE = React.PropTypes.shape({
-        // function(currentSelection, vertexId, DOMElement, vertex): return true if this item should be disabled
+        // function(currentSelection, elementId, DOMElement, element): return true if this item should be disabled
         shouldDisable: React.PropTypes.func,
 
-        // function(currentSelection, vertex): return true if this item can handle the given vertex
+        // function(currentSelection, element): return true if this item can handle the given vertex
         canHandle: React.PropTypes.func,
 
         // The primary label to display
@@ -63,6 +63,8 @@ define([
         },
 
         render() {
+            const { items, element, elementTitle, domElement, onMenuItemClick } = this.props;
+
             return (
                 <ul className="dropdown-menu" role="menu">
                     {this.props.items.map((item, itemIndex) => {
@@ -70,11 +72,15 @@ define([
                             return (<li key={itemIndex} className="divider"/>);
                         } else {
                             return (
-                                <ElementContextMenuItem key={itemIndex} elementTitle={this.props.elementTitle}
-                                                        item={item} domElement={this.props.domElement}
-                                                        element={this.props.element}
-                                                        onClick={this.handleMenuItemClick.bind(this, item)}
-                                                        onMenuItemClick={this.props.onMenuItemClick}/>
+                                <ElementContextMenuItem
+                                    key={itemIndex}
+                                    elementTitle={elementTitle}
+                                    item={item}
+                                    domElement={domElement}
+                                    element={element}
+                                    onClick={this.handleMenuItemClick.bind(this, item)}
+                                    onMenuItemClick={onMenuItemClick}
+                                />
                             );
                         }
                     })}
@@ -111,10 +117,12 @@ define([
         },
 
         componentWillMount() {
+            const { element, domElement, item } = this.props;
             const currentSelection = visalloData.selectedObjects.vertexIds;
-            const disabled = _.isFunction(this.props.item.shouldDisable)
-                ? this.props.item.shouldDisable(currentSelection, this.props.element.id, this.props.domElement, this.props.element)
+            const disabled = _.isFunction(item.shouldDisable)
+                ? this.props.item.shouldDisable(currentSelection, element.id, domElement, element)
                 : false;
+
             this.setState({
                 disabled: disabled
             });
@@ -359,9 +367,12 @@ define([
             return (<div className="vertex-menu" ref="menuDiv">
                 { items.length &&
                     <ElementContextMenuList
-                        items={this.state.items} elementTitle={this.state.title}
-                        domElement={this.props.domElement} element={this.state.element}
-                        onMenuItemClick={this.handleMenuItemClick}/>
+                        items={items}
+                        elementTitle={title}
+                        domElement={this.props.domElement}
+                        element={element}
+                        onMenuItemClick={this.handleMenuItemClick}
+                    />
                 }
             </div>);
         },

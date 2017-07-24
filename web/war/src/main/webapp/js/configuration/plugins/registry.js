@@ -3,7 +3,7 @@
  * Visallo under _UI Extensions_.  Documentation with examples is available at {@link http://docs.visallo.org/extension-points/front-end docs.visallo.org}.
  *
  * @module registry
- * @classdesc Registry for adding and removing extensions given documentated extension points
+ * @classdesc Registry for adding and removing extensions given documented extension points
  */
 define(['underscore', 'updeep', 'reselect'], function(_, u, reselect) {
 
