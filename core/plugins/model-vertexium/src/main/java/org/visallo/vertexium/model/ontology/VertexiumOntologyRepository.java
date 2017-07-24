@@ -755,7 +755,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
 
         boolean finalSearchable = determineSearchable(propertyIri, dataType, textIndexHints, searchable);
 
-        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, null, getAuthorizations(workspaceId))) {
+        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.LOW, user, getAuthorizations(workspaceId))) {
             ctx.setPushOnQueue(false);
 
             ExistingElementMutation<Vertex> builder = vertex.prepareMutation();

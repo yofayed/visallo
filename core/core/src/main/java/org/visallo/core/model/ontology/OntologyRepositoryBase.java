@@ -143,8 +143,8 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
                 TOP_OBJECT_PROPERTY_IRI,
                 null,
                 true,
-                null,
-                null
+                getSystemUser(),
+                PUBLIC
         );
         if (topObjectProperty.getUserVisible()) {
             topObjectProperty.setProperty(OntologyProperties.USER_VISIBLE.getPropertyName(), false, authorizations);
@@ -408,7 +408,7 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
         boolean isDeclaredInOntology = o.isDeclared(ontologyClass);
 
         Concept parent = getParentConcept(o, ontologyClass, inDir, authorizations);
-        Concept result = internalGetOrCreateConcept(parent, uri, label, null, null, inDir, isDeclaredInOntology, null, PUBLIC);
+        Concept result = internalGetOrCreateConcept(parent, uri, label, null, null, inDir, isDeclaredInOntology, getSystemUser(), PUBLIC);
 
         for (OWLAnnotation annotation : EntitySearcher.getAnnotations(ontologyClass, o)) {
             String annotationIri = annotation.getProperty().getIRI().toString();
@@ -629,8 +629,8 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
                     intents,
                     deleteable,
                     updateable,
-                    null,
-                    null
+                    getSystemUser(),
+                    PUBLIC
             );
             property.setProperty(OntologyProperties.DISPLAY_NAME.getPropertyName(), propertyDisplayName, authorizations);
 
@@ -791,8 +791,8 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
                 iri,
                 null,
                 isDeclaredInOntology,
-                null,
-                null
+                getSystemUser(),
+                PUBLIC
         );
 
         for (OWLAnnotation annotation : EntitySearcher.getAnnotations(objectProperty, o)) {

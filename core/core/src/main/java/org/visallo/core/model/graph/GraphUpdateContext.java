@@ -56,6 +56,13 @@ public abstract class GraphUpdateContext implements AutoCloseable {
             User user,
             Authorizations authorizations
     ) {
+        checkNotNull(graph, "graph cannot be null");
+        checkNotNull(workQueueRepository, "workQueueRepository cannot be null");
+        checkNotNull(visibilityTranslator, "visibilityTranslator cannot be null");
+        checkNotNull(priority, "priority cannot be null");
+        checkNotNull(user, "user cannot be null");
+        checkNotNull(authorizations, "authorizations cannot be null");
+
         this.graph = graph;
         this.workQueueRepository = workQueueRepository;
         this.visibilityTranslator = visibilityTranslator;

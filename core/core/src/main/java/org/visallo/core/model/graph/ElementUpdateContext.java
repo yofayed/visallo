@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.vertexium.util.Preconditions.checkNotNull;
+
 public class ElementUpdateContext<T extends Element> {
     private final VisibilityTranslator visibilityTranslator;
     private final ElementMutation<T> mutation;
@@ -55,10 +57,9 @@ public class ElementUpdateContext<T extends Element> {
             Date modifiedDate,
             VisibilityJson visibilityJson
     ) {
+        checkNotNull(user, "User cannot be null");
         Visibility defaultVisibility = visibilityTranslator.getDefaultVisibility();
-        if (user != null) {
-            VisalloProperties.MODIFIED_BY.updateProperty(this, user.getUserId(), defaultVisibility);
-        }
+        VisalloProperties.MODIFIED_BY.updateProperty(this, user.getUserId(), defaultVisibility);
         VisalloProperties.MODIFIED_DATE.updateProperty(this, modifiedDate, defaultVisibility);
         VisalloProperties.VISIBILITY_JSON.updateProperty(this, visibilityJson, defaultVisibility);
     }
