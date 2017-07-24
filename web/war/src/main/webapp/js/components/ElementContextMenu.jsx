@@ -11,10 +11,10 @@ define([
 
     const MENU_ITEM_SHAPE = React.PropTypes.shape({
         // function(currentSelection, elementId, DOMElement, element): return true if this item should be disabled
-        shouldDisable: React.PropTypes.func,
+        shouldDisable: PropTypes.func,
 
         // function(currentSelection, element): return true if this item can handle the given vertex
-        canHandle: React.PropTypes.func,
+        canHandle: PropTypes.func,
 
         // The primary label to display
         label: PropTypes.string.isRequired,
