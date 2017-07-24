@@ -88,8 +88,8 @@ public abstract class OntologyRepositoryBase implements OntologyRepository {
 
     public void loadOntologies(Configuration config, Authorizations authorizations) throws Exception {
         lockRepository.lock("ontology", () -> {
-            Concept rootConcept = internalGetOrCreateConcept(null, ROOT_CONCEPT_IRI, "root", null, null, null, false, null, PUBLIC);
-            Concept entityConcept = internalGetOrCreateConcept(rootConcept, ENTITY_CONCEPT_IRI, "thing", null, null, null, false, null, PUBLIC);
+            Concept rootConcept = internalGetOrCreateConcept(null, ROOT_CONCEPT_IRI, "root", null, null, null, false, getSystemUser(), PUBLIC);
+            Concept entityConcept = internalGetOrCreateConcept(rootConcept, ENTITY_CONCEPT_IRI, "thing", null, null, null, false, getSystemUser(), PUBLIC);
             getOrCreateTopObjectPropertyRelationship(authorizations);
 
             clearCache();
