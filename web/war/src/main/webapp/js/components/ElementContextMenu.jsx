@@ -9,7 +9,7 @@ define([
 
     const DIVIDER = 'DIVIDER';
 
-    const MENU_ITEM_SHAPE = React.PropTypes.shape({
+    const MENU_ITEM_SHAPE = PropTypes.shape({
         // function(currentSelection, elementId, DOMElement, element): return true if this item should be disabled
         shouldDisable: PropTypes.func,
 
