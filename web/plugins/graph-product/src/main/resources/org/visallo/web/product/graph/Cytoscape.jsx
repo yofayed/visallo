@@ -335,14 +335,14 @@ define([
                 if (decorations && decorations.length) {
                     const specs = specsForNode(cyNode, toPosition);
                     if (animate) {
-                        decorations.each(function() {
-                            const position = calculatePosition(this.data('padding'), this.data('alignment'), this, specs);
-                            this.stop().animate({ position }, { ...ANIMATION });
+                        decorations.forEach(function(decoration) {
+                            const position = calculatePosition(decoration.data('padding'), decoration.data('alignment'), decoration, specs);
+                            decoration.stop().animate({ position }, { ...ANIMATION });
                         })
                     } else {
                         this.state.cy.batch(function() {
-                            decorations.each(function() {
-                                this.position(calculatePosition(this.data('padding'), this.data('alignment'), this, specs));
+                            decorations.forEach(function(decoration) {
+                                decoration.position(calculatePosition(decoration.data('padding'), decoration.data('alignment'), decoration, specs));
                             })
                         })
                     }

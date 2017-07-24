@@ -17,7 +17,7 @@ define([], function() {
             linebreak = Math.round(
                     Math.sqrt(len * (this.spaceY / this.spaceX))
                 ) * this.spaceX,
-            getPos = function(i, node) {
+            getPos = function(node, i) {
                 if ((x - bb.x1) > linebreak) {
                   x = bb.x1;
                   y += self.spaceY;
