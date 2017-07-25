@@ -230,6 +230,12 @@ public abstract class GraphUpdateContext implements AutoCloseable {
     /**
      * Gets a vertex by id from the graph. If the vertex does not exist prepares a new mutation and
      * calls update.
+     *
+     * @param vertexId   The existing vertex id, desired vertex id for new vertices, or null to generate a new id
+     *                   and create a new vertex.
+     * @param timestamp  The timestamp to assign new vertices or null to use the current time
+     * @param visibility The visibility of the new vertex
+     * @param updateFn   Closure in which all element updates should be made
      */
     public UpdateFuture<Vertex> getOrCreateVertexAndUpdate(
             String vertexId,
@@ -237,7 +243,7 @@ public abstract class GraphUpdateContext implements AutoCloseable {
             Visibility visibility,
             Update<Vertex> updateFn
     ) {
-        Vertex existingVertex = graph.getVertex(vertexId, getAuthorizations());
+        Vertex existingVertex = vertexId == null ? null : graph.getVertex(vertexId, getAuthorizations());
         ElementMutation<Vertex> m = existingVertex == null
                 ? graph.prepareVertex(vertexId, timestamp, visibility)
                 : existingVertex.prepareMutation();
@@ -262,6 +268,15 @@ public abstract class GraphUpdateContext implements AutoCloseable {
     /**
      * Gets a edge by id from the graph. If the edge does not exist prepares a new mutation and
      * calls update.
+     *
+     * @param edgeId      The existing edge id, desired edge id for new edges, or null to generate a new id
+     *                    and create a new edge.
+     * @param outVertexId the out vertex id of newly created edges
+     * @param inVertexId  the in vertex id of newly created edges
+     * @param label       the label to assign on newly created edges
+     * @param timestamp   The timestamp to assign new edges or null to use the current time
+     * @param visibility  The visibility of the new edge
+     * @param updateFn    Closure in which all element updates should be made
      */
     public UpdateFuture<Edge> getOrCreateEdgeAndUpdate(
             String edgeId,
@@ -272,7 +287,7 @@ public abstract class GraphUpdateContext implements AutoCloseable {
             Visibility visibility,
             Update<Edge> updateFn
     ) {
-        Edge existingEdge = graph.getEdge(edgeId, getAuthorizations());
+        Edge existingEdge = edgeId == null ? null : graph.getEdge(edgeId, getAuthorizations());
         ElementMutation<Edge> m = existingEdge == null
                 ? graph.prepareEdge(edgeId, outVertexId, inVertexId, label, timestamp, visibility)
                 : existingEdge.prepareMutation();
