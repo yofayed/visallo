@@ -64,6 +64,15 @@ define([
             this.$modal = this.$node.html(template({
                 title: F.vertex.title(this.attr.vertex)
             }));
+            var windowWidth = Math.round($(window).width() * 0.9);
+            this.$modal.find('.modal-resizable').resizable({
+                minWidth: Math.min(windowWidth, 375),
+                maxWidth: windowWidth,
+                handles: 'e, w',
+                resize: function(event, ui) {
+                    ui.position.left = 0;
+                }
+            });
             this.$modal.modal();
 
             this.on('click', {

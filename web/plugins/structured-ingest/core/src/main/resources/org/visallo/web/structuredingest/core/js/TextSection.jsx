@@ -19,7 +19,11 @@ define([
             return (
                 <div className="com-visallo-structuredFile-text-table">
                   <div className="buttons">
-                    <button onClick={this.onClick} className="btn btn-default btn-small">{i18n('csv.file_import.mapping.button')}</button>
+                    <button onClick={this.onClick} className="btn btn-default icon-with-description">
+                        <div style={{backgroundImage: 'url(img/glyphicons_custom/extract-rows.png)'}} className="icon"></div>
+                        {i18n('csv.file_import.mapping.button')}
+                        <div className="description">{i18n('csv.file_import.mapping.button.description')}</div>
+                    </button>
                   </div>
                   <div className="table">
                     { error ? 'Error Analyzing File' :
@@ -59,7 +63,8 @@ define([
                 'org/visallo/web/structuredingest/core/js/form',
                 'org/visallo/web/structuredingest/core/templates/modal.hbs'
             ], (CSVMappingForm, template) => {
-                CSVMappingForm.attachTo($(template({})).appendTo('#app'), { vertex });
+                const $modal = $(template({})).appendTo('#app');
+                CSVMappingForm.attachTo($modal, { vertex });
             });
         },
         analyze() {
