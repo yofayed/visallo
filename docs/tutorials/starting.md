@@ -56,6 +56,10 @@ The file was imported into Visallo and run through the graph property work queue
 
 Now that we have some people in our system, we can use the example web plugin to google their names.  To see the code that makes up this plugin, look inside of the ```./web``` folder in your project.  Click on "Bruce Wayne" in the graph and the Element Inspector will open.  In the Element Inspector you can view the information that you are allowed to see about Bruce Wayne.  Click the "Google" button at the top menu bar of the Element Inspector to open a new window that automatically opens the search results page for "Bruce Wayne" in Google.  
 
+### Example Command Line Tool
+
+Alternativly you can look at the command line tool example. This example will import two people and link them together with an edge. To see the code that makes up this plugin, look inside of the ```./cli``` folder in your project.
+
 ## Now What?
 
 In our next tutorial, we will work through Visallo's version of Hello World  by [creating a custom Hello World Graph Property Worker](helloworldgpw.md)

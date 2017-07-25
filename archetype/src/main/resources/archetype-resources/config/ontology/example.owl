@@ -57,6 +57,14 @@
     </owl:ObjectProperty>
 
 
+    <!-- ${ontologyBaseIri}${symbol_pound}knows -->
+
+    <owl:ObjectProperty rdf:about="${ontologyBaseIri}${symbol_pound}knows">
+        <rdfs:label xml:lang="en">Knows</rdfs:label>
+        <rdfs:domain rdf:resource="${ontologyBaseIri}${symbol_pound}person"/>
+        <rdfs:range rdf:resource="${ontologyBaseIri}${symbol_pound}person"/>
+    </owl:ObjectProperty>
+
 
     <!-- ${ontologyBaseIri}${symbol_pound}rawContainsImageOfEntity -->
 

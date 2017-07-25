@@ -33,6 +33,14 @@
         </dependency>
         <dependency>
             <groupId>${groupId}</groupId>
+            <artifactId>${rootArtifactId}-cli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>${rootArtifactId}-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${groupId}</groupId>
             <artifactId>${rootArtifactId}-web</artifactId>
         </dependency>
         <dependency>
@@ -197,6 +205,39 @@
                                 <argument>${visallo.dir}/config/truststore.jks</argument>
                                 <argument>--trustStorePassword</argument>
                                 <argument>password</argument>
+                            </arguments>
+                            <workingDirectory>${project.build.directory}</workingDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>runcli</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${plugin.maven.exec.version}</version>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>${debug.flag}</argument>
+                                <argument>${debug.options}</argument>
+                                <argument>-DVISALLO_DIR=${visallo.dir}</argument>
+                                <argument>-Dvisallo.VISALLO_DIR=${visallo.dir}</argument>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>myproject.cli.ExampleCommandLineTool</argument>
                             </arguments>
                             <workingDirectory>${project.build.directory}</workingDirectory>
                         </configuration>

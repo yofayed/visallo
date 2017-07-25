@@ -21,6 +21,7 @@ import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.WorkQueueNames;
 import org.visallo.core.model.graph.GraphRepository;
 import org.visallo.core.model.ontology.OntologyRepository;
+import org.visallo.core.model.properties.VisalloProperties;
 import org.visallo.core.model.termMention.TermMentionRepository;
 import org.visallo.core.model.user.AuthorizationRepository;
 import org.visallo.core.model.user.UserRepository;
@@ -33,6 +34,7 @@ import org.visallo.core.security.VisibilityTranslator;
 import org.visallo.core.user.User;
 import org.visallo.model.queue.inmemory.InMemoryWorkQueueRepository;
 import org.visallo.vertexium.model.user.InMemoryUser;
+import org.visallo.web.clientapi.model.VisibilityJson;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -62,13 +64,13 @@ public abstract class GraphPropertyWorkerTestBase {
     protected OntologyRepository ontologyRepository;
 
     @Mock
-    private UserRepository userRepository;
+    protected UserRepository userRepository;
 
     @Mock
-    private AuthorizationRepository authorizationRepository;
+    protected AuthorizationRepository authorizationRepository;
 
     @Mock
-    private WorkspaceRepository workspaceRepository;
+    protected WorkspaceRepository workspaceRepository;
 
     protected GraphPropertyWorkerTestBase() {
 
@@ -180,8 +182,13 @@ public abstract class GraphPropertyWorkerTestBase {
         }
     }
 
+    /**
+     * @deprecated {@link #run(GraphPropertyWorker, GraphPropertyWorkerPrepareData, Element, Property, InputStream, String, ElementOrPropertyStatus, String)} will prepare the worker
+     */
+    @Deprecated
     protected void prepare(GraphPropertyWorker gpw) throws Exception {
         gpw.setOntologyRepository(ontologyRepository);
+        gpw.setWorkspaceRepository(workspaceRepository);
         gpw.setVisibilityTranslator(getVisibilityTranslator());
         gpw.setGraph(getGraph());
         gpw.setWorkQueueRepository(getWorkQueueRepository());
@@ -190,23 +197,46 @@ public abstract class GraphPropertyWorkerTestBase {
     }
 
     protected void run(GraphPropertyWorker gpw, GraphPropertyWorkerPrepareData workerPrepareData, Element e) {
-        run(gpw, workerPrepareData, e, null, null);
+        run(gpw, workerPrepareData, e, null);
+    }
+
+    protected void run(
+            GraphPropertyWorker gpw,
+            GraphPropertyWorkerPrepareData workerPrepareData,
+            Element e,
+            String workspaceId
+    ) {
+        String visibilitySource = getVisibilitySource(e);
+        run(gpw, workerPrepareData, e, null, null, workspaceId, null, visibilitySource);
         for (Property property : e.getProperties()) {
             InputStream in = null;
             if (property.getValue() instanceof StreamingPropertyValue) {
                 StreamingPropertyValue spv = (StreamingPropertyValue) property.getValue();
                 in = spv.getInputStream();
             }
-            run(gpw, workerPrepareData, e, property, in);
+            run(gpw, workerPrepareData, e, property, in, workspaceId, null, visibilitySource);
         }
     }
 
+    private String getVisibilitySource(Element e) {
+        String visibilitySource = null;
+        if (e != null) {
+            VisibilityJson visibilitySourceJson = VisalloProperties.VISIBILITY_JSON.getPropertyValue(e, null);
+            if (visibilitySourceJson != null) {
+                visibilitySource = visibilitySourceJson.getSource();
+            }
+        }
+        return visibilitySource;
+    }
+
     protected boolean run(GraphPropertyWorker gpw, GraphPropertyWorkerPrepareData workerPrepareData, Element e, Property prop, InputStream in) {
-        return run(gpw, workerPrepareData, e, prop, in, null, null, null);
+        String visibilitySource = getVisibilitySource(e);
+        return run(gpw, workerPrepareData, e, prop, in, null, null, visibilitySource);
     }
 
     protected boolean run(GraphPropertyWorker gpw, GraphPropertyWorkerPrepareData workerPrepareData, Element e, Property prop, InputStream in, String workspaceId, ElementOrPropertyStatus status) {
-        return run(gpw, workerPrepareData, e, prop, in, workspaceId, status, null);
+        String visibilitySource = getVisibilitySource(e);
+        return run(gpw, workerPrepareData, e, prop, in, workspaceId, status, visibilitySource);
     }
 
     protected boolean run(
@@ -220,6 +250,8 @@ public abstract class GraphPropertyWorkerTestBase {
             String visibilitySource
     ) {
         try {
+            gpw.setOntologyRepository(ontologyRepository);
+            gpw.setWorkspaceRepository(workspaceRepository);
             gpw.setConfiguration(getConfiguration());
             gpw.setGraph(getGraph());
             gpw.setVisibilityTranslator(getVisibilityTranslator());
