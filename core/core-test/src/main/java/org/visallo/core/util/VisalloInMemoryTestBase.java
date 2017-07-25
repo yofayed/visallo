@@ -23,6 +23,7 @@ import org.visallo.core.model.user.*;
 import org.visallo.core.model.workQueue.TestWorkQueueRepository;
 import org.visallo.core.model.workQueue.WorkQueueRepository;
 import org.visallo.core.model.workspace.WorkspaceDiffHelper;
+import org.visallo.core.model.workspace.WorkspaceHelper;
 import org.visallo.core.model.workspace.WorkspaceListener;
 import org.visallo.core.model.workspace.WorkspaceRepository;
 import org.visallo.core.model.workspace.product.WorkProduct;
@@ -60,6 +61,7 @@ public abstract class VisalloInMemoryTestBase {
     private FileSystemRepository fileSystemRepository;
     private LongRunningProcessRepository longRunningProcessRepository;
     private WorkQueueNames workQueueNames;
+    private WorkspaceHelper workspaceHelper;
 
     @Before
     public void before() {
@@ -85,6 +87,7 @@ public abstract class VisalloInMemoryTestBase {
         fileSystemRepository = null;
         longRunningProcessRepository = null;
         workQueueNames = null;
+        workspaceHelper = null;
     }
 
     protected WorkspaceRepository getWorkspaceRepository() {
@@ -432,5 +435,21 @@ public abstract class VisalloInMemoryTestBase {
         }
         workQueueNames = new WorkQueueNames(getConfiguration());
         return workQueueNames;
+    }
+
+    public WorkspaceHelper getWorkspaceHelper() {
+        if (workspaceHelper != null) {
+            return workspaceHelper;
+        }
+        workspaceHelper = new WorkspaceHelper(
+                getTermMentionRepository(),
+                getWorkQueueRepository(),
+                getGraph(),
+                getOntologyRepository(),
+                getWorkspaceRepository(),
+                getPrivilegeRepository(),
+                getAuthorizationRepository()
+        );
+        return workspaceHelper;
     }
 }
