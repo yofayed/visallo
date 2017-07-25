@@ -1,0 +1,4 @@
+Bundle-Version: 4.0.0
+Manifest-Version: 1.0
+Main-Class: org.visallo.web.TomcatWebServer
+Class-Path: ${classpath}

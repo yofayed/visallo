@@ -135,6 +135,92 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputProperty>v-classpath</outputProperty>
+                    <pathSeparator xml:space="preserve">_SEP_</pathSeparator>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>fix-classpath-for-manifest</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>v-classpath</name>
+                            <value>${v-classpath}</value>
+                            <regex>_SEP_</regex>
+                            <replacement xml:space="preserve">${line.separator}  </replacement>
+                            <failIfNoMatch>false</failIfNoMatch>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.internetitem</groupId>
+                <artifactId>write-properties-file-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>write-properties-file</goal>
+                        </goals>
+                        <configuration>
+                            <filename>classpath.properties</filename>
+                            <properties>
+                                <property>
+                                    <name>classpath</name>
+                                    <value>${v-classpath}</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.directory}/classes/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+
+        <filters>
+            <filter>${project.build.directory}/classes/classpath.properties</filter>
+        </filters>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+
     <profiles>
         <profile>
             <id>dev-tomcat-run</id>
@@ -149,9 +235,8 @@
                             <arguments>
                                 <argument>-DVISALLO_DIR=${basedir}/../..</argument>
                                 <argument>-Dvisallo.VISALLO_DIR=${basedir}/../..</argument>
-                                <argument>-classpath</argument>
-                                <classpath/>
-                                <argument>org.visallo.web.TomcatWebServer</argument>
+                                <argument>-jar</argument>
+                                <argument>visallo-dev-tomcat-server-${v5.visallo.version}-tests.jar</argument>
                                 <argument>--webAppDir</argument>
                                 <argument>${web.basedir}/src/main/webapp</argument>
                                 <argument>--port</argument>
