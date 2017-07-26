@@ -56,6 +56,16 @@
             </dependency>
             <dependency>
                 <groupId>${groupId}</groupId>
+                <artifactId>${rootArtifactId}-cli</artifactId>
+                <version>${version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${groupId}</groupId>
+                <artifactId>${rootArtifactId}-core</artifactId>
+                <version>${version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${groupId}</groupId>
                 <artifactId>${rootArtifactId}-web</artifactId>
                 <version>${version}</version>
             </dependency>
@@ -78,6 +88,13 @@
                 <groupId>org.visallo</groupId>
                 <artifactId>visallo-dev-tomcat-server</artifactId>
                 <version>${visallo.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.visallo</groupId>
+                <artifactId>visallo-core-test</artifactId>
+                <version>${visallo.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

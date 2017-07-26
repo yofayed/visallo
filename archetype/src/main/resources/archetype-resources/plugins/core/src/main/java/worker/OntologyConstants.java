@@ -1,7 +1,7 @@
 #set( $symbol_pound = '#' )
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
-package ${package}.worker;
+package ${package};
 
 import org.visallo.core.model.properties.types.StringSingleValueVisalloProperty;
 
@@ -13,6 +13,7 @@ public interface OntologyConstants {
     String CONTACTS_CSV_FILE_CONCEPT_TYPE = ONTOLOGY_BASE_IRI + "contactsCsvFile";
 
     String HAS_ENTITY_EDGE_LABEL = ONTOLOGY_BASE_IRI + "hasEntity";
+    String KNOWS_EDGE_LABEL = ONTOLOGY_BASE_IRI + "knows";
 
     StringSingleValueVisalloProperty PERSON_FULL_NAME_PROPERTY =
             new StringSingleValueVisalloProperty(ONTOLOGY_BASE_IRI + "fullName");

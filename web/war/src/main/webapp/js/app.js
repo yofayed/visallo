@@ -931,7 +931,7 @@ define([
                     height = minHeight;
                 }
                 const maxHeight = $pane.resizable('option', 'maxHeight');
-                if (maxHeight && height < maxHeight) {
+                if (maxHeight && height > maxHeight) {
                     height = maxHeight;
                 }
                 $pane.height(height);
@@ -942,7 +942,9 @@ define([
             var thisPane = ui.element,
                 maxWidthAllowed = this.availablePaneWidth(thisPane);
 
-            thisPane.resizable('option', 'maxWidth', maxWidthAllowed);
+            if (!thisPane.closest('.modal').length) {
+                thisPane.resizable('option', 'maxWidth', maxWidthAllowed);
+            }
         };
 
         this.onResizeStopSave = function(event, ui) {
