@@ -63,22 +63,6 @@ public abstract class WorkspaceRepositoryTestBase extends VisalloInMemoryTestBas
         return true;
     }
 
-    private WorkspaceHelper getWorkspaceHelper() {
-        if (workspaceHelper == null) {
-            workspaceHelper = new WorkspaceHelper(
-                    getTermMentionRepository(),
-                    getWorkQueueRepository(),
-                    getGraph(),
-                    getOntologyRepository(),
-                    getWorkspaceRepository(),
-                    getPrivilegeRepository(),
-                    getAuthorizationRepository()
-            );
-        }
-
-        return workspaceHelper;
-    }
-
     @Test
     public void testFindByIdNotExists() {
         Workspace ws = getWorkspaceRepository().findById("workspaceNotExists", false, user);
