@@ -1,20 +1,16 @@
 package org.visallo.web;
 
-import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.v5analytics.webster.Handler;
 import com.v5analytics.webster.handlers.StaticResourceHandler;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.visallo.core.bootstrap.InjectHelper;
 import org.visallo.core.config.Configuration;
 import org.visallo.core.exception.VisalloAccessDeniedException;
 import org.visallo.core.exception.VisalloException;
-import org.visallo.core.exception.VisalloResourceNotFoundException;
 import org.visallo.core.geocoding.DefaultGeocoderRepository;
 import org.visallo.core.geocoding.GeocoderRepository;
-import org.visallo.core.trace.Trace;
-import org.visallo.core.trace.TraceSpan;
 import org.visallo.core.util.ServiceLoaderUtil;
 import org.visallo.core.util.VisalloLogger;
 import org.visallo.core.util.VisalloLoggerFactory;
@@ -50,27 +46,28 @@ import org.visallo.web.routes.search.*;
 import org.visallo.web.routes.user.*;
 import org.visallo.web.routes.vertex.*;
 import org.visallo.web.routes.workspace.*;
+import org.visallo.web.webEventListeners.WebEventListener;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.vertexium.util.IterableUtils.toList;
 
 public class Router extends HttpServlet {
     private static final long serialVersionUID = 4689515508877380905L;
     private static final VisalloLogger LOGGER = VisalloLoggerFactory.getLogger(Router.class);
-    private static final String GRAPH_TRACE_ENABLE = "graphTraceEnable";
     private WebApp app;
     private Configuration configuration;
     private GeocoderRepository geocoderRepository;
+    private List<WebEventListener> webEventListeners;
+    private List<WebEventListener> webEventListenersReverse;
 
     @SuppressWarnings("unchecked")
     public Router(ServletContext servletContext) {
@@ -260,124 +257,45 @@ public class Router extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        TraceSpan trace = null;
-        CurrentUser.setUserInLogMappedDiagnosticContexts(request);
         try {
-            if (isGraphTraceEnabled(request)) {
-                String traceDescription = request.getRequestURI();
-                Map<String, String> parameters = new HashMap<>();
-                for (Map.Entry<String, String[]> reqParameters : request.getParameterMap().entrySet()) {
-                    parameters.put(reqParameters.getKey(), Joiner.on(", ").join(reqParameters.getValue()));
-                }
-                trace = Trace.on(traceDescription, parameters);
+            for (WebEventListener webEventListener : getWebEventListeners()) {
+                webEventListener.before(app, request, response);
             }
-
             response.addHeader("Accept-Ranges", "bytes");
             app.handle(request, response);
+            for (WebEventListener webEventListener : getWebEventListenersReverse()) {
+                webEventListener.after(app, request, response);
+            }
         } catch (ConnectionClosedException cce) {
             LOGGER.debug("Connection closed by client", cce);
+            for (WebEventListener webEventListener : getWebEventListenersReverse()) {
+                webEventListener.error(app, request, response, cce);
+            }
         } catch (Throwable e) {
-            handleException(request, response, e);
+            for (WebEventListener webEventListener : getWebEventListenersReverse()) {
+                webEventListener.error(app, request, response, e);
+            }
         } finally {
-            if (trace != null) {
-                trace.close();
-            }
-            Trace.off();
-            CurrentUser.clearUserFromLogMappedDiagnosticContexts();
-        }
-    }
-
-    private void handleException(HttpServletRequest request, HttpServletResponse response, Throwable e)
-            throws IOException, ServletException {
-        if (e.getCause() instanceof VisalloResourceNotFoundException) {
-            handleNotFound(response, (VisalloResourceNotFoundException) e.getCause());
-            return;
-        }
-        if (e.getCause() instanceof BadRequestException) {
-            handleBadRequest(response, (BadRequestException) e.getCause());
-            return;
-        }
-        if (e.getCause() instanceof VisalloAccessDeniedException) {
-            handleAccessDenied(response, (VisalloAccessDeniedException) e.getCause());
-            return;
-        }
-        if (handleIllegalState(request, response, e)) {
-            return;
-        }
-        if (isClientAbortException(e)) {
-            return;
-        }
-
-        String message = String.format("Unhandled exception for %s %s", request.getMethod(), request.getRequestURI());
-        if (app.isDevModeEnabled()) {
-            throw new ServletException(message, e);
-        } else {
-            LOGGER.warn(message, e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
-
-    private boolean isClientAbortException(Throwable e) {
-        // Need to use a string here because ClientAbortException is a Tomcat specific exception
-        if (e.getClass().getName().equals("org.apache.catalina.connector.ClientAbortException")) {
-            return true;
-        }
-        if (e.getCause() != null) {
-            return isClientAbortException(e.getCause());
-        }
-        return false;
-    }
-
-    private boolean handleIllegalState(HttpServletRequest request, HttpServletResponse response, Throwable e) throws IOException {
-        boolean isMultipart = request.getContentType() != null && request.getContentType().startsWith("multipart/");
-        if (isMultipart) {
-            String TOMCAT_MAX_REQUEST_MESSAGE = "$SizeLimitExceededException";
-            String TOMCAT_MAX_FILE_MESSAGE = "$FileSizeLimitExceededException";
-            Throwable cause = e.getCause() == null ? e : e.getCause();
-            String message = cause == null ? null : cause.getMessage();
-
-            if (message != null && (
-                    message.contains(TOMCAT_MAX_FILE_MESSAGE) || message.contains(TOMCAT_MAX_REQUEST_MESSAGE))) {
-                long bytesToMB = 1024 * 1024;
-                String errorMessage = String.format(
-                        "Uploaded file(s) are too large. " +
-                        "Limits are set to %dMB per file and %dMB total for all files",
-                        Configuration.DEFAULT_MULTIPART_MAX_FILE_SIZE / bytesToMB,
-                        Configuration.DEFAULT_MULTIPART_MAX_REQUEST_SIZE / bytesToMB
-                );
-                LOGGER.error(message, cause);
-                handleBadRequest(response, new BadRequestException("files", errorMessage));
-                return true;
+            for (WebEventListener webEventListener : getWebEventListenersReverse()) {
+                webEventListener.always(app, request, response);
             }
         }
-        return false;
     }
 
-    private void handleAccessDenied(HttpServletResponse response, VisalloAccessDeniedException accessDenied) throws IOException {
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDenied.getMessage());
-    }
-
-    private void handleNotFound(HttpServletResponse response, VisalloResourceNotFoundException notFoundException) throws IOException {
-        response.sendError(HttpServletResponse.SC_NOT_FOUND, notFoundException.getMessage());
-    }
-
-    private void handleBadRequest(HttpServletResponse response, BadRequestException badRequestException) {
-        LOGGER.error("bad request", badRequestException);
-        JSONObject error = new JSONObject();
-        error.put(badRequestException.getParameterName(), badRequestException.getMessage());
-        if (badRequestException.getInvalidValues() != null) {
-            JSONArray values = new JSONArray();
-            for (String v : badRequestException.getInvalidValues()) {
-                values.put(v);
-            }
-            error.put("invalidValues", values);
+    private List<WebEventListener> getWebEventListeners() {
+        if (webEventListeners == null) {
+            webEventListeners = InjectHelper.getInjectedServices(WebEventListener.class, configuration).stream()
+                    .sorted(Comparator.comparingInt(WebEventListener::getPriority))
+                    .collect(Collectors.toList());
         }
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        VisalloResponse.configureResponse(ResponseTypes.JSON_OBJECT, response, error);
+        return webEventListeners;
     }
 
-    private boolean isGraphTraceEnabled(ServletRequest req) {
-        return req.getParameter(GRAPH_TRACE_ENABLE) != null || req instanceof HttpServletRequest && ((HttpServletRequest) req).getHeader(GRAPH_TRACE_ENABLE) != null;
+    private List<WebEventListener> getWebEventListenersReverse() {
+        if (webEventListenersReverse == null) {
+            webEventListenersReverse = Lists.reverse(getWebEventListeners());
+        }
+        return webEventListenersReverse;
     }
 
     @Inject

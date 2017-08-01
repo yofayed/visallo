@@ -1,0 +1,3 @@
+org.visallo.web.webEventListeners.CurrentUserWebEventListener
+org.visallo.web.webEventListeners.TraceWebEventListener
+org.visallo.web.webEventListeners.ErrorHandlerWebEventListener
