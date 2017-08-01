@@ -49,7 +49,7 @@ define([
             const valueForInput = transformForInput(value);
             const disabled = _.isEmpty(valueForSubmit) || !type || !domain;
             return (
-                <div>
+                <div className="selector-property-form">
                     { error ? (<Alert error={error} />) : null }
                     <input type="text"
                         onChange={this.onDisplayNameChange}

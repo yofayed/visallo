@@ -329,7 +329,7 @@
   user-select: none;
 }
 
-.com-visallo-csv .entities select {
+.com-visallo-csv .entities select.entity {
   margin-bottom: 0;
   width: auto;
 }
