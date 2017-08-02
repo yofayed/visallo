@@ -176,8 +176,9 @@ define([
                                 };
                                 outputItem.title = diffs[0].title || i18n('vertex.property.title.not_available');
                             }
-                            if (diffs[0].conceptType) {
-                                var concept = self.ontologyConcepts.byId[diffs[0].conceptType];
+                            const conceptType = diffs[0].conceptType || diffs[0].elementConcept;
+                            if (conceptType) {
+                                var concept = self.ontologyConcepts.byId[conceptType];
                                 if (concept) {
                                     outputItem.concept = concept;
                                     outputItem.conceptImage = concept.glyphIconHref;
@@ -198,12 +199,13 @@ define([
                                     properties: [],
                                     'http://visallo.org#visibilityJson': diffs[0].visibilityJson
                                 };
-                                outputItem.edgeLabel = self.ontologyRelationships.byTitle[diffs[0].label].displayName;
                             }
 
-                            if (diffs[0].label) {
-                                const relationship = self.ontologyRelationships.byId[diffs[0].label];
+                            const label = diffs[0].label || diffs[0].elementConcept;
+                            if (label) {
+                                const relationship = self.ontologyRelationships.byId[label];
                                 if (relationship) {
+                                    outputItem.edgeLabel = relationship.displayName;
                                     outputItem.relationship = relationship;
                                     if (relationship.sandboxStatus !== 'PUBLIC') {
                                         outputItem.requiresOntologyPublish = true;
@@ -215,6 +217,8 @@ define([
                                 targetId = diffs[0].inVertexId,
                                 source = verticesById[sourceId],
                                 target = verticesById[targetId];
+                            outputItem.sourceId = sourceId;
+                            outputItem.targetId = targetId;
                             outputItem.sourceTitle = titleForEdgesVertices(source, sourceId, groupedByElement);
                             outputItem.targetTitle = titleForEdgesVertices(target, targetId, groupedByElement);
                         }
@@ -576,12 +580,12 @@ define([
                         if (diff.concept) add(concepts, diff.concept, diff);
                         if (diff.relationship) add(relationships, diff.relationship, diff);
                     }
-                    diff.properties.forEach(diff => {
-                        if (diff.publish && diff.requiresOntologyPublishProperty && diff.property) {
-                            add(properties, diff.property, diff)
-                        }
-                    })
                 }
+                diff.properties.forEach(diff => {
+                    if (diff.publish && diff.requiresOntologyPublishProperty && diff.property) {
+                        add(properties, diff.property, diff)
+                    }
+                })
             })
 
             return { concepts, relationships, properties };

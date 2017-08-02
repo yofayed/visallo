@@ -171,19 +171,19 @@ define([], function() {
                      * that might be using the ontology.
                      *
                      * @global
-                     * @event ontologyChanged
+                     * @event ontologyUpdated
                      * @property {object} data
                      * @property {object} data.ontology
                      * @example <caption>From Flight</caption>
-                     * this.on(document, 'ontologyChanged', function(event, data) {
+                     * this.on(document, 'ontologyUpdated', function(event, data) {
                      *     console.log('Ontology:', data.ontology);
                      * })
                      * @example <caption>Anywhere</caption>
-                     * $(document).on('ontologyChanged', function(event, data) {
+                     * $(document).on('ontologyUpdated', function(event, data) {
                      *     console.log('Ontology:', data.ontology);
                      * })
                      */
-                    this.trigger('ontologyChanged', { ontology: ontologyRequest.result });
+                    this.trigger('ontologyUpdated', { ontology: ontologyRequest.result });
                 })
             }
         };
