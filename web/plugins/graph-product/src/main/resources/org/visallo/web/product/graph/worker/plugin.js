@@ -161,6 +161,10 @@ define([
     }
 
     function updateVisibleCollapsedNodes(state, {workspaceId, vertices}) {
+        if (_.isEmpty(vertices)) {
+            return state;
+        }
+
         const updateProduct = (product) => {
             if (product && product.extendedData) {
                 const { vertices: productVertices, compoundNodes: collapsedNodes } = product.extendedData;

@@ -17,16 +17,16 @@ import org.visallo.core.model.workspace.WorkspaceRepository;
 import org.visallo.core.security.ACLProvider;
 import org.visallo.core.security.VisibilityTranslator;
 import org.visallo.core.user.User;
+import org.visallo.core.util.ClientApiConverter;
 import org.visallo.core.util.VertexiumMetadataUtil;
 import org.visallo.core.util.VisalloLogger;
 import org.visallo.core.util.VisalloLoggerFactory;
 import org.visallo.web.BadRequestException;
-import org.visallo.web.routes.SetPropertyBase;
-import org.visallo.web.VisalloResponse;
+import org.visallo.web.clientapi.model.ClientApiEdge;
 import org.visallo.web.clientapi.model.ClientApiSourceInfo;
-import org.visallo.web.clientapi.model.ClientApiSuccess;
 import org.visallo.web.parameterProviders.ActiveWorkspaceId;
 import org.visallo.web.parameterProviders.JustificationText;
+import org.visallo.web.routes.SetPropertyBase;
 import org.visallo.web.util.VisibilityValidator;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +64,7 @@ public class EdgeSetProperty extends SetPropertyBase implements ParameterizedHan
     }
 
     @Handle
-    public ClientApiSuccess handle(
+    public ClientApiEdge handle(
             HttpServletRequest request,
             @Required(name = "edgeId") String edgeId,
             @Optional(name = "propertyKey") String propertyKey,
@@ -122,7 +122,7 @@ public class EdgeSetProperty extends SetPropertyBase implements ParameterizedHan
                 user,
                 authorizations
         );
-        setPropertyResult.elementMutation.save(authorizations);
+        Edge save = setPropertyResult.elementMutation.save(authorizations);
 
         if (!autoPublish) {
             // add the vertex to the workspace so that the changes show up in the diff panel
@@ -130,8 +130,8 @@ public class EdgeSetProperty extends SetPropertyBase implements ParameterizedHan
             workspaceRepository.updateEntityOnWorkspace(workspaceId, edge.getVertexId(Direction.OUT), user);
         }
 
-        workQueueRepository.pushGraphPropertyQueue(edge, propertyKey, propertyName, workspaceId, visibilitySource, Priority.HIGH);
+        workQueueRepository.pushGraphPropertyQueue(edge, propertyKey, propertyName, workspaceId, visibilitySource, Priority.NORMAL);
 
-        return VisalloResponse.SUCCESS;
+        return (ClientApiEdge) ClientApiConverter.toClientApi(save, workspaceId, authorizations);
     }
 }
