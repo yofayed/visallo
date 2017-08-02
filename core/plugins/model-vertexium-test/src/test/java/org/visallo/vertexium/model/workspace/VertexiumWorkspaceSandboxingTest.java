@@ -480,7 +480,7 @@ public class VertexiumWorkspaceSandboxingTest extends VisalloInMemoryTestBase {
         VertexItem vertexDiff = vertexDiffs.get(0);
         assertEquals(vertex.getId(), vertexDiff.getVertexId());
         assertEquals(VERTEX_CONCEPT_TYPE, vertexDiff.getConceptType());
-        assertEquals(VERTEX_TITLE, vertexDiff.getTitle());
+        assertEquals(null, vertexDiff.getTitle());
         assertEquals("VertexDiffItem", vertexDiff.getType());
         assertEquals(SandboxStatus.PRIVATE, vertexDiff.getSandboxStatus());
         assertFalse(vertexDiff.isDeleted());

@@ -16,6 +16,7 @@ import org.visallo.web.clientapi.model.ClientApiWorkspaceDiff;
 import org.visallo.web.clientapi.model.SandboxStatus;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import static org.vertexium.util.IterableUtils.toList;
@@ -65,6 +66,7 @@ public class WorkspaceDiffHelper {
                 result.addAll(entityDiffs);
             }
         }
+
 
         for (Edge workspaceEdge : workspaceEdges) {
             List<ClientApiWorkspaceDiff.Item> entityDiffs = diffEdge(workspace, workspaceEdge, authorizations);
@@ -139,11 +141,11 @@ public class WorkspaceDiffHelper {
     ) {
         List<ClientApiWorkspaceDiff.Item> result = new ArrayList<>();
 
-        Vertex entityVertex = this.graph.getVertex(
-                workspaceEntity.getEntityVertexId(),
-                FetchHint.ALL_INCLUDING_HIDDEN,
-                authorizations
-        );
+        EnumSet<FetchHint> hints = EnumSet.of(FetchHint.PROPERTIES, FetchHint.PROPERTY_METADATA, FetchHint.INCLUDE_HIDDEN);
+        // Workspace vertex will be null if deleted, so retrieve with hidden
+        Vertex entityVertex = workspaceEntity.getVertex() == null ?
+            this.graph.getVertex(workspaceEntity.getEntityVertexId(), hints, authorizations) :
+            workspaceEntity.getVertex();
 
         // vertex can be null if the user doesn't have access to the entity
         if (entityVertex == null) {
@@ -177,7 +179,7 @@ public class WorkspaceDiffHelper {
             boolean deleted
     ) {
         String vertexId = vertex.getId();
-        String title = formulaEvaluator.evaluateTitleFormula(vertex, userContext, null);
+        String title = deleted ? formulaEvaluator.evaluateTitleFormula(vertex, userContext, null) : null;
         String conceptType = VisalloProperties.CONCEPT_TYPE.getPropertyValue(vertex);
         Property visibilityJsonProperty = VisalloProperties.VISIBILITY_JSON.getProperty(vertex);
         JsonNode visibilityJson = visibilityJsonProperty == null ? null : JSONUtil.toJsonNode(JsonSerializer.toJsonProperty(

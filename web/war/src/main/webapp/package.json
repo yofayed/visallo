@@ -5,9 +5,9 @@
   "dependencies": {
     "@visallo/bootstrap": "2.3.2",
     "@visallo/jscache-lru": "1.0.0",
+    "@visallo/react-virtualized-select": "^3.1.0",
     "@visallo/requirejs-ejs-plugin": "0.3.1",
     "@visallo/requirejs-less": "1.0.0",
-    "@visallo/react-virtualized-select": "^3.1.0",
     "atmosphere.js": "2.3.1",
     "babel-polyfill": "^6.23.0",
     "bluebird": "3.4.1",
@@ -44,6 +44,7 @@
     "react-dom": "15.6.1",
     "react-redux": "^5.0.5",
     "react-select": "1.0.0-rc.5",
+    "react-virtualized": "^9.9.0",
     "redux": "^3.7.2",
     "redux-worker": "^0.1.2",
     "redux-worker-middleware": "^1.0.0",

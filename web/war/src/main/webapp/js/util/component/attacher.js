@@ -48,12 +48,12 @@ define([
     };
 
     Attacher.prototype.teardown = function(options = {}) {
+        const { flight = true, react = true } = options;
+        if (!this._node) throw new Error('No node specified');
         if (!this._options.preferDirectReactChildren) {
-            const { flight = true, react = true } = options;
-            if (!this._node) throw new Error('No node specified');
             if (react) ReactDOM.unmountComponentAtNode(this._node);
-            if (flight) $(this._node).teardownAllComponents();
         }
+        if (flight) $(this._node).teardownAllComponents();
         return this;
     };
 

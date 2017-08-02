@@ -2,10 +2,71 @@ define([
     'create-react-class',
     'prop-types',
     'classnames',
+    'react-virtualized',
     'util/vertex/formatters',
-    'util/privileges'
-], function(createReactClass, PropTypes, classNames, F, Privileges) {
+    'util/privileges',
+    'util/dnd',
+    'components/visibility/VisibilityViewer',
+    'fast-json-patch'
+], function(
+    createReactClass,
+    PropTypes,
+    classNames,
+    ReactVirtualized,
+    F,
+    Privileges,
+    dnd,
+    VisibilityViewer,
+    fastJsonPatch) {
     'use strict';
+
+    const ELEMENT_SIZE = 45;
+    const PROPERTY_UPDATE_SIZE = 70;
+    const PROPERTY_NEW_SIZE = 40;
+    const AVERAGE_ROW_SIZE = (ELEMENT_SIZE + PROPERTY_UPDATE_SIZE + PROPERTY_NEW_SIZE) / 3;
+
+    function lookupTitle(diffTitle, titles, vertexId) {
+        let str = diffTitle;
+        let loading = false;
+        if (!str) {
+            if (vertexId && vertexId in titles) {
+                str = titles[vertexId] || i18n('vertex.property.title.not_available')
+            } else {
+                loading = true;
+                str = i18n('workspaces.diff.title.loading');
+            }
+        }
+        return { str, loading };
+    }
+
+    function debounceAfterFirst(fn) {
+        const debounced = _.debounce(fn, 500);
+        let first = true;
+        return function() {
+            if (first) {
+                fn.apply(null, arguments);
+                first = false;
+            } else {
+                debounced.apply(null, arguments);
+            }
+        }
+    }
+
+    function titlesRequest(ids) {
+        return Promise.require('util/withDataRequest')
+            .then(dr => {
+                return dr.dataRequest('vertex', 'multiple', { vertexIds: ids })
+                    .then(result => {
+                        const newTitles = {};
+                        result.forEach(v => {
+                            if (v) {
+                                newTitles[v.id] = F.vertex.title(v);
+                            }
+                        })
+                        return newTitles;
+                    })
+            })
+    }
 
     function formatVisibility(propertyOrProperties) {
         const property = Array.isArray(propertyOrProperties) ? propertyOrProperties[0] : propertyOrProperties;
@@ -21,19 +82,22 @@ define([
 
     const DiffPanel = createReactClass({
 
-        renderHeader: function(diffs) {
-            const { publishing, undoing, onApplyPublishClick, onApplyUndoClick } = this.props;
-            const flatDiffs = diffs.reduce((flat, diff) => {
-                const { type } = diff.action;
-                const nonUpdates = type !== 'update' ? [ diff ] : [];
-                return [...flat, ...nonUpdates, ...diff.properties];
-            }, []);
-            const { publishCount, undoCount } = flatDiffs.reduce(({ publishCount, undoCount }, { publish, undo }) => ({
-                publishCount: publish ? publishCount + 1 : publishCount,
-                undoCount: undo ? undoCount + 1 : undoCount
-            }), { publishCount: 0, undoCount: 0 });
-            const publishingAll = publishCount === flatDiffs.length;
-            const undoingAll = undoCount === flatDiffs.length;
+        getInitialState() {
+            return { titles: {} };
+        },
+
+        renderHeader: function(flatDiffs) {
+            const {
+                publishCount,
+                undoCount,
+                totalCount,
+                publishing,
+                undoing,
+                onApplyPublishClick,
+                onApplyUndoClick
+            } = this.props;
+            const publishingAll = publishCount === totalCount;
+            const undoingAll = undoCount === totalCount;
 
             return (
               <div className="diff-header">
@@ -113,7 +177,7 @@ define([
             const disabledBecauseOntologyChange = requiresOntologyPublish && Privileges.missingONTOLOGY_PUBLISH;
 
             return (
-                <td className="actions">
+                <div className="actions">
                     <div className="btn-group">
                         {Privileges.canPUBLISH && !disabledBecauseOntologyChange ? (
                             <button className={
@@ -142,7 +206,7 @@ define([
                             </button>
                         ) : null}
                     </div>
-                </td>
+                </div>
             );
         },
 
@@ -151,8 +215,9 @@ define([
                 (<div title={ i18n('workspaces.diff.requires.ontology.publish.title') } className="action-subtype">{ i18n('workspaces.diff.requires.ontology.publish') }</div>) : null;
         },
 
-        renderVertexDiff: function(diff) {
-            const { action, active, className, conceptImage, deleted, publish, selectedConceptImage, title, undo, vertex, vertexId } = diff;
+        renderVertexDiff: function(key, style, diff) {
+            const { titles } = this.state;
+            const { action, active, className, conceptImage, deleted, publish, selectedConceptImage, title: diffTitle, undo, vertex, vertexId } = diff;
             const { onVertexRowClick } = this.props;
             const conceptImageStyle = {
                 backgroundImage: conceptImage || vertex ? `url(${conceptImage || F.vertex.image(vertex, null, 80)})` : ''
@@ -160,84 +225,95 @@ define([
             const selectedConceptImageStyle = {
                 backgroundImage: selectedConceptImage || vertex ? `url(${selectedConceptImage || F.vertex.selectedImage(vertex, null, 80)})` : ''
             };
+            const title = lookupTitle(diffTitle, titles, vertexId);
 
             return (
-                <tr className={
-                    classNames('vertex-row', className, {
+                <div key={key} style={style}
+                    className={
+                    classNames('d-row', 'vertex-row', className, {
                         'mark-publish': publish,
                         'mark-undo': undo,
                         active: active,
                         deleted: deleted
                     })}
                     onClick={() => onVertexRowClick(active ? null : vertexId)}
+                    draggable={true}
+                    onDragStart={e => { console.log('dragStartHere'); this.onDragStart(e); }}
                     data-diff-id={ vertexId }
                     data-vertex-id={ vertexId }>
-                    <th className="vertex-label" colSpan="2">
+                    <div className="vertex-label">
                         <div className="img" style={conceptImageStyle}></div>
                         <div className="selected-img" style={selectedConceptImageStyle}></div>
-                        <h1 data-vertex-id={ vertexId }>
-                            {title}
-                            {vertex['http://visallo.org#visibilityJson'] ? (
-                                <div
-                                    className="visibility"
-                                    data-visibility={JSON.stringify(vertex['http://visallo.org#visibilityJson'])} />
-                            ) : null}
-                        </h1>
+                        <h1 title={title.loading ? '' : title.str}>{title.loading ? (<span className="loading">{title.str}</span>) : title.str}</h1>
                         {action.type !== 'update' ? (
                             <span className="label action-type">{ action.display }</span>
                         ) : null}
                         {this.renderRequiresOntologyPublish(diff)}
-                    </th>
-                    {action.type !== 'update' ?
-                        this.renderDiffActions(vertexId, diff) : (
-                        <td>&nbsp;</td>
-                    )}
-                </tr>
+                    </div>
+                    {action.type !== 'update' ? this.renderDiffActions(vertexId, diff) : null }
+                </div>
             );
         },
 
-        renderEdgeDiff: function(diff) {
-            const { action, active, className, deleted, edge, edgeId, edgeLabel, publish, sourceTitle, targetTitle, undo } = diff;
+        onDragStart(event) {
+            const { target } = event;
+            if (target.dataset) {
+                const { vertexId, edgeId } = target.dataset;
+                const elements = { vertexIds: vertexId ? [vertexId] : [], edgeIds: edgeId ? [edgeId] : [] };
+                const dt = event.dataTransfer;
+                if (dt) {
+                    dt.effectAllowed = 'all';
+                    dnd.setDataTransferWithElements(dt, elements);
+                }
+            }
+        },
+
+        renderEdgeDiff: function(key, style, diff) {
+            const { action, active, className, deleted, edge, edgeId, edgeLabel,
+                publish, undo,
+                sourceId, targetId,
+                sourceTitle: sourceTitleDiff, targetTitle: targetTitleDiff
+            } = diff;
             const { onEdgeRowClick } = this.props;
+            const { titles } = this.state;
+            const sourceTitle = lookupTitle(sourceTitleDiff, titles, sourceId);
+            const targetTitle = lookupTitle(targetTitleDiff, titles, targetId);
 
             return (
-                <tr className={
-                    classNames('vertex-row', className, {
+                <div key={key} style={style}
+                    className={classNames('d-row', 'edge-row', className, {
                         'mark-publish': publish,
                         'mark-undo': undo,
                         active: active,
                         deleted: deleted
                     })}
                     onClick={() => onEdgeRowClick(active ? null : edgeId)}
+                    draggable={true}
+                    onDragStart={this.onDragStart}
                     data-diff-id={edgeId}
                     data-edge-id={edgeId}>
-                    <th className="vertex-label" colSpan="2">
-                        <div className="img" />
-                        <h1 data-edge-id={ edgeId }>
-                            {sourceTitle}
+                    <div className="vertex-label">
+                        <h1 title={`"${sourceTitle.str}" \n${edgeLabel} \n"${targetTitle.str}"`}
+                            data-edge-id={ edgeId } className="edge-cont">
+                            <span className={classNames({'loading': sourceTitle.loading, 'edge-v': !sourceTitle.loading})}>{sourceTitle.str}</span>
                             <span className="edge-label">{edgeLabel + ' '}</span>
-                            {targetTitle}
-                            {edge['http://visallo.org#visibilityJson'] ? (
-                                <div
-                                    className="visibility"
-                                    data-visibility={JSON.stringify(edge['http://visallo.org#visibilityJson'])} />
-                            ) : null}
+                            <span className={classNames({'loading': targetTitle.loading, 'edge-v': !targetTitle.loading})}>{targetTitle.str}</span>
                         </h1>
 
                         {action.type !== 'update' ? (
                             <span className="label action-type">{ action.display }</span>
                         ) : null}
                         {this.renderRequiresOntologyPublish(diff)}
-                    </th>
+                    </div>
                     {action.type !== 'update' ?
                         this.renderDiffActions(edgeId, diff) : (
-                        <td>&nbsp;</td>
+                        <div>&nbsp;</div>
                     )}
-                </tr>
+                </div>
             );
         },
 
-        renderPropertyDiff: function(property) {
+        renderPropertyDiff: function(key, style, property) {
             const { className, deleted, id, name, new: nextProp, old: previousProp, publish, undo } = property;
             const { formatLabel } = this.props;
             const nextVisibility = nextProp ? formatVisibility(nextProp) : null;
@@ -246,72 +322,125 @@ define([
             const value = previousProp ? formatValue(name, previousProp, property) : null;
             const valueStyle = value !== nextValue ? { textDecoration: 'line-through'} : {};
             const visibilityStyle = visibility !== nextVisibility ? { textDecoration: 'line-through'} : {};
+            const propertyNameDisplay = formatLabel(name);
 
             return (
-                <tr className={
-                    classNames(className, {
+                <div key={key} style={style}
+                    className={classNames('d-row', className, {
                         'mark-publish': publish,
                         'mark-undo': undo
                     })}
                     data-diff-id={id}>
-                <td className="property-label">{ formatLabel(name) }</td>
-                <td className={
-                    classNames('property-value', {
-                        deleted: deleted
-                    })}>
+                <div title={propertyNameDisplay} className="property-label">{ propertyNameDisplay }</div>
+                <div title={nextValue} className={classNames('property-value', { deleted: deleted })}>
                     {previousProp && nextProp ? (
-                        <div>
-                            {nextValue}
-                            <div className="visibility" data-visibility={nextVisibility} />
-                            <div style={valueStyle}>{value}</div>
-                            <div
-                                className="visibility"
-                                data-visibility={visibility}
-                                style={visibilityStyle} />
-                        </div>
+                        [
+                            nextValue,
+                            <VisibilityViewer key={key + 'p-vis'} value={nextVisibility && nextVisibility.source} />,
+                            <div title={value} key={key + 'pval'} style={valueStyle}>{value}</div>,
+                            <VisibilityViewer key={key + 'p-val-vis'} style={visibilityStyle} value={visibility && visibility.source} />
+                        ]
                     ) : null}
                     {!previousProp && nextProp ? (
-                        <div>
-                            {nextValue}
-                            <div className="visibility" data-visibility={nextVisibility} />
-                        </div>
+                        [
+                            nextValue,
+                            <VisibilityViewer key={key + 'v'} value={nextVisibility && nextVisibility.source} />
+                        ]
                     ) : null}
                     {this.renderRequiresOntologyPublish(property)}
-                </td>
+                </div>
                 {this.renderDiffActions(id, property)}
-              </tr>
+              </div>
             );
         },
 
-        renderDiff: function(diff) {
-            let diffRows = [];
-            if (diff.vertex) {
-                diffRows = [this.renderVertexDiff(diff)];
-            } else if (diff.edge) {
-                diffRows = [this.renderEdgeDiff(diff)];
-            }
-            return [...diffRows, ...diff.properties.map(this.renderPropertyDiff)];
+        componentDidMount() {
+            this.getTitles = debounceAfterFirst(this.getTitles);
         },
 
-        render: function() {
-            const { diffs } = this.props;
+        render() {
+            const { AutoSizer, List } = ReactVirtualized;
+            const { flatDiffs } = this.props;
+            const rowHeight = ({ index }) => (flatDiffs[index].vertex || flatDiffs[index].edge) ?
+                ELEMENT_SIZE :
+                flatDiffs[index].old ?
+                PROPERTY_UPDATE_SIZE :
+                PROPERTY_NEW_SIZE;
+            const rowRenderer = this._rowRenderer;
+            const onRowsRendered = ({ overscanStartIndex, overscanStopIndex, startIndex, stopIndex }) => {
+                this.getTitles(startIndex, stopIndex)
+            }
 
             return (
                 <div className="diffs-list">
-                    {this.renderHeader(diffs)}
-                    <div className="diff-content">
-                        <table className="table">
-                            <tbody>
-                                {diffs.map(this.renderDiff)}
-                            </tbody>
-                        </table>
+                    {this.renderHeader(flatDiffs)}
+                    <div className="diff-cont">
+                        <div className="diff-alerts" />
+                        <div className="diff-content">
+                            <AutoSizer>
+                            {({ height, width }) => (
+                                <List
+                                    width={width}
+                                    height={height}
+                                    rowCount={flatDiffs.length}
+                                    estimatedRowSize={AVERAGE_ROW_SIZE}
+                                    rowHeight={rowHeight}
+                                    rowRenderer={rowRenderer}
+                                    onRowsRendered={onRowsRendered}
+                                />
+                            )}
+                            </AutoSizer>
+                        </div>
                     </div>
                 </div>
             );
         },
 
+        getTitles(startIndex, stopIndex) {
+            if (this.titlesRequest) {
+                this.titlesRequest.cancel();
+            }
+            const { titles } = this.state;
+            const { flatDiffs } = this.props;
+            const ids = Object.keys(flatDiffs.slice(startIndex, stopIndex + 1).reduce((ids, diff) => {
+                if (diff.vertexId) {
+                    if (!diff.title && !(diff.vertexId in titles)) ids[diff.vertexId] = true;
+                } else if (diff.sourceId && diff.targetId) {
+                    if (!diff.sourceTitle && !(diff.sourceId in titles)) ids[diff.sourceId] = true;
+                    if (!diff.targetTitle && !(diff.targetId in titles)) ids[diff.targetId] = true;
+                }
+                return ids;
+            }, {}))
+            if (ids.length) {
+                this.titlesRequest = titlesRequest(ids)
+                    .then(newTitles => {
+                        if (!_.isEmpty(newTitles)) {
+                            const updatedTitles = { ...titles, ...newTitles };
+                            this.setState({ titles: updatedTitles })
+                        }
+                    })
+                    .catch(error => {
+                        console.warn(error);
+                    })
+                    .finally(() => {
+                        this.titlesRequest = null;
+                    })
+            }
+        },
+
+        _rowRenderer({ index, isScrolling, isVisible, key, parent, style }) {
+            const { flatDiffs } = this.props;
+            const diff = flatDiffs[index];
+            const content =
+                diff.vertex ? this.renderVertexDiff(key, style, diff) :
+                diff.edge ? this.renderEdgeDiff(key, style, diff) :
+                this.renderPropertyDiff(key, style, diff)
+
+            return content;
+        },
+
         propTypes: {
-            diffs: PropTypes.array.isRequired,
+            flatDiffs: PropTypes.array.isRequired,
             formatLabel: PropTypes.func.isRequired,
             onPublishClick: PropTypes.func.isRequired,
             onUndoClick: PropTypes.func.isRequired,

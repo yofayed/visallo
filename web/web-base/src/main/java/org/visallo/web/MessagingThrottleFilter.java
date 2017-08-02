@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -82,8 +83,35 @@ public class MessagingThrottleFilter implements PerRequestBroadcastFilter {
         });
 
         if (!contains) {
+            // check if any message is equal after removing the progress and progressMessage
+            // don't need to send multiple progress updates with no other changes
+            if (json.has("data")) {
+                JSONObject jsonNoProgress = cloneWithoutProgress(json);
+
+                List<JSONObject> outdated = messages.stream().filter(existing -> {
+                    JSONObject existingNoProgress = cloneWithoutProgress(existing);
+                    return JSONUtil.areEqual(existingNoProgress, jsonNoProgress);
+                }).collect(Collectors.toList());
+                messages.removeAll(outdated);
+            }
             messages.add(json);
         }
+    }
+
+    private JSONObject cloneWithoutProgress(JSONObject json) {
+        JSONObject clone = new JSONObject(json, (String[]) json.keySet().toArray(new String[0]));
+
+        if (json.has("data")) {
+            JSONObject jsonData = clone.getJSONObject("data");
+            Set<String> keySetWithoutProgress = new HashSet<>(jsonData.keySet());
+            keySetWithoutProgress.remove("progress");
+            keySetWithoutProgress.remove("progressMessage");
+            keySetWithoutProgress.remove("row");
+            String[] keysWithoutProgress = keySetWithoutProgress.toArray(new String[0]);
+            clone.put("data", new JSONObject(jsonData, keysWithoutProgress));
+        }
+
+        return clone;
     }
 
     private Long getTimeSinceLastRequest(String uuid) {

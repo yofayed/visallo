@@ -62,6 +62,7 @@ public abstract class VisalloInMemoryTestBase {
     private LongRunningProcessRepository longRunningProcessRepository;
     private WorkQueueNames workQueueNames;
     private WorkspaceHelper workspaceHelper;
+    private Map configurationMap;
 
     @Before
     public void before() {
@@ -88,6 +89,7 @@ public abstract class VisalloInMemoryTestBase {
         longRunningProcessRepository = null;
         workQueueNames = null;
         workspaceHelper = null;
+        configurationMap = null;
     }
 
     protected WorkspaceRepository getWorkspaceRepository() {
@@ -371,7 +373,7 @@ public abstract class VisalloInMemoryTestBase {
         if (configuration != null) {
             return configuration;
         }
-        HashMap config = getConfigurationMap();
+        Map config = getConfigurationMap();
         HashMapConfigurationLoader configLoader = new HashMapConfigurationLoader(config);
 
         configuration = new Configuration(configLoader, config) {
@@ -389,10 +391,14 @@ public abstract class VisalloInMemoryTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    protected HashMap getConfigurationMap() {
-        HashMap config = new HashMap();
-        config.put("org.visallo.core.model.user.UserPropertyAuthorizationRepository.defaultAuthorizations", "");
-        return config;
+    protected Map getConfigurationMap() {
+        if (configurationMap != null) {
+            return configurationMap;
+        }
+        configurationMap = new HashMap();
+        configurationMap.put("org.visallo.core.model.user.UserPropertyAuthorizationRepository.defaultAuthorizations", "");
+        configurationMap.put("org.visallo.core.model.user.UserPropertyPrivilegeRepository.defaultPrivileges", "");
+        return configurationMap;
     }
 
     protected GraphRepository getGraphRepository() {

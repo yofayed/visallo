@@ -71,13 +71,12 @@
             'rangy-highlighter': '../libs/rangy/lib/rangy-highlighter',
             'rangy-cssclassapplier': '../libs/rangy/lib/rangy-classapplier',
             'rangy-serializer': '../libs/rangy/lib/rangy-serializer',
-
             'react': '../libs/react/dist/react.min',
+            'react-dom': '../libs/react-dom/dist/react-dom.min',
             'create-react-class': '../libs/create-react-class/create-react-class.min',
             'react-proptypes-dev': '../libs/prop-types/prop-types.min',
-            'react-dom': '../libs/react-dom/dist/react-dom.min',
-
             'react-redux': '../libs/react-redux/dist/react-redux.min',
+            'react-virtualized': '../libs/react-virtualized/dist/umd/react-virtualized',
             'react-virtualized-select': '../libs/@visallo/react-virtualized-select/dist/umd/react-virtualized-select',
             'Reselect': '../libs/reselect/dist/reselect',
             'redux': '../libs/redux/dist/redux.min',

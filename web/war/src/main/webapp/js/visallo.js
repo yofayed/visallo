@@ -127,6 +127,9 @@ function(jQuery,
                     ], function(React, _F, _withDataRequest) {
                         // Don't need to require react in jsx even if never used
                         window.React = React;
+                        // Provide for react-virtualized
+                        define('React', [], React);
+                        define('ReactDOM', ['react-dom'], _.identity);
                         F = _F;
                         withDataRequest = _withDataRequest;
                         loadApplicationTypeBasedOnUrlHash();

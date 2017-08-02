@@ -3,23 +3,20 @@ define([
     'flight/lib/component',
     'react',
     'react-dom',
-    './DiffPanel',
     'util/vertex/formatters',
     'util/withDataRequest',
-    'util/dnd',
     'require'
 ], function(
     defineComponent,
     React,
     ReactDOM,
-    DiffPanel,
     F,
     withDataRequest,
-    dnd,
     require) {
     'use strict';
 
     var SHOW_CHANGES_TEXT_SECONDS = 3;
+    var DiffPanel;
 
     return defineComponent(Diff, withDataRequest);
 
@@ -35,7 +32,7 @@ define([
             return diff.title;
         }
 
-        return i18n('vertex.property.title.not_available');
+        return null;
     }
 
     function Diff() {
@@ -46,25 +43,48 @@ define([
         })
 
         this.render = function() {
+            if (!DiffPanel) {
+                require(['./DiffPanel'], panel => {
+                    DiffPanel = panel
+                    this.render();
+                });
+                return;
+            }
+            this.$node.removeClass('loading-small-animate');
+
             ReactDOM.render(React.createElement(DiffPanel, {
-                diffs: this.diffs,
+                flatDiffs: this.flatDiffs,
                 formatLabel: this.formatLabel,
-                onPublishClick: this.onMarkPublish.bind(this),
-                onUndoClick: this.onMarkUndo.bind(this),
-                onSelectAllPublishClick: this.onSelectAllPublish.bind(this),
-                onSelectAllUndoClick: this.onSelectAllUndo.bind(this),
-                onDeselectAllClick: this.onDeselectAll.bind(this),
+                onPublishClick: this.onMarkPublish,
+                onUndoClick: this.onMarkUndo,
+                onSelectAllPublishClick: this.onSelectAllPublish,
+                onSelectAllUndoClick: this.onSelectAllUndo,
+                onDeselectAllClick: this.onDeselectAll,
                 publishing: this.publishing,
                 undoing: this.undoing,
-                onApplyPublishClick: this.onApplyPublishClick.bind(this),
-                onApplyUndoClick: this.onApplyUndoClick.bind(this),
-                onVertexRowClick: this.onVertexRowClick.bind(this),
-                onEdgeRowClick: this.onEdgeRowClick.bind(this)
+                onApplyPublishClick: this.onApplyPublishClick,
+                onApplyUndoClick: this.onApplyUndoClick,
+                onVertexRowClick: this.onVertexRowClick,
+                onEdgeRowClick: this.onEdgeRowClick,
+                ...this.renderCounts
             }), this.$node[0]);
         };
 
+        this.before('teardown', function() {
+            ReactDOM.unmountComponentAtNode(this.node);
+        })
+
         this.after('initialize', function() {
             var self = this;
+
+            [
+                'onMarkPublish', 'onSelectAll', 'onSelectAllPublish',
+                'onSelectAllUndo', 'onMarkUndo', 'onDeselectAll',
+                'onApplyPublishClick', 'onApplyUndoClick',
+                'onVertexRowClick', 'onEdgeRowClick'
+            ].forEach(m => {
+                this[m] = this[m].bind(this);
+            })
 
             this.dataRequest('ontology', 'ontology').done(function(ontology) {
                 self.ontologyConcepts = ontology.concepts;
@@ -77,23 +97,45 @@ define([
             })
         });
 
+        this.setDiffs = function(diffs) {
+            this.diffs = diffs;
+            this.flatDiffs = this.diffs.reduce((flat, diff, i) => {
+                const { type } = diff.action;
+                return [...flat, diff, ...diff.properties];
+            }, []);
+            this.updateCounts();
+        }
+
+        this.updateCounts = function() {
+            let totalCount = 0;
+            const { publishCount, undoCount } = this.flatDiffs.reduce(({ publishCount, undoCount }, { action, publish, undo }) => {
+                let inc = 0;
+                if (!action || action.type !== 'update') {
+                    inc = 1;
+                    totalCount++;
+                }
+                return {
+                    publishCount: publish ? publishCount + inc : publishCount,
+                    undoCount: undo ? undoCount + inc : undoCount
+                }
+            }, { publishCount: 0, undoCount: 0 });
+
+            this.renderCounts = { publishCount, undoCount, totalCount };
+        }
+
         this.setup = function() {
             var self = this;
-            this.diffs = [];
+            this.setDiffs([]);
 
             self.processDiffs(self.attr.diffs).done(function(processDiffs) {
-                self.diffs = processDiffs;
+                self.setDiffs(processDiffs)
                 self.render();
-                self.updateVisibility();
-                self.updateDraggables();
             });
 
             self.on('diffsChanged', function(event, data) {
                 self.processDiffs(data.diffs).done(function(processDiffs) {
-                    self.diffs = processDiffs;
+                    self.setDiffs(processDiffs);
                     self.render();
-                    self.updateVisibility();
-                    self.updateDraggables();
                 });
             })
             self.on(document, 'objectsSelected', self.onObjectsSelected);
@@ -124,21 +166,20 @@ define([
                 output = [];
 
             return Promise.all([
-                this.dataRequest('vertex', 'store', { vertexIds: _.unique(referencedVertices) }),
-                this.dataRequest('edge', 'store', { edgeIds: _.unique(referencedEdges) }),
+                visalloData.storePromise,
                 visalloData.selectedObjectsPromise()
-            ]).spread(function(vertexResults, edgeResults, selectedObjects) {
-                    var vertices = _.compact(vertexResults),
-                        edges = _.compact(edgeResults),
-                        verticesById = _.indexBy(vertices, 'id'),
-                        edgesById = _.indexBy(edges, 'id'),
-                        selectedById = selectedObjects.vertices.concat(selectedObjects.edges)
-                            .map(function(object) { return object.id; })
-                            .reduce(function(selected, id) {
-                                selected[id] = true;
-                                return selected;
-                            }, {}),
-                        previousDiffsById = self.diffsById || {};
+            ]).spread(function(store, selectedObjects) {
+                var state = store.getState(),
+                    workspaceId = state.workspace.currentId,
+                    verticesById = state.element[workspaceId] || {},
+                    edgesById = verticesById,
+                    selectedById = selectedObjects.vertices.concat(selectedObjects.edges)
+                        .map(function(object) { return object.id; })
+                        .reduce(function(selected, id) {
+                            selected[id] = true;
+                            return selected;
+                        }, {}),
+                    previousDiffsById = self.diffsById || {};
                     self.diffsForElementId = {};
                     self.diffsById = {};
                     self.diffDependencies = {};
@@ -174,7 +215,7 @@ define([
                                     properties: [],
                                     'http://visallo.org#visibilityJson': diffs[0]['http://visallo.org#visibilityJson']
                                 };
-                                outputItem.title = diffs[0].title || i18n('vertex.property.title.not_available');
+                                outputItem.title = diffs[0].title;
                             }
                             const conceptType = diffs[0].conceptType || diffs[0].elementConcept;
                             if (conceptType) {
@@ -375,6 +416,7 @@ define([
             Object.keys(this.diffsById).forEach(function(id) {
                 deselectAction(self.diffsById[id]);
             });
+            this.updateCounts();
             this.render();
 
             function deselectAction(diff, action) {
@@ -404,6 +446,7 @@ define([
                     selectAction(self.diffsById[id], action);
                 }
             });
+            this.updateCounts();
             this.render();
 
             function allowSelect(diff) {
@@ -463,7 +506,7 @@ define([
                 var error = $('<div>')
                     .addClass('alert alert-warning')
                     .html(html)
-                    .prependTo(this.$node.find('.diff-content'))
+                    .prependTo(this.$node.find('.diff-alerts').empty())
                     .alert();
             })
         };
@@ -507,10 +550,8 @@ define([
                         .processDiffs(nextDiffs)
                         .then(function(processDiffs) {
                             if (processDiffs.length) {
-                                self.diffs = processDiffs;
+                                self.setDiffs(processDiffs);
                                 self.render();
-                                self.updateVisibility();
-                                self.updateDraggables();
 
                                 if (failures && failures.length) {
                                     var error = $('<div>')
@@ -519,7 +560,7 @@ define([
                                             '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
                                             '<ul><li>' + _.pluck(failures, 'errorMessage').join('</li><li>') + '</li></ul>'
                                         )
-                                        .prependTo(self.$node.find('.diff-content'))
+                                        .prependTo(self.$node.find('.diff-alerts').empty())
                                         .alert();
                                 }
 
@@ -532,24 +573,23 @@ define([
                         });
                 })
                 .catch(function(errorText) {
-                    //TODO move to react
+                    self.render();
+
                     var error = $('<div>')
                         .addClass('alert alert-error')
                         .html(
                             '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
                             i18n('workspaces.diff.error', type, errorText)
                         )
-                        .prependTo(self.$node.find('.diff-content'))
+                        .prependTo(self.$node.find('.diff-alerts').empty())
                         .alert();
-
-                    _.delay(error.remove.bind(error), 5000)
                 });
         };
         this.onApplyPublishClick = _.partial(this.onApplyAll, 'publish', false);
         this.onApplyUndoClick = _.partial(this.onApplyAll, 'undo', false);
 
         this.resetWarning = function() {
-            this.$node.find('.diff-content > .alert').remove();
+            this.$node.find('.diff-alerts').empty();
             this.skipSchemaWarning = false;
         }
 
@@ -694,39 +734,6 @@ define([
                 }, []);
         };
 
-        //TODO handle in react
-        this.updateDraggables = function() {
-            this.$node.find('.vertex-label')
-                .attr('draggable', true)
-                .off('dragstart')
-                .on('dragstart', function(event) {
-                    const $h1 = $(event.target).find('h1');
-                    const vertexId = $h1.data('vertexId');
-                    const edgeId = $h1.data('edgeId');
-                    const elements = { vertexIds: vertexId ? [vertexId] : [], edgeIds: edgeId ? [edgeId] : [] };
-                    const dt = event.originalEvent.dataTransfer;
-
-                    dt.effectAllowed = 'all';
-                    dnd.setDataTransferWithElements(dt, elements);
-                });
-        };
-
-        this.updateVisibility = function() {
-            var self = this;
-
-            require(['util/visibility/view'], function(Visibility) {
-                Visibility.teardownAll();
-                self.$node.find('.visibility').each(function() {
-                    var node = $(this),
-                        visibility = JSON.parse(node.attr('data-visibility'));
-
-                    Visibility.attachTo(node, {
-                        value: visibility && visibility.source
-                    });
-                });
-            });
-        };
-
         this.onMarkUndo = function(diffId, state) {
             var self = this,
                 diff = this.diffsById[diffId],
@@ -822,6 +829,7 @@ define([
 
                 default: console.warn('Unknown diff item type', diff.type)
             }
+            this.updateCounts();
             this.render();
         };
 
@@ -917,6 +925,7 @@ define([
 
                 default: console.warn('Unknown diff item type', diff.type)
             }
+            this.updateCounts();
             this.render();
         };
     }

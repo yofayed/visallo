@@ -11,11 +11,13 @@ define([
             componentPath: PropTypes.string.isRequired,
             behavior: PropTypes.object,
             legacyMapping: PropTypes.object,
-            nodeType: PropTypes.string
+            nodeType: PropTypes.string,
+            nodeStyle: PropTypes.object,
+            nodeClassName: PropTypes.string
         },
 
         getDefaultProps() {
-            return { nodeType: 'div' };
+            return { nodeType: 'div', nodeStyle: {}, nodeClassName: '' };
         },
 
         getInitialState() {
@@ -33,36 +35,42 @@ define([
         },
 
         componentWillUnmount() {
-            this.attacher.teardown();
+            if (this.attacher) {
+                this.attacher.teardown();
+            }
         },
 
         render() {
-            const { nodeType } = this.props;
+            const { nodeType, nodeStyle, nodeClassName } = this.props;
             const { element } = this.state;
 
-            return element ? element : React.createElement(nodeType, { ref: 'node' });
+            return element ? element : React.createElement(nodeType, {
+                ref: 'node',
+                style: nodeStyle,
+                className: nodeClassName
+            });
         },
 
         reattach(props) {
-            const { componentPath, legacyMapping, behavior, nodeType, ...rest } = props;
+            const { componentPath, legacyMapping, behavior, nodeType, nodeStyle, nodeClassName, ...rest } = props;
 
-            this.attacher = attacher({ preferDirectReactChildren: true })
+            const inst = (this.attacher || (this.attacher = attacher({ preferDirectReactChildren: true })))
                 .path(componentPath)
                 .params(rest);
 
             if (this.refs.node) {
-                this.attacher.node(this.refs.node)
+                inst.node(this.refs.node)
             }
 
             if (behavior) {
-                this.attacher.behavior(behavior)
+                inst.behavior(behavior)
             }
 
             if (legacyMapping) {
-                this.attacher.legacyMapping(legacyMapping)
+                inst.legacyMapping(legacyMapping)
             }
 
-            this.attacher.attach({
+            inst.attach({
                 teardown: true,
                 teardownOptions: { react: false },
                 emptyFlight: true
