@@ -99,12 +99,13 @@ define([
                  propertyName: property.name,
                  value: property.value,
                  visibilitySource: property.visibilitySource,
+                 oldVisibilitySource: property.oldVisibilitySource,
                  justificationText: property.justificationText
             }, function(params) {
                 if (property.sourceInfo) {
                     params.sourceInfo = JSON.stringify(property.sourceInfo);
                 }
-                if (property.key) {
+                if (!_.isUndefined(property.key)) {
                     params.propertyKey = property.key;
                 }
                 if (property.metadata) {
