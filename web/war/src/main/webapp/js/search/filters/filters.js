@@ -100,7 +100,7 @@ define([
                 return this.dataRequest('ontology', 'propertiesByDomainType', this.matchType);
             };
 
-            this.on(document, 'ontologyChanged', function(event, { ontology }) {
+            this.on(document, 'ontologyUpdated', function(event, { ontology }) {
                 const { relationships, concepts } = ontology;
                 this.conceptsById = concepts.byId;
                 this.relationshipsById = relationships.byId;

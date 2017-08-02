@@ -151,7 +151,9 @@ public class ClientApiWorkspaceDiff implements ClientApiObject {
     public static class PropertyItem extends Item {
         private String elementType;
         private String elementId;
-        private String elementConcept;
+        private String elementConcept = null;
+        private String inVertexId = null;
+        private String outVertexId = null;
         private String name;
         private String key;
         private String visibilityString;
@@ -179,6 +181,22 @@ public class ClientApiWorkspaceDiff implements ClientApiObject {
             this.visibilityString = visibilityString;
         }
 
+        public PropertyItem(
+                String elementType, String elementId, String label, String outVertexId, String inVertexId, String name, String key, JsonNode oldData,
+                JsonNode newData, SandboxStatus sandboxStatus, boolean deleted, String visibilityString) {
+            super("PropertyDiffItem", sandboxStatus, deleted);
+            this.elementType = elementType;
+            this.elementId = elementId;
+            this.elementConcept = label;
+            this.inVertexId = inVertexId;
+            this.outVertexId = outVertexId;
+            this.name = name;
+            this.key = key;
+            this.oldData = oldData;
+            this.newData = newData;
+            this.visibilityString = visibilityString;
+        }
+
         public String getElementType() {
             return elementType;
         }
@@ -189,6 +207,14 @@ public class ClientApiWorkspaceDiff implements ClientApiObject {
 
         public String getElementConcept() {
             return elementConcept;
+        }
+
+        public String getInVertexId() {
+            return inVertexId;
+        }
+
+        public String getOutVertexId() {
+            return outVertexId;
         }
 
         public String getName() {

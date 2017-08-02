@@ -238,18 +238,37 @@ public class WorkspaceDiffHelper {
             oldData = JSONUtil.toJsonNode(JsonSerializer.toJsonProperty(existingProperty));
         }
         JsonNode newData = JSONUtil.toJsonNode(JsonSerializer.toJsonProperty(workspaceProperty));
-        return new ClientApiWorkspaceDiff.PropertyItem(
-                ElementType.getTypeFromElement(element).name().toLowerCase(),
-                element.getId(),
-                VisalloProperties.CONCEPT_TYPE.getPropertyValue(element),
-                workspaceProperty.getName(),
-                workspaceProperty.getKey(),
-                oldData,
-                newData,
-                sandboxStatus,
-                deleted,
-                workspaceProperty.getVisibility().getVisibilityString()
-        );
+
+        ElementType type = ElementType.getTypeFromElement(element);
+        if (type.equals(ElementType.VERTEX)) {
+            return new ClientApiWorkspaceDiff.PropertyItem(
+                    type.name().toLowerCase(),
+                    element.getId(),
+                    VisalloProperties.CONCEPT_TYPE.getPropertyValue(element),
+                    workspaceProperty.getName(),
+                    workspaceProperty.getKey(),
+                    oldData,
+                    newData,
+                    sandboxStatus,
+                    deleted,
+                    workspaceProperty.getVisibility().getVisibilityString()
+            );
+        } else {
+            return new ClientApiWorkspaceDiff.PropertyItem(
+                    type.name().toLowerCase(),
+                    element.getId(),
+                    ((Edge) element).getLabel(),
+                    ((Edge) element).getVertexId(Direction.OUT),
+                    ((Edge) element).getVertexId(Direction.IN),
+                    workspaceProperty.getName(),
+                    workspaceProperty.getKey(),
+                    oldData,
+                    newData,
+                    sandboxStatus,
+                    deleted,
+                    workspaceProperty.getVisibility().getVisibilityString()
+            );
+        }
     }
 
     private Property findExistingProperty(
