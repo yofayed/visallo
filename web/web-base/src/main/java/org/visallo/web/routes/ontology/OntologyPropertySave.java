@@ -38,6 +38,7 @@ public class OntologyPropertySave extends OntologyBase {
     public ClientApiOntology.Property handle(
             @Required(name = "displayName", allowEmpty = false) String displayName,
             @Required(name = "dataType", allowEmpty = false) String dataType,
+            @Optional(name = "displayType", allowEmpty = false) String displayType,
             @Optional(name = "propertyIri", allowEmpty = false) String propertyIri,
             @Optional(name = "conceptIris[]") String[] conceptIris,
             @Optional(name = "relationshipIris[]") String[] relationshipIris,
@@ -65,6 +66,9 @@ public class OntologyPropertySave extends OntologyBase {
             def.setSortable(true);
             def.setUserVisible(true);
             def.setUpdateable(true);
+            if (displayType != null) {
+                def.setDisplayType(displayType);
+            }
             if (type.equals(PropertyType.STRING)) {
                 def.setTextIndexHints(TextIndexHint.ALL);
             }
