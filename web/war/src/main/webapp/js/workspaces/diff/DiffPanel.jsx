@@ -21,7 +21,7 @@ define([
     'use strict';
 
     const ELEMENT_SIZE = 45;
-    const PROPERTY_UPDATE_SIZE = 70;
+    const PROPERTY_UPDATE_SIZE = 75;
     const PROPERTY_NEW_SIZE = 40;
     const AVERAGE_ROW_SIZE = (ELEMENT_SIZE + PROPERTY_UPDATE_SIZE + PROPERTY_NEW_SIZE) / 3;
 

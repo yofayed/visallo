@@ -242,15 +242,12 @@ define([
                 this.dataRequest('workspace', 'diff'),
                 this.dataRequest('ontology', 'ontology')
             ]).spread(function({ diffs }, { properties: ontologyProperties, concepts: ontologyConcepts }) {
-                var diffsWithoutVisibleProperty = _.map(diffs, function(d) {
-                        return _.omit(d, 'visible');
-                    });
+                const sameDiff = self.previousDiff && _.isEqual(diffs, self.previousDiff);
 
-                // Check if same
-                if (self.previousDiff && _.isEqual(diffsWithoutVisibleProperty, self.previousDiff)) {
+                if (sameDiff) {
                     return;
                 }
-                self.previousDiff = diffsWithoutVisibleProperty;
+                self.previousDiff = diffs;
 
                 var vertexDiffsById = _.indexBy(diffs, function(diff) {
                         return diff.vertexId;
