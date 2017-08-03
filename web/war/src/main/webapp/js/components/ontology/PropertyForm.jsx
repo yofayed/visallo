@@ -1,12 +1,14 @@
 define([
     'create-react-class',
     'prop-types',
+    'classnames',
     './ConceptSelector',
     './RelationshipSelector',
     '../Alert'
 ], function(
     createReactClass,
     PropTypes,
+    classNames,
     ConceptsSelector,
     RelationshipSelector,
     Alert) {
@@ -45,14 +47,18 @@ define([
             const { domain, type } = this.state;
             const { conceptId, relationshipId, error, transformForSubmit, transformForInput } = this.props;
             const value = this.getValue();
-            const valueForSubmit = transformForSubmit(value);
             const valueForInput = transformForInput(value);
-            const disabled = _.isEmpty(valueForSubmit) || !type || !domain;
+            const { valid, reason, value: valueForSubmit } = transformForSubmit(value);
+            const disabled = !valid || !type || !domain;
+
             return (
-                <div className="selector-property-form">
+                <div className="ontology-form">
                     { error ? (<Alert error={error} />) : null }
                     <input type="text"
+                        placeholder={i18n('ontology.form.displayname.placeholder')}
                         onChange={this.onDisplayNameChange}
+                        title={reason}
+                        className={classNames({ invalid: !valid })}
                         value={valueForInput} />
 
                     { relationshipId ?
@@ -93,17 +99,14 @@ define([
                     </select>
 
                     <div className="base-select-form-buttons">
-                    <button
-                        onClick={this.props.onCancel}
-                        className="btn btn-link btn-small"
-                        style={{ width: 'auto', marginBottom: '1em'}}>Cancel</button>
-                    <button
-                        disabled={disabled}
-                        onClick={this.onCreate}
-                        className="btn btn-small btn-primary"
-                        style={{ width: 'auto', marginBottom: '1em'}}>{
-                            disabled ? 'Create' : `Create "${valueForSubmit}"`
-                        }</button>
+                        <button onClick={this.props.onCancel}
+                            className="btn btn-link btn-small">{i18n('ontology.form.cancel.button')}</button>
+                        <button disabled={disabled} onClick={this.onCreate}
+                            className="btn btn-small btn-primary">{
+                                disabled ?
+                                    i18n('ontology.form.create.button') :
+                                    i18n('ontology.form.create.value.button', valueForSubmit)
+                            }</button>
                     </div>
                 </div>
             )
