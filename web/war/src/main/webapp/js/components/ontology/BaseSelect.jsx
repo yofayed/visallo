@@ -12,7 +12,6 @@ define([
 
     const MaxValueLength = 50;
     const transformForInput = value => (value || '').substring(0, MaxValueLength);
-    const transformForSubmit = value => transformForInput(value).trim();
 
     const createFixedCreatable = Creatable => {
         class CreatablePutLast extends Creatable {
@@ -96,7 +95,13 @@ define([
             const { creating, showForm, value, CreateForm, selectComponent, key, error, type } = this.state;
             const { formProps, value: defaultValue, creatable, createForm, disabled, placeholder, ...rest } = this.props;
             const hasKey = Boolean(key);
-            const extendedFormProps = { ...(formProps || {}), type, transformForSubmit, transformForInput };
+            const extendedFormProps = {
+                ...(formProps || {}),
+                type,
+                transformForSubmit: this.transformForSubmit,
+                transformForInput
+            };
+
             return (
                 <div>
                 {
@@ -139,6 +144,27 @@ define([
                 </div>
             );
         },
+        transformForSubmit(value) {
+            const { options, labelKey } = this.props;
+            const transformed = transformForInput(value).trim();
+            const valid = transformed.length > 0;
+            const matchesExisting = valid && _.any(
+                options,
+                o => o[labelKey].toLowerCase() === transformed.toLowerCase());
+
+            if (matchesExisting) {
+                return {
+                    valid: false,
+                    value: transformed,
+                    reason: i18n('ontology.form.displayname.error.duplicate')
+                };
+            }
+            return {
+                valid,
+                value: transformed,
+                reason: valid ? null : i18n('ontology.form.displayname.error.empty')
+            };
+        },
         setupCreatable(props) {
             // Hack to get the internal Creatable from the Select dependency of
             // virtualized. Requiring 'react-select' in amd doesn't work
@@ -160,12 +186,14 @@ define([
             this.setState({ showForm: false })
         },
         onCreate(option) {
-            option.displayName = transformForSubmit(option.displayName);
-
-            const key = keyCounter();
-            this.props.onCreate(option, { key });
-            const { type, displayName } = option;
-            this.setState({ showForm: false, key, creating: displayName, type })
+            const { valid, value } = transformForSubmit(option.displayName);
+            if (valid) {
+                option.displayName = value;
+                const key = keyCounter();
+                this.props.onCreate(option, { key });
+                const { type, displayName } = option;
+                this.setState({ showForm: false, key, creating: displayName, type })
+            }
         },
         onNewOptionClick(option) {
             this.setState({ showForm: true, error: null, creating: option[this.props.labelKey], type: null })

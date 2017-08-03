@@ -1,9 +1,10 @@
 define([
     'create-react-class',
     'prop-types',
+    'classnames',
     './ConceptSelector',
     '../Alert'
-], function(createReactClass, PropTypes, ConceptsSelector, Alert) {
+], function(createReactClass, PropTypes, classNames, ConceptsSelector, Alert) {
 
     const RelationshipForm = createReactClass({
         propTypes: {
@@ -25,45 +26,44 @@ define([
             const { error, transformForSubmit, transformForInput } = this.props;
 
             const value = this.getValue();
-            const valueForSubmit = transformForSubmit(value);
             const valueForInput = transformForInput(value);
-            const disabled = _.isEmpty(valueForSubmit);
+            const { valid, reason, value: valueForSubmit } = transformForSubmit(value);
+            const disabled = !valid;
             return (
-                <div>
+                <div className="ontology-form">
                     { error ? (<Alert error={error} />) : null }
                     <ConceptsSelector
                         value={_.isString(this.state.sourceId) ? this.state.sourceId : this.props.sourceId}
-                        placeholder="From Concept"
+                        placeholder={i18n('ontology.relationship.concept.from')}
                         filter={{conceptId: this.props.sourceId, showAncestors: true }}
                         creatable={false}
                         clearable={false}
                         onSelected={this.onSourceConceptSelected} />
 
                     <input type="text"
-                        placeholder="Display Name"
+                        placeholder={i18n('ontology.form.displayname.placeholder')}
                         onChange={this.onDisplayNameChange}
+                        title={reason}
+                        className={classNames({ invalid: !valid })}
                         value={valueForInput} />
 
                     <ConceptsSelector
                         value={_.isString(this.state.targetId) ? this.state.targetId : this.props.targetId}
                         filter={{conceptId: this.props.targetId, showAncestors: true }}
-                        placeholder="To Concept"
+                        placeholder={i18n('ontology.relationship.concept.to')}
                         clearable={false}
                         creatable={false}
                         onSelected={this.onTargetConceptSelected} />
 
                     <div className="base-select-form-buttons">
-                    <button
-                        onClick={this.props.onCancel}
-                        className="btn btn-link btn-small"
-                        style={{ width: 'auto', marginBottom: '1em'}}>Cancel</button>
-                    <button
-                        disabled={disabled}
-                        onClick={this.onCreate}
-                        className="btn btn-small btn-primary"
-                        style={{ width: 'auto', marginBottom: '1em'}}>{
-                            disabled ? 'Create' : `Create "${valueForSubmit}"`
-                        }</button>
+                        <button onClick={this.props.onCancel}
+                            className="btn btn-link btn-small">{i18n('ontology.form.cancel.button')}</button>
+                        <button disabled={disabled} onClick={this.onCreate}
+                            className="btn btn-small btn-primary">{
+                                disabled ?
+                                    i18n('ontology.form.create.button') :
+                                    i18n('ontology.form.create.value.button', valueForSubmit)
+                            }</button>
                     </div>
                 </div>
             )
