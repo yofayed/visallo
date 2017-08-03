@@ -72,23 +72,23 @@ define([
 
                     <select value={type || ''} onChange={this.handleTypeChange}>
                         <option value="">Select Data Format…</option>
-                        <optgroup label="Text">
-                            <option value="string">String</option>
-                            <option value="link">Link</option>
+                        <optgroup label={i18n('ontology.property.dataformat.text')}>
+                            <option value="string">{i18n('ontology.property.dataformat.text.string')}</option>
+                            <option value="string|link">{i18n('ontology.property.dataformat.text.link')}</option>
                         </optgroup>
-                        <optgroup label="Numbers">
-                            <option value="integer">Integer</option>
-                            <option value="double">Double</option>
-                            <option value="currency">Currency</option>
-                            <option value="duration">Duration</option>
-                            <option value="bytes">Size (Bytes)</option>
+                        <optgroup label={i18n('ontology.property.dataformat.number')}>
+                            <option value="integer">{i18n('ontology.property.dataformat.number.integer')}</option>
+                            <option value="double">{i18n('ontology.property.dataformat.number.double')}</option>
+                            <option value="currency">{i18n('ontology.property.dataformat.number.currency')}</option>
+                            <option value="double|duration">{i18n('ontology.property.dataformat.number.duration')}</option>
+                            <option value="integer|bytes">{i18n('ontology.property.dataformat.number.bytes')}</option>
                         </optgroup>
-                        <optgroup label="Dates">
-                            <option value="dateOnly">Date</option>
-                            <option value="datetime">Date (including time)</option>
+                        <optgroup label={i18n('ontology.property.dataformat.date')}>
+                            <option value="date">{i18n('ontology.property.dataformat.date.date')}</option>
+                            <option value="date|dateOnly">{i18n('ontology.property.dataformat.date.dateOnly')}</option>
                         </optgroup>
-                        <optgroup label="Location">
-                            <option value="geolocation">Geo Coordinate</option>
+                        <optgroup label={i18n('ontology.property.dataformat.location')}>
+                            <option value="geoLocation">{i18n('ontology.property.dataformat.location.geoLocation')}</option>
                         </optgroup>
                     </select>
 
@@ -125,9 +125,12 @@ define([
             if (this.props.relationshipId) {
                 domain.relationshipIris = [this.state.domain];
             }
+            const [dataType, displayType] = this.state.type.split('|');
+
             this.props.onCreate({
-                domain: domain,
-                type: this.state.type,
+                domain,
+                dataType,
+                displayType,
                 displayName: this.getValue()
             })
         }

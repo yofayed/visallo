@@ -15,24 +15,6 @@ define([
     ontologySelectors,
     ontologyActions) {
 
-    const ontologyDisplayTypes = {
-        bytes: {
-            displayType: 'bytes',
-            dataType: 'integer'
-        },
-        dateOnly: {
-            displayType: 'dateOnly',
-            dataType: 'dateTime'
-        },
-        duration: {
-            displayType: 'duration',
-            dataType: 'double'
-        },
-        link: {
-            displayType: 'link',
-            dataType: 'string'
-        }
-    }
     const FilterProps = ['dataType', 'deleteable', 'searchable', 'sortable', 'updateable', 'userVisible'];
     const FilterPropDefaults = {
         userVisible: true
@@ -138,18 +120,15 @@ define([
         },
 
         (dispatch, props) => ({
-            onCreate: ({ displayName, type, domain }, options) => {
-                let property = { displayName, ...domain };
-                if (ontologyDisplayTypes[type]) {
-                    property = {
-                        ...property,
-                        ...ontologyDisplayTypes[type]
-                    };
-                } else {
-                    property = {
-                        ...property,
-                        dataType: type
-                    };
+            onCreate: ({ displayName, dataType, displayType, domain }, options) => {
+                let property = {
+                    displayName,
+                    dataType,
+                    displayType,
+                    ...domain,
+                };
+                if (!property.displayType) {
+                    delete property.displayType;
                 }
                 dispatch(ontologyActions.addProperty(property, options));
             }

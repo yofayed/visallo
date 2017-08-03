@@ -39,6 +39,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         ClientApiOntology.Property response = route.handle(
                 "New Property",
                 "string",
+                null,
                 propertyIRI,
                 new String[]{PUBLIC_CONCEPT_IRI},
                 new String[]{PUBLIC_RELATIONSHIP_IRI},
@@ -78,11 +79,35 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
                 Collections.singletonList(property.getId()));
     }
 
+    @Test
+    public void testSaveNewPropertyWithDisplayType() throws Exception {
+        when(privilegeRepository.hasPrivilege(user, Privilege.ONTOLOGY_ADD)).thenReturn(true);
+
+        String propertyIRI = "junit-property";
+        ClientApiOntology.Property response = route.handle(
+                "New Property",
+                "integer",
+                "bytes",
+                propertyIRI,
+                new String[]{PUBLIC_CONCEPT_IRI},
+                new String[]{PUBLIC_RELATIONSHIP_IRI},
+                WORKSPACE_ID,
+                user
+        );
+
+        // make sure the response looks ok
+        assertEquals(propertyIRI, response.getTitle());
+        assertEquals("New Property", response.getDisplayName());
+        assertEquals(PropertyType.INTEGER, response.getDataType());
+        assertEquals("bytes", response.getDisplayType());
+    }
+
     @Test(expected = VisalloAccessDeniedException.class)
     public void testSaveNewPropertyWithNoPrivilege() throws Exception {
         route.handle(
                 "New Property",
                 "string",
+                null,
                 "junit-property",
                 new String[]{PUBLIC_CONCEPT_IRI},
                 new String[]{PUBLIC_RELATIONSHIP_IRI},
@@ -97,6 +122,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
             route.handle(
                     "New Property",
                     "string",
+                    null,
                     "junit-property",
                     new String[]{"unknown-concept"},
                     new String[]{PUBLIC_RELATIONSHIP_IRI},
@@ -115,6 +141,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
             route.handle(
                     "New Property",
                     "string",
+                    null,
                     "junit-property",
                     new String[]{PUBLIC_CONCEPT_IRI},
                     new String[]{"unknown-relationship"},
@@ -133,6 +160,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
             route.handle(
                     "New Property",
                     "unknown-type",
+                    null,
                     "junit-property",
                     new String[]{PUBLIC_CONCEPT_IRI},
                     new String[]{PUBLIC_RELATIONSHIP_IRI},
@@ -152,7 +180,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         String propertyIRI = "junit-property";
         String displayName = "New Property";
         String dataType = "string";
-        route.handle(displayName, dataType, propertyIRI, new String[]{PUBLIC_CONCEPT_IRI}, new String[]{PUBLIC_RELATIONSHIP_IRI}, WORKSPACE_ID, user);
+        route.handle(displayName, dataType, null, propertyIRI, new String[]{PUBLIC_CONCEPT_IRI}, new String[]{PUBLIC_RELATIONSHIP_IRI}, WORKSPACE_ID, user);
 
         Concept publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID);
         assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
@@ -160,7 +188,7 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         Relationship publicRelationship = ontologyRepository.getRelationshipByIRI(PUBLIC_RELATIONSHIP_IRI, WORKSPACE_ID);
         assertTrue(publicRelationship.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
 
-        route.handle(displayName, dataType, propertyIRI, new String[]{PUBLIC_CONCEPT_IRI_B}, new String[]{PUBLIC_RELATIONSHIP_IRI_B}, WORKSPACE_ID, user);
+        route.handle(displayName, dataType, null, propertyIRI, new String[]{PUBLIC_CONCEPT_IRI_B}, new String[]{PUBLIC_RELATIONSHIP_IRI_B}, WORKSPACE_ID, user);
 
         publicConcept = ontologyRepository.getConceptByIRI(PUBLIC_CONCEPT_IRI, WORKSPACE_ID);
         assertTrue(publicConcept.getProperties().stream().anyMatch(p -> p.getIri().equals(propertyIRI)));
@@ -181,31 +209,31 @@ public class OntologyPropertySaveTest extends OntologyRouteTestBase {
         String dataType = "string";
         String[] things = new String[]{ontologyRepository.getEntityConcept(OntologyRepository.PUBLIC).getIRI()};
         String[] relationships = new String[]{PUBLIC_RELATIONSHIP_IRI};
-        ClientApiOntology.Property response = route.handle(displayName, dataType, null, things, relationships, WORKSPACE_ID, user);
+        ClientApiOntology.Property response = route.handle(displayName, dataType, null,null, things, relationships, WORKSPACE_ID, user);
 
         String originalIri = response.getTitle();
         assertTrue(originalIri.matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_property#[a-z0-9]+"));
 
         // ensure changing display name changes the iri
-        response = route.handle(displayName + "1", dataType, null, things, relationships, WORKSPACE_ID, user);
+        response = route.handle(displayName + "1", dataType,null, null, things, relationships, WORKSPACE_ID, user);
         assertNotEquals(originalIri, response.getTitle());
         assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_property1#[a-z0-9]+"));
 
         // ensure changing data type changes the iri
-        response = route.handle(displayName, "integer", null, things, relationships, WORKSPACE_ID, user);
+        response = route.handle(displayName, "integer", null, null, things, relationships, WORKSPACE_ID, user);
         assertNotEquals(originalIri, response.getTitle());
         assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_property#[a-z0-9]+"));
 
         // ensure changing concepts does not change the iri
-        response = route.handle(displayName, dataType, null, new String[]{PUBLIC_CONCEPT_IRI}, relationships, WORKSPACE_ID, user);
+        response = route.handle(displayName, dataType,null,null, new String[]{PUBLIC_CONCEPT_IRI}, relationships, WORKSPACE_ID, user);
         assertEquals(originalIri, response.getTitle());
 
         // ensure changing relationships does not change the iri
-        response = route.handle(displayName, dataType, null, things, new String[]{PUBLIC_RELATIONSHIP_IRI_B}, WORKSPACE_ID, user);
+        response = route.handle(displayName, dataType,null,null, things, new String[]{PUBLIC_RELATIONSHIP_IRI_B}, WORKSPACE_ID, user);
         assertEquals(originalIri, response.getTitle());
 
         // ensure changing workspace changes the iri
-        response = route.handle(displayName, dataType, null, things, relationships, "other-workspace", user);
+        response = route.handle(displayName, dataType,null,null, things, relationships, "other-workspace", user);
         assertNotEquals(originalIri, response.getTitle());
         assertTrue(response.getTitle().matches(OntologyRepositoryBase.BASE_OWL_IRI + "/new_property#[a-z0-9]+"));
     }

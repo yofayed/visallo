@@ -8,7 +8,6 @@ import java.util.Date;
 
 public enum PropertyType {
     DATE("date"),
-    DATE_TIME("dateTime"),
     STRING("string"),
     GEO_LOCATION("geoLocation"),
     IMAGE("image"),
@@ -54,7 +53,6 @@ public enum PropertyType {
     public static Class getTypeClass(PropertyType propertyType) {
         switch (propertyType) {
             case DATE:
-            case DATE_TIME:
                 return Date.class;
             case STRING:
             case DIRECTORY_ENTITY:
