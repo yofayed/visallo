@@ -186,7 +186,7 @@ define([
             this.setState({ showForm: false })
         },
         onCreate(option) {
-            const { valid, value } = transformForSubmit(option.displayName);
+            const { valid, value } = this.transformForSubmit(option.displayName);
             if (valid) {
                 option.displayName = value;
                 const key = keyCounter();
